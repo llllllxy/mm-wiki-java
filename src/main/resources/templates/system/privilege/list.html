@@ -28,14 +28,18 @@
                     <strong th:text="${menu.name}">菜单</strong>
                     <span class="pull-right" th:if="${#strings.contains(#strings.toLowerCase(mode), 'dev')}">
                         <a name="edit" th:attr="data-link=@{/system/privilege/edit(privilege_id=${menu.privilegeId})}">改</a> |
-                        <a th:onclick="|Layers.confirm('确定要删除权限吗？', '/system/privilege/delete?privilege_id=${menu.privilegeId}');|">删</a>
+                        <a data-message="确定要删除权限吗？"
+                           th:data-url="|/system/privilege/delete?privilege_id=${menu.privilegeId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
                     </span>
                 </li>
                 <li th:each="controller : ${controllers}" th:if="${controller.parentId == menu.privilegeId}" class="list-group-item">
                     <span th:text="${controller.name}">权限</span>
                     <span class="pull-right" th:if="${#strings.contains(#strings.toLowerCase(mode), 'dev')}">
                         <a name="edit" th:attr="data-link=@{/system/privilege/edit(privilege_id=${controller.privilegeId})}">改</a> |
-                        <a th:onclick="|Layers.confirm('确定要删除权限吗？', '/system/privilege/delete?privilege_id=${controller.privilegeId}');|">删</a>
+                        <a data-message="确定要删除权限吗？"
+                           th:data-url="|/system/privilege/delete?privilege_id=${controller.privilegeId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
                     </span>
                 </li>
             </ul>

@@ -48,7 +48,10 @@
                     <td class="center"><label class="text-info" th:text="${role.name}">角色</label></td>
                     <td class="center">
                         <span th:if="${user.userId == 1}">无</span>
-                        <a th:if="${user.userId != 1}" th:onclick="|Layers.confirm('确定重置该用户为默认角色吗？', '/system/role/resetUser?user_id=${user.userId}');|"><i class="remove glyphicon glyphicon-refresh"></i>重置角色</a>
+                        <a th:if="${user.userId != 1}" data-message="确定重置该用户为默认角色吗？"
+                           th:data-url="|/system/role/resetUser?user_id=${user.userId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="remove glyphicon glyphicon-refresh"></i>重置角色</a>
                     </td>
                 </tr>
                 </tbody>

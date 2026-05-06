@@ -12,6 +12,7 @@
     <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
     <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -46,7 +47,9 @@
                     <td th:text="${user.mobile}">mobile</td>
                     <td th:text="${user.im}">im</td>
                     <td class="center">
-                        <a th:onclick="|Common.ajaxSubmit('/follow/cancel?follow_id=${user.followId}')|"><i class="glyphicon glyphicon-heart"></i></a>
+                        <a th:data-url="|/follow/cancel?follow_id=${user.followId}|"
+                           onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-heart"></i></a>
                     </td>
                 </tr>
                 </tbody>

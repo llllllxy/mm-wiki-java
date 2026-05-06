@@ -12,6 +12,7 @@
     <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
     <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -46,7 +47,10 @@
                             <td><strong><a th:href="@{/user/info(user_id=${item.userId})}" target="_parent" th:text="${item.username}">user</a></strong></td>
                             <td th:text="${item.givenName}">name</td>
                             <td th:text="${item.email}">email</td>
-                            <td class="center"><a th:onclick="|Common.ajaxSubmit('/follow/cancel?follow_id=${item.followId}&redirect=/system/profile/followUser')|"><i class="glyphicon glyphicon-heart"></i></a></td>
+                            <td class="center"><a
+                                    th:data-url="|/follow/cancel?follow_id=${item.followId}&amp;redirect=/system/profile/followUser|"
+                                    onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                    class="glyphicon glyphicon-heart"></i></a></td>
                         </tr>
                         </tbody>
                     </table>

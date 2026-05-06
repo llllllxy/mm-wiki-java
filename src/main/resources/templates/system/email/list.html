@@ -61,8 +61,13 @@
                     </td>
                     <td class="center">
                         <a name="edit" th:attr="data-link=@{/system/email/edit(email_id=${email.emailId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:if="${email.isUsed != 1}" th:onclick="|Layers.confirm('确定要启用该邮件服务器吗？', '/system/email/used?email_id=${email.emailId}');|"><i class="glyphicon glyphicon-ok-circle"></i>启用</a>
-                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/email/delete?email_id=${email.emailId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                        <a th:if="${email.isUsed != 1}" data-message="确定要启用该邮件服务器吗？"
+                           th:data-url="|/system/email/used?email_id=${email.emailId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-ok-circle"></i>启用</a>
+                        <a data-message="确定删除吗？" th:data-url="|/system/email/delete?email_id=${email.emailId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-trash"></i>删除</a>
                     </td>
                 </tr>
                 </tbody>

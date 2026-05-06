@@ -53,7 +53,10 @@
                     <td th:text="${attachment.username}">user</td>
                     <td th:text="${attachment.createTime}">time</td>
                     <td class="center">
-                        <a th:if="${is_delete}" th:onclick="|Layers.confirm('确定删除附件吗？', '/attachment/delete?attachment_id=${attachment.attachmentId}')|"><i class="glyphicon glyphicon-trash"></i></a>
+                        <a th:if="${is_delete}" data-message="确定删除附件吗？"
+                           th:data-url="|/attachment/delete?attachment_id=${attachment.attachmentId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-trash"></i></a>
                         <a th:href="@{/attachment/download(attachment_id=${attachment.attachmentId})}"><i class="glyphicon glyphicon-download"></i></a>
                     </td>
                 </tr>

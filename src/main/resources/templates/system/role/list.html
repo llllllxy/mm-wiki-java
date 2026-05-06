@@ -59,7 +59,10 @@
                         <a th:if="${role.roleId != 1}" name="edit" th:attr="data-link=@{/system/role/edit(role_id=${role.roleId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
                         <a th:if="${role.roleId != 1}" name="privilege" th:attr="data-link=@{/system/role/privilege(role_id=${role.roleId})}"><i class="glyphicon glyphicon-lock"></i>权限</a>
                         <a name="user" th:attr="data-link=@{/system/role/user(role_id=${role.roleId})}"><i class="glyphicon glyphicon-user"></i>用户</a>
-                        <a th:if="${role.roleId != 1 and role.type == 0}" th:onclick="|Layers.confirm('确定删除吗？', '/system/role/delete?role_id=${role.roleId}');|"><i class="remove glyphicon glyphicon-trash"></i>删除</a>
+                        <a th:if="${role.roleId != 1 and role.type == 0}" data-message="确定删除吗？"
+                           th:data-url="|/system/role/delete?role_id=${role.roleId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="remove glyphicon glyphicon-trash"></i>删除</a>
                     </td>
                 </tr>
                 </tbody>

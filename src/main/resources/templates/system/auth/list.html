@@ -62,8 +62,14 @@
                     </td>
                     <td class="center">
                         <a name="edit" th:attr="data-link=@{/system/auth/edit(login_auth_id=${auth.loginAuthId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:if="${auth.isUsed != 1}" th:onclick="|Layers.confirm('确定要启用该登录认证吗？', '/system/auth/used?login_auth_id=${auth.loginAuthId}');|"><i class="glyphicon glyphicon-ok-circle"></i>启用</a>
-                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/auth/delete?login_auth_id=${auth.loginAuthId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                        <a th:if="${auth.isUsed != 1}" data-message="确定要启用该登录认证吗？"
+                           th:data-url="|/system/auth/used?login_auth_id=${auth.loginAuthId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-ok-circle"></i>启用</a>
+                        <a data-message="确定删除吗？"
+                           th:data-url="|/system/auth/delete?login_auth_id=${auth.loginAuthId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-trash"></i>删除</a>
                     </td>
                 </tr>
                 </tbody>

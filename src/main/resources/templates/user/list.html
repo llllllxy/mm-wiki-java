@@ -12,6 +12,7 @@
     <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
     <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -63,8 +64,12 @@
                     <td th:text="${user.im}">im</td>
                     <td class="center">
                         <th:block th:if="${user.userId != login_user_id}">
-                            <a th:if="${user.follow}" th:onclick="|Common.ajaxSubmit('/follow/cancel?follow_id=${user.followId}')|"><i class="glyphicon glyphicon-heart"></i></a>
-                            <a th:if="${!user.follow}" th:onclick="|Common.ajaxSubmit('/follow/add?type=2&object_id=${user.userId}')|"><i class="glyphicon glyphicon-heart-empty"></i></a>
+                            <a th:if="${user.follow}" th:data-url="|/follow/cancel?follow_id=${user.followId}|"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                    class="glyphicon glyphicon-heart"></i></a>
+                            <a th:if="${!user.follow}" th:data-url="|/follow/add?type=2&amp;object_id=${user.userId}|"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                    class="glyphicon glyphicon-heart-empty"></i></a>
                         </th:block>
                     </td>
                 </tr>

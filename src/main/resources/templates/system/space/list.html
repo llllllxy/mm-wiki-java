@@ -75,7 +75,10 @@
                         <a name="user" th:attr="data-link=@{/system/space/member(space_id=${space.spaceId})}"><i class="fa fa-group"></i> 成员</a>
                         <a th:href="@{/system/space/edit(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-edit"></i> 编辑</a>
                         <a th:href="@{/system/space/download(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-download-alt"></i> 下载</a>
-                        <a th:onclick="|Layers.confirm('确定删除该空间吗？删除前请确认已经备份。', '/system/space/delete?space_id=${space.spaceId}');|"><i class="glyphicon glyphicon-remove"></i> 删除</a>
+                        <a data-message="确定删除该空间吗？删除前请确认已经备份。"
+                           th:data-url="|/system/space/delete?space_id=${space.spaceId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-remove"></i> 删除</a>
                     </td>
                 </tr>
                 </tbody>

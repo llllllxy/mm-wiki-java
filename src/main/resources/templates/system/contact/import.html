@@ -53,7 +53,11 @@
                     <td class="center" th:text="${user.mobile}">mobile</td>
                     <td th:text="${user.email}">email</td>
                     <td class="center">
-                        <a th:if="${user.isForbidden != 1}" th:onclick="|importContact('确定导入该用户为系统联系人吗？','/system/contact/save','name=${user.givenName}&mobile=${user.mobile}&position=${user.position}&email=${user.email}')|">
+                        <a th:if="${user.isForbidden != 1}"
+                           data-message="确定导入该用户为系统联系人吗？"
+                           data-url="/system/contact/save"
+                           th:data-params="|name=${user.givenName}&amp;mobile=${user.mobile}&amp;position=${user.position}&amp;email=${user.email}|"
+                           onclick="importContact(this.getAttribute('data-message'), this.getAttribute('data-url'), this.getAttribute('data-params'))">
                             <i class="glyphicon glyphicon-import"></i>导入
                         </a>
                     </td>

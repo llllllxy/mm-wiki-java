@@ -43,7 +43,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**")
             .addResourceLocations("classpath:/static/");
-        String imagesLocation = Path.of(mmwikiProperties.getDocumentRootDir()).toAbsolutePath().resolve("images").toUri().toString();
+        String imagesLocation = Path.of(mmwikiProperties.getDocumentRootDir())
+                .toAbsolutePath()
+                .normalize()
+                .resolve("images")
+                .toUri()
+                .toString();
+        if (!imagesLocation.endsWith("/")) {
+            imagesLocation += "/";
+        }
         registry.addResourceHandler("/images/**")
             .addResourceLocations(imagesLocation);
     }

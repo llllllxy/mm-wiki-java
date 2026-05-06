@@ -53,7 +53,10 @@
                     <td class="center" th:text="${contact.email}">email</td>
                     <td class="center">
                         <a name="edit" th:attr="data-link=@{/system/contact/edit(contact_id=${contact.contactId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/contact/delete?contact_id=${contact.contactId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                        <a data-message="确定删除吗？"
+                           th:data-url="|/system/contact/delete?contact_id=${contact.contactId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-trash"></i>删除</a>
                     </td>
                 </tr>
                 </tbody>

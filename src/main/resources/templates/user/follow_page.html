@@ -12,6 +12,7 @@
     <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
     <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -41,7 +42,9 @@
                 <tr th:each="item : ${pages}">
                     <td><strong><a th:href="@{/document/index(document_id=${item.document.documentId})}" target="_parent" th:text="${item.document.name}">doc</a></strong></td>
                     <td th:text="${item.document.type == 1 ? '页面' : '目录'}">页面</td>
-                    <td class="center"><a th:onclick="|Common.ajaxSubmit('/follow/cancel?follow_id=${item.followId}')|"><i class="glyphicon glyphicon-heart"></i></a></td>
+                    <td class="center"><a th:data-url="|/follow/cancel?follow_id=${item.followId}|"
+                                          onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                            class="glyphicon glyphicon-heart"></i></a></td>
                 </tr>
                 </tbody>
             </table>

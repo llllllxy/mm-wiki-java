@@ -1,8 +1,10 @@
 package org.tinycloud.mmwiki.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,11 +36,11 @@ public class ImageController extends ControllerSupport {
     private final DocumentFileService documentFileService;
 
     public ImageController(
-        DocumentService documentService,
-        SpaceService spaceService,
-        AccessService accessService,
-        AttachmentService attachmentService,
-        DocumentFileService documentFileService
+            DocumentService documentService,
+            SpaceService spaceService,
+            AccessService accessService,
+            AttachmentService attachmentService,
+            DocumentFileService documentFileService
     ) {
         this.documentService = documentService;
         this.spaceService = spaceService;
@@ -50,9 +52,9 @@ public class ImageController extends ControllerSupport {
     @PostMapping("/image/upload")
     @ResponseBody
     public EditorImageResponse upload(
-        @RequestParam("document_id") String documentId,
-        @RequestParam("editormd-image-file") MultipartFile file,
-        HttpServletRequest request
+            @RequestParam("document_id") String documentId,
+            @RequestParam("editormd-image-file") MultipartFile file,
+            HttpServletRequest request
     ) throws Exception {
         Document document = documentService.findActiveById(documentId);
         if (document == null) {

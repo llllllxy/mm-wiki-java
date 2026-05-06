@@ -74,7 +74,12 @@
                         </select>
                     </td>
                     <td class="center">
-                        <a href="javascript:void(0)" th:onclick="|removeMember(${space_id}, ${member.user.userId}, ${member.spaceUserId})|"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>
+                        <a href="javascript:void(0)"
+                           th:data-space-id="${space_id}"
+                           th:data-user-id="${member.user.userId}"
+                           th:data-space-user-id="${member.spaceUserId}"
+                           onclick="removeMember(this.getAttribute('data-space-id'), this.getAttribute('data-user-id'), this.getAttribute('data-space-user-id'))"><i
+                                class="glyphicon glyphicon-remove-circle"></i>移除</a>
                     </td>
                 </tr>
                 </tbody>

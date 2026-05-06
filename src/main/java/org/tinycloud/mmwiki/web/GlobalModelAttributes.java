@@ -28,10 +28,7 @@ public class GlobalModelAttributes {
     public void populate(Model model, HttpServletRequest request) {
         model.addAttribute("version", properties.getVersion());
         model.addAttribute("copyright", properties.getCopyright());
-        model.addAttribute(
-            "system_name",
-            configService.getValue("system_name", properties.getSystemNameFallback())
-        );
+        model.addAttribute("system_name", configService.getValue("system_name", properties.getSystemNameFallback()));
 
         CurrentUser currentUser = (CurrentUser) request.getAttribute(AuthInterceptor.CURRENT_USER_ATTR);
         if (currentUser != null) {

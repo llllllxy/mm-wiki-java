@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -47,12 +49,12 @@ public class AuthInterceptor implements HandlerInterceptor {
     private final LogMapper logMapper;
 
     public AuthInterceptor(
-        UserService userService,
-        MmwikiProperties properties,
-        ObjectMapper objectMapper,
-        PrivilegeMapper privilegeMapper,
-        RolePrivilegeMapper rolePrivilegeMapper,
-        LogMapper logMapper
+            UserService userService,
+            MmwikiProperties properties,
+            ObjectMapper objectMapper,
+            PrivilegeMapper privilegeMapper,
+            RolePrivilegeMapper rolePrivilegeMapper,
+            LogMapper logMapper
     ) {
         this.userService = userService;
         this.properties = properties;
@@ -89,7 +91,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String expectedIdentify = HashUtils.md5(
-            request.getHeader("User-Agent") + IpUtils.getClientIp(request) + currentUser.getPasswordHash()
+                request.getHeader("User-Agent") + IpUtils.getClientIp(request) + currentUser.getPasswordHash()
         );
         if (!expectedIdentify.equals(parts[1])) {
             return handleUnauthenticated(request, response);
@@ -147,8 +149,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             objectMapper.writeValue(
-                response.getWriter(),
-                JsonResponse.error("未登录或登录已失效！", null, "/author/index", 2000)
+                    response.getWriter(),
+                    JsonResponse.error("未登录或登录已失效！", null, "/author/index", 2000)
             );
             return false;
         }
@@ -188,8 +190,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             objectMapper.writeValue(
-                response.getWriter(),
-                JsonResponse.error("抱歉，您没有权限操作！", null, "/system/main/index", 2000)
+                    response.getWriter(),
+                    JsonResponse.error("抱歉，您没有权限操作！", null, "/system/main/index", 2000)
             );
             return false;
         }
@@ -215,7 +217,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
             builder.append(entry.getKey()).append('=');
             if (entry.getKey().toLowerCase(Locale.ROOT).contains("password")
-                || entry.getKey().toLowerCase(Locale.ROOT).contains("pwd")) {
+                    || entry.getKey().toLowerCase(Locale.ROOT).contains("pwd")) {
                 builder.append("***");
             } else {
                 builder.append(String.join(",", entry.getValue()));

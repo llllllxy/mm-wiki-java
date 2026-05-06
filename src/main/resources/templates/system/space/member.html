@@ -77,7 +77,9 @@
                         </select>
                     </td>
                     <td class="center">
-                        <a th:onclick="|Layers.confirm('确定要移除该成员吗？', '/system/space_user/remove?space_user_id=${member.spaceUserId}&space_id=${space_id}&user_id=${member.user.userId}');|">
+                        <a data-message="确定要移除该成员吗？"
+                           th:data-url="|/system/space_user/remove?space_user_id=${member.spaceUserId}&amp;space_id=${space_id}&amp;user_id=${member.user.userId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
                             <i class="glyphicon glyphicon-remove-circle"></i>移除
                         </a>
                     </td>

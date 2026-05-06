@@ -72,8 +72,14 @@
                     <td class="center">
                         <a name="info" th:attr="data-link=@{/system/user/info(user_id=${user.userId})}"><i class="glyphicon glyphicon-eye-open"></i> 详情</a>
                         <a th:href="@{/system/user/edit(user_id=${user.userId})}"><i class="glyphicon glyphicon-edit"></i> 编辑</a>
-                        <a th:if="${user.isForbidden == 1}" th:onclick="|Layers.confirm('确定恢复该用户吗？', '/system/user/recover?user_id=${user.userId}');|"><i class="glyphicon glyphicon-ok"></i> 恢复</a>
-                        <a th:if="${user.isForbidden != 1 and user.roleId != 1}" th:onclick="|Layers.confirm('确定屏蔽该用户吗？', '/system/user/forbidden?user_id=${user.userId}');|"><i class="glyphicon glyphicon-remove"></i> 屏蔽</a>
+                        <a th:if="${user.isForbidden == 1}" data-message="确定恢复该用户吗？"
+                           th:data-url="|/system/user/recover?user_id=${user.userId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-ok"></i> 恢复</a>
+                        <a th:if="${user.isForbidden != 1 and user.roleId != 1}" data-message="确定屏蔽该用户吗？"
+                           th:data-url="|/system/user/forbidden?user_id=${user.userId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-remove"></i> 屏蔽</a>
                     </td>
                 </tr>
                 </tbody>

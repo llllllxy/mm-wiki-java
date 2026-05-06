@@ -10,6 +10,8 @@ var Page = {
      * @returns {boolean}
      */
     ajaxSave: function (element, sendEmail, isAutoFollow) {
+        sendEmail = String(sendEmail || "0");
+        isAutoFollow = String(isAutoFollow || "0");
 
         /**
          * 成功信息条
@@ -54,7 +56,7 @@ var Page = {
         }
 
         var containerHtml = '<div class="container-fluid" style="padding: 20px 20px 0 20px">';
-        containerHtml += '<textarea name="edit_comment" class="form-control" rows="3" autofocus="autofocus" style="resize:none""></textarea>';
+        containerHtml += '<textarea name="edit_comment" class="form-control" rows="3" autofocus="autofocus" style="resize:none"></textarea>';
         containerHtml += '<div style="margin-top: 8px;text-align: left">';
 
         if (sendEmail === "1") {

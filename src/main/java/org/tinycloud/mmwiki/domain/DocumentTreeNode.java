@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * MM-Wiki 数据模型。
  *
@@ -9,10 +11,12 @@ package org.tinycloud.mmwiki.domain;
 public class DocumentTreeNode {
 
     private String id;
+    @JsonProperty("pId")
     private String pId;
     private String name;
     private Integer spaceId;
     private boolean open;
+    @JsonProperty("isParent")
     private boolean isParent;
 
     public String getId() {
@@ -23,6 +27,7 @@ public class DocumentTreeNode {
         this.id = id;
     }
 
+    @JsonProperty("pId")
     public String getPId() {
         return pId;
     }
@@ -55,6 +60,7 @@ public class DocumentTreeNode {
         this.open = open;
     }
 
+    @JsonProperty("isParent")
     public boolean isParent() {
         return isParent;
     }

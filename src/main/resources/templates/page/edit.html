@@ -47,8 +47,16 @@
                         <input type="text" name="name" class="form-control" placeholder="请输入文档名称" th:value="${document.name}" th:readonly="${document.parentId == '0'}">
                     </div>
                     <div class="col-md-2 text-center">
-                        <button type="button" class="btn btn-primary" th:onclick="|Page.ajaxSave(this.form, '${sendEmail}', '${autoFollowDoc}')|"><i class="fa fa-save"></i> 保存</button>
-                        <button type="button" class="btn btn-default" th:onclick="|Page.cancelSave('确定要放弃此次修改吗?', '/document/index?document_id=${document.documentId}')|"><i class="fa fa-mail-reply"></i> 取消</button>
+                        <button type="button" class="btn btn-primary" th:data-send-email="${sendEmail}"
+                                th:data-auto-follow-doc="${autoFollowDoc}"
+                                onclick="Page.ajaxSave(this.form, this.getAttribute('data-send-email'), this.getAttribute('data-auto-follow-doc'))">
+                            <i class="fa fa-save"></i> 保存
+                        </button>
+                        <button type="button" class="btn btn-default" data-message="确定要放弃此次修改吗？"
+                                th:data-url="|/document/index?document_id=${document.documentId}|"
+                                onclick="Page.cancelSave(this.getAttribute('data-message'), this.getAttribute('data-url'))">
+                            <i class="fa fa-mail-reply"></i> 取消
+                        </button>
                     </div>
                 </div>
             </div>
@@ -62,22 +70,28 @@
 </div>
 <script type="text/plain" id="initialMarkdown" th:text="${page_content}"></script>
 <script th:inline="javascript">
-    if(parent.layoutClose) {
+    if (parent.layoutClose) {
         parent.layoutClose();
     }
-    if(parent.hiddenScrollY) {
+    if (parent.hiddenScrollY) {
         parent.hiddenScrollY();
     }
-    var storageId = "mm_wiki_doc_" + [[${document.documentId}]];
+
+    var documentId = /*[[${document.documentId}]]*/ "";
+    var sendEmail = String(/*[[${sendEmail}]]*/ "0");
+    var autoFollowDoc = String(/*[[${autoFollowDoc}]]*/ "0");
+    var storageId = "mm_wiki_doc_" + documentId;
+
     $(function() {
         editormd.katexURL = {
             js  : "/static/plugins/editor.md/lib/katex/katex.min",
             css : "/static/plugins/editor.md/lib/katex/katex.min"
         };
+
         var initialMarkdown = $("#initialMarkdown").text();
         var editor = editormd("document_page_editor", {
             width: "100%",
-            path : '/static/plugins/editor.md/lib/',
+            path: "/static/plugins/editor.md/lib/",
             toolbarIcons : function() {
                 return [
                     "sidebar", "save", "|",
@@ -88,11 +102,12 @@
                     "link", "reference-link", "image", "attachment", "code", "preformatted-text", "code-block", "table", "datetime", "html-entities", "pagebreak", "|",
                     "goto-line", "watch", "preview", "search", "|",
                     "help"
-                ]
+                ];
             },
             toolbarCustomIcons : {
-                sidebar   : '<a onclick="parent.layoutToggle()" title="展开关闭侧边栏"><i class="fa fa-columns item"></i></a>',
-                save : "<a onclick=" + 'Page.ajaxSave(\"#page_form\")' + " title='保存文档'><i class='fa fa-save'></i></a>"
+                sidebar: '<a onclick="parent.layoutToggle()" title="展开关闭侧边栏"><i class="fa fa-columns item"></i></a>',
+                save: '<a onclick="Page.ajaxSave(\'#page_form\', \'' + sendEmail + '\', \'' + autoFollowDoc + '\')" title="保存文档"><i class="fa fa-save"></i></a>',
+                attachment: '<a onclick="Page.attachment(\'' + documentId + '\')" title="上传附件"><i class="fa fa-paperclip item"></i></a>'
             },
             theme : "default",
             previewTheme : "default",
@@ -100,28 +115,95 @@
             markdown : initialMarkdown,
             codeFold : true,
             placeholder: "欢迎使用 MM-Wiki，请使用 Markdown 规范编写",
+            //syncScrolling : false,
+            // 保存 HTML 到 Textarea
             saveHTMLToTextarea: false,
             searchReplace: true,
+            // 关闭实时预览
+            //watch : false,
+            // 开启 HTML 标签解析，为了安全性，默认不开启
+            // htmlDecode : "style,script,iframe|on*,alert",
+            // 开启 HTML 标签解析，为了安全性，默认不开启
+            // htmlDecode : "style,script,iframe,sub,sup,embed,img|on*",
+            //关闭工具栏
+            //toolbar  : false,
+            // 关闭预览 HTML 的代码块高亮，默认开启
+            //previewCodeHighlight : false,
             emoji : false,
             taskList : true,
-            tocm : true,
-            tex : true,
-            flowChart : true,
-            sequenceDiagram : true,
+            tocm: true, // Using [TOCM]
+            tex: true, // 开启科学公式TeX语言支持，默认关闭
+            flowChart: true, // 开启流程图支持，默认关闭
+            sequenceDiagram: true, // 开启时序/序列图支持，默认关闭,
+            //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+            //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+            //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+            //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+            //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
             imageUpload : true,
             imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-            imageUploadURL : "/image/upload?document_id=" + [[${document.documentId}]],
+            imageUploadURL: "/image/upload?document_id=" + encodeURIComponent(documentId),
             onload : function() {
+                //Vincent [46603415@qq.com] 新增图片粘贴上传功能 Start
+                $("#document_page_editor").on("paste", function (e) {
+                    var clipboardData = (e.originalEvent && e.originalEvent.clipboardData) || window.clipboardData;
+                    if (!(clipboardData && clipboardData.items)) {
+                        return;
+                    }
+
+                    for (var i = 0, length = clipboardData.items.length; i < length; i++) {
+                        var item = clipboardData.items[i];
+                        if (item.kind !== "file" || !/^image\//i.test(item.type)) {
+                            continue;
+                        }
+
+                        var imageFile = item.getAsFile();
+                        if (!imageFile) {
+                            continue;
+                        }
+
+                        var time = Date.now();
+                        var fileName = imageFile.name || ("clipboard-" + time + "." + (imageFile.type.split("/")[1] || "png"));
+                        var uploadName = time + "-" + fileName;
+                        var uploadFile = imageFile;
+                        try {
+                            uploadFile = new File([imageFile], uploadName, {type: imageFile.type});
+                        } catch (ignore) {
+                        }
+
+                        var formData = new FormData();
+                        formData.append("editormd-image-file", uploadFile);
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function () {
+                            var data = JSON.parse(xhr.responseText || "{}");
+                            if (data.success === 1) {
+                                editor.insertValue("![image](" + data.url + ")\r\n");
+                            } else {
+                                Layers.failedMsg(data.message || "图片上传失败");
+                            }
+                        };
+                        xhr.onerror = function () {
+                            Layers.failedMsg("图片上传失败");
+                        };
+                        xhr.open("POST", "/image/upload?document_id=" + encodeURIComponent(documentId) + "&guid=" + time, true);
+                        xhr.send(formData);
+
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+
                 var docStorage = Storage.get(storageId);
                 if (docStorage !== "") {
                     layer.confirm("是否恢复为上次未提交的本地文档？", {
-                        btn: ['是','否'],
+                        btn: ["是", "否"],
                         skin: Layers.skin,
-                        btnAlign: 'c',
+                        btnAlign: "c",
                         title: "<i class='fa fa-warning'></i><strong> 警告</strong>"
                     }, function(index) {
                         editor.setMarkdown(docStorage);
-                        layer.close(index)
+                        layer.close(index);
                     }, function() {});
                 }
             },

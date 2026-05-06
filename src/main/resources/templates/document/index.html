@@ -55,7 +55,7 @@
 </div>
 <script type="text/javascript" src="/static/js/modules/document.js"></script>
 <script th:inline="javascript">
-    var documentsData = /*[[${documentsJson}]]*/ [];
+    var documentsData = JSON.parse(/*[[${documentsJson}]]*/ "[]");
     Document.ListTree("#dir_tree", documentsData, [[${default_document_id}]], [[${is_editor}]], [[${is_delete}]]);
     Layers.bindIframe("[name='create_document']", "创建文档", "345px", "800px");
 </script>

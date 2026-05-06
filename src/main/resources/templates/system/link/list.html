@@ -54,7 +54,9 @@
                     <td class="center" th:text="${link.sequence}">0</td>
                     <td class="center">
                         <a name="edit" th:attr="data-link=@{/system/link/edit(link_id=${link.linkId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/link/delete?link_id=${link.linkId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                        <a data-message="确定删除吗？" th:data-url="|/system/link/delete?link_id=${link.linkId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                                class="glyphicon glyphicon-trash"></i>删除</a>
                     </td>
                 </tr>
                 </tbody>

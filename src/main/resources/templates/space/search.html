@@ -49,8 +49,14 @@
                     <td class="center" th:text="${space.createDateText}">2026-05-06</td>
                     <td class="center">
                         <div class="btn-group btn-group-sm" role="group">
-                            <a th:if="${space.collection}" name="collection_space" th:onclick="|Common.ajaxSubmit('/collection/cancel?collection_id=${space.collectionId}')|" type="button" class="btn btn-default"><i class="glyphicon glyphicon-star"> </i></a>
-                            <a th:unless="${space.collection}" name="collection_space" th:onclick="|Common.ajaxSubmit('/collection/add?type=2&resource_id=${space.spaceId}')|" type="button" class="btn btn-default"><i class="glyphicon glyphicon-star-empty"> </i></a>
+                            <a th:if="${space.collection}" name="collection_space"
+                               th:data-url="|/collection/cancel?collection_id=${space.collectionId}|"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))" type="button"
+                               class="btn btn-default"><i class="glyphicon glyphicon-star"> </i></a>
+                            <a th:unless="${space.collection}" name="collection_space"
+                               th:data-url="|/collection/add?type=2&amp;resource_id=${space.spaceId}|"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))" type="button"
+                               class="btn btn-default"><i class="glyphicon glyphicon-star-empty"> </i></a>
                             <a name="user" th:attr="data-link=@{/space/member(space_id=${space.spaceId})}" type="button" class="btn btn-default"><i class="fa fa-group"></i></a>
                         </div>
                     </td>
