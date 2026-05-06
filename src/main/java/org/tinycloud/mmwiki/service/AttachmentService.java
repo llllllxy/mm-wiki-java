@@ -10,6 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.mapper.AttachmentMapper;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class AttachmentService {
 

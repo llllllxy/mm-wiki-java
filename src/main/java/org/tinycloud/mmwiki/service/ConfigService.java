@@ -5,6 +5,12 @@ import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.ConfigEntry;
 import org.tinycloud.mmwiki.mapper.ConfigMapper;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class ConfigService {
 

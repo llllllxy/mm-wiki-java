@@ -10,6 +10,12 @@ import org.tinycloud.mmwiki.service.PluginService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
+/**
+ * MM-Wiki 页面与接口控制器。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Controller
 public class SystemPluginController extends ControllerSupport {
 

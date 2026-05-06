@@ -17,6 +17,12 @@ import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.Paginator;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class SystemProfileService {
 
@@ -43,16 +49,25 @@ public class SystemProfileService {
         this.configService = configService;
     }
 
+    /**
+     * 加载个人中心首页资料与最近动态。
+     */
     public ProfileInfoView loadInfo(Integer userId) {
         User user = requireUser(userId);
         List<LogDocumentView> logs = decorateLogs(logDocumentMapper.findByUserId(userId, 0, 10));
         return new ProfileInfoView(user, logs, logs.size());
     }
 
+    /**
+     * 加载可编辑的个人资料。
+     */
     public User loadEditableProfile(Integer userId) {
         return requireUser(userId);
     }
 
+    /**
+     * 保存当前用户的个人资料。
+     */
     public JsonResponse<Void> modifyProfile(
         Integer userId,
         String givenName,
@@ -91,6 +106,9 @@ public class SystemProfileService {
         return JsonResponse.success("个人资料修改成功", null, "/system/profile/info", 2000);
     }
 
+    /**
+     * 加载当前用户关注与粉丝信息。
+     */
     public FollowUserView loadFollowUsers(Integer userId) {
         User user = requireUser(userId);
 
@@ -117,6 +135,9 @@ public class SystemProfileService {
         return new FollowUserView(user, users, fansUsers, users.size(), fansUsers.size());
     }
 
+    /**
+     * 分页加载当前用户关注的文档。
+     */
     public FollowDocPage loadFollowDocs(Integer userId, int page, int number) {
         User user = requireUser(userId);
         int safePage = Math.max(1, page);
@@ -149,6 +170,9 @@ public class SystemProfileService {
         );
     }
 
+    /**
+     * 分页加载当前用户的文档操作动态。
+     */
     public ActivityPage loadActivity(Integer userId, String keyword, int page, int number) {
         requireUser(userId);
         int safePage = Math.max(1, page);
@@ -169,6 +193,9 @@ public class SystemProfileService {
         return new ActivityPage(logs, search, Paginator.of(safePage, safeNumber, count, "/system/profile/activity?keyword=" + search));
     }
 
+    /**
+     * 校验旧密码并保存新密码。
+     */
     public JsonResponse<Void> savePassword(Integer userId, String password, String passwordNew, String passwordConfirm) {
         if (!StringUtils.hasText(password) || !StringUtils.hasText(passwordNew) || !StringUtils.hasText(passwordConfirm)) {
             return JsonResponse.error("密码不能为空。", null, "", 2000);

@@ -18,6 +18,12 @@ import org.tinycloud.mmwiki.service.SpaceService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.EditorImageResponse;
 
+/**
+ * MM-Wiki 页面与接口控制器。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Controller
 public class ImageController extends ControllerSupport {
 

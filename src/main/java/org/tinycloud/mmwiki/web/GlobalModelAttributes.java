@@ -7,6 +7,12 @@ import org.springframework.ui.Model;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.service.ConfigService;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @ControllerAdvice
 public class GlobalModelAttributes {
 

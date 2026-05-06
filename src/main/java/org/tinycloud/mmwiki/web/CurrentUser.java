@@ -4,6 +4,12 @@ import java.io.Serial;
 import java.io.Serializable;
 import org.tinycloud.mmwiki.domain.User;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public class CurrentUser implements Serializable {
 
     @Serial

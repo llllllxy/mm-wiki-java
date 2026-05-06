@@ -11,6 +11,12 @@ import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class PrivilegeService {
 

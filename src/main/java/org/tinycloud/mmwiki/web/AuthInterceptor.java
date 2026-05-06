@@ -27,6 +27,12 @@ import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.HashUtils;
 import org.tinycloud.mmwiki.util.IpUtils;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 

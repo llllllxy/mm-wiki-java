@@ -8,6 +8,12 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.tinycloud.mmwiki.domain.Follow;
 
+/**
+ * MM-Wiki MyBatis 数据访问接口。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Mapper
 public interface FollowMapper {
 

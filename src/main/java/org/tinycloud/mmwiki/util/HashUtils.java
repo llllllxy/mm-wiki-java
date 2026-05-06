@@ -4,6 +4,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * MM-Wiki 通用工具类。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public final class HashUtils {
 
     private HashUtils() {

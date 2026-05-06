@@ -11,6 +11,12 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.Document;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class DocumentFileService {
 

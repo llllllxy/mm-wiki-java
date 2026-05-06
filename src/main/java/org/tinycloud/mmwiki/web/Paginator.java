@@ -3,6 +3,12 @@ package org.tinycloud.mmwiki.web;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public class Paginator {
 
     private final long nums;

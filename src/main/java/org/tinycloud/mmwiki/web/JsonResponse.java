@@ -2,6 +2,12 @@ package org.tinycloud.mmwiki.web;
 
 import java.util.Map;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public class JsonResponse<T> {
 
     private int code;

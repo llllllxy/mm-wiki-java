@@ -7,6 +7,12 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.tinycloud.mmwiki.web.AuthInterceptor;
 
+/**
+ * MM-Wiki Spring 配置类。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 

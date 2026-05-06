@@ -10,6 +10,12 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.tinycloud.mmwiki.domain.Privilege;
 
+/**
+ * MM-Wiki MyBatis 数据访问接口。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Mapper
 public interface PrivilegeMapper {
 

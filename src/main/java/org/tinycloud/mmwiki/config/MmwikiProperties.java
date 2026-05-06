@@ -1,8 +1,16 @@
 package org.tinycloud.mmwiki.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
+/**
+ * MM-Wiki Spring 配置类。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @ConfigurationProperties(prefix = "mmwiki")
+@Component
 public class MmwikiProperties {
 
     private String version = "v0.2.1-java-migration";

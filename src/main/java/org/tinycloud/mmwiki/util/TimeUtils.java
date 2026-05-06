@@ -4,6 +4,12 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * MM-Wiki 通用工具类。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public final class TimeUtils {
 
     private static final DateTimeFormatter DEFAULT_FORMATTER =

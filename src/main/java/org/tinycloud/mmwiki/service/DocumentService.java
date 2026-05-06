@@ -38,6 +38,12 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.Paginator;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class DocumentService {
 
@@ -82,14 +88,23 @@ public class DocumentService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 按文档 ID 查询未删除的文档。
+     */
     public Document findActiveById(String documentId) {
         return documentMapper.findActiveById(documentId);
     }
 
+    /**
+     * 查询空间默认文档。
+     */
     public Document findSpaceDefaultDocument(Integer spaceId) {
         return requireSpaceDefaultDocument(spaceId);
     }
 
+    /**
+     * 加载文档浏览页所需的正文、权限、附件与导航数据。
+     */
     public DocumentViewData loadDocumentView(String documentId, CurrentUser currentUser) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -122,6 +137,9 @@ public class DocumentService {
         );
     }
 
+    /**
+     * 加载文档分享页所需的数据。
+     */
     public SharedPageView loadSharedView(String documentId) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -141,6 +159,9 @@ public class DocumentService {
         );
     }
 
+    /**
+     * 导出 Markdown 文档内容。
+     */
     public ExportPayload exportDocument(String documentId, CurrentUser currentUser) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -158,6 +179,9 @@ public class DocumentService {
         return new ExportPayload(document.getName() + ".zip", new ByteArrayResource(zipDocument(document, pageFile, attachments)));
     }
 
+    /**
+     * 将文档列表转换为前端树组件使用的 JSON。
+     */
     public String toTreeJson(List<Document> documents) {
         List<DocumentTreeNode> treeNodes = documents.stream().map(document -> {
             DocumentTreeNode node = new DocumentTreeNode();
@@ -176,6 +200,9 @@ public class DocumentService {
         }
     }
 
+    /**
+     * 计算当前文档的父级路径链路。
+     */
     public List<Document> getParentDocuments(Document document) {
         if ("0".equals(document.getParentId())) {
             return List.of(document);
@@ -200,6 +227,9 @@ public class DocumentService {
         return ordered;
     }
 
+    /**
+     * 加载文档编辑页所需的数据。
+     */
     public DocumentEditData loadEditData(String documentId, CurrentUser currentUser) throws IOException {
         DocumentViewData view = loadDocumentView(documentId, currentUser);
         if (!view.editor()) {
@@ -214,6 +244,9 @@ public class DocumentService {
     }
 
     @Transactional
+    /**
+     * 创建页面或目录文档，并同步初始化磁盘文件。
+     */
     public JsonResponse<Void> createDocument(CurrentUser currentUser, Integer spaceId, String parentId, Integer type, String name) throws IOException {
         String cleanName = name == null ? "" : name.trim();
         if (spaceId == null || !StringUtils.hasText(parentId) || cleanName.isBlank()) {
@@ -266,6 +299,9 @@ public class DocumentService {
     }
 
     @Transactional
+    /**
+     * 保存文档正文与基础属性，并记录编辑历史。
+     */
     public JsonResponse<Void> modifyPage(
         CurrentUser currentUser,
         String documentId,
@@ -316,6 +352,9 @@ public class DocumentService {
     }
 
     @Transactional
+    /**
+     * 移动文档到新的目录位置并维护层级路径。
+     */
     public JsonResponse<Void> moveDocument(CurrentUser currentUser, String documentId, String targetId, String moveType) throws IOException {
         if (!StringUtils.hasText(documentId) || !StringUtils.hasText(targetId)) {
             return JsonResponse.error("缺少文档参数。", null, "", 2000);
@@ -375,6 +414,9 @@ public class DocumentService {
     }
 
     @Transactional
+    /**
+     * 软删除文档并清理对应的文档资源。
+     */
     public JsonResponse<Void> deleteDocument(CurrentUser currentUser, String documentId) throws IOException {
         if (!StringUtils.hasText(documentId)) {
             return JsonResponse.error("没有选择文档。", null, "", 2000);
@@ -403,6 +445,9 @@ public class DocumentService {
         return JsonResponse.success("删除文档成功", null, "/document/index?document_id=" + document.getParentId(), 2000);
     }
 
+    /**
+     * 分页加载文档历史记录。
+     */
     public HistoryPage loadHistory(String documentId, CurrentUser currentUser, int page, int number) {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());

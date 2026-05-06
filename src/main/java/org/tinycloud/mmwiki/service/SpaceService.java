@@ -35,6 +35,12 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.Paginator;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class SpaceService {
 
@@ -71,6 +77,9 @@ public class SpaceService {
         this.attachmentService = attachmentService;
     }
 
+    /**
+     * 查询空间并在不存在时中断当前业务流程。
+     */
     public Space requireSpace(Integer spaceId) {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
@@ -80,6 +89,9 @@ public class SpaceService {
         return space;
     }
 
+    /**
+     * 统计当前可用的空间标签。
+     */
     public Set<String> listTags() {
         Set<String> tags = new LinkedHashSet<>();
         for (Space space : spaceMapper.findAllActive()) {
@@ -96,6 +108,9 @@ public class SpaceService {
         return tags;
     }
 
+    /**
+     * 分页加载当前用户可访问的空间列表。
+     */
     public SpacePage listSpaces(CurrentUser currentUser, String keyword, int page, int number) {
         int safePage = Math.max(1, page);
         int safeNumber = Math.max(10, Math.min(number, 100));
@@ -114,6 +129,9 @@ public class SpaceService {
         return new SpacePage(spaces, count, keyword == null ? "" : keyword, Paginator.of(safePage, safeNumber, count, "/space/list"));
     }
 
+    /**
+     * 加载当前用户收藏的空间列表。
+     */
     public SpaceCollectionPage listCollectedSpaces(CurrentUser currentUser) {
         List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionService.TYPE_SPACE);
         if (collections.isEmpty()) {
@@ -131,6 +149,9 @@ public class SpaceService {
         return new SpaceCollectionPage(spaces, spaces.size());
     }
 
+    /**
+     * 按标签筛选当前用户可访问的空间。
+     */
     public SpaceCollectionPage searchByTag(CurrentUser currentUser, String tag) {
         List<Space> spaces = spaceMapper.findByTag(tag == null ? "" : tag.trim());
         markCollections(currentUser, spaces);
@@ -138,10 +159,16 @@ public class SpaceService {
         return new SpaceCollectionPage(spaces, spaces.size());
     }
 
+    /**
+     * 分页加载空间成员与可添加用户。
+     */
     public MemberPage listMembers(Integer spaceId, int page, int number) {
         return listMembers(null, spaceId, page, number);
     }
 
+    /**
+     * 分页加载空间成员与可添加用户。
+     */
     public MemberPage listMembers(CurrentUser currentUser, Integer spaceId, int page, int number) {
         Space space = requireSpace(spaceId);
         AccessService.Access access = currentUser == null ? new AccessService.Access(true, false, false) : null;
@@ -177,6 +204,9 @@ public class SpaceService {
     }
 
     @Transactional
+    /**
+     * 创建空间并初始化默认文档目录。
+     */
     public JsonResponse<Void> createSpace(CurrentUser currentUser, Space space) throws IOException {
         JsonResponse<Void> validation = validateSpace(space, null);
         if (validation != null) {
@@ -206,6 +236,9 @@ public class SpaceService {
     }
 
     @Transactional
+    /**
+     * 更新空间基础信息与访问级别。
+     */
     public JsonResponse<Void> updateSpace(CurrentUser currentUser, Space space) throws IOException {
         if (space == null || space.getSpaceId() == null) {
             return JsonResponse.error("空间不存在！", null, "", 2000);
@@ -240,6 +273,9 @@ public class SpaceService {
     }
 
     @Transactional
+    /**
+     * 删除空间并清理对应的文档资源。
+     */
     public JsonResponse<Void> deleteSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
@@ -267,6 +303,9 @@ public class SpaceService {
         return JsonResponse.success("删除空间成功", null, "/system/space/list", 2000);
     }
 
+    /**
+     * 打包下载空间下的文档资源。
+     */
     public SpaceDownload downloadSpace(Integer spaceId) throws IOException {
         Space space = requireSpace(spaceId);
         List<Attachment> attachments = attachmentService.findBySpaceId(spaceId);
@@ -274,6 +313,9 @@ public class SpaceService {
         return new SpaceDownload(space.getName() + ".zip", new ByteArrayResource(payload));
     }
 
+    /**
+     * 向私有空间添加成员并设置权限。
+     */
     public void addMember(CurrentUser currentUser, Integer spaceId, Integer userId, Integer privilege) {
         Space space = requireSpace(spaceId);
         AccessService.Access access = accessService.access(currentUser, space);
@@ -286,6 +328,9 @@ public class SpaceService {
         spaceUserService.add(spaceId, userId, privilege);
     }
 
+    /**
+     * 从私有空间移除成员。
+     */
     public void removeMember(CurrentUser currentUser, Integer spaceId, Integer userId, Integer spaceUserId) {
         Space space = requireSpace(spaceId);
         AccessService.Access access = accessService.access(currentUser, space);
@@ -299,6 +344,9 @@ public class SpaceService {
         spaceUserService.deleteById(spaceUserId);
     }
 
+    /**
+     * 更新空间成员权限。
+     */
     public void updateMemberPrivilege(CurrentUser currentUser, Integer spaceId, Integer spaceUserId, Integer privilege) {
         Space space = requireSpace(spaceId);
         AccessService.Access access = accessService.access(currentUser, space);

@@ -16,6 +16,12 @@ import org.tinycloud.mmwiki.web.AuthInterceptor;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
+/**
+ * MM-Wiki 业务服务实现。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Service
 public class AuthService {
 
@@ -29,10 +35,16 @@ public class AuthService {
         this.properties = properties;
     }
 
+    /**
+     * 判断系统是否开启统一登录。
+     */
     public boolean isSsoOpen() {
         return "1".equals(configService.getValue("sso_open", "0"));
     }
 
+    /**
+     * 校验本地账号密码并写入登录会话。
+     */
     public JsonResponse<Void> login(String username, String password, HttpServletRequest request, HttpServletResponse response) {
         String cleanUsername = username == null ? "" : username.trim();
         String cleanPassword = password == null ? "" : password.trim();
@@ -67,10 +79,16 @@ public class AuthService {
         return JsonResponse.success("登录成功！", null, "/main/index", 2000);
     }
 
+    /**
+     * 返回统一登录暂未实现的兼容提示。
+     */
     public JsonResponse<Void> authLoginStub() {
         return JsonResponse.error("统一登录功能尚未迁移完成。", null, "", 2000);
     }
 
+    /**
+     * 清理服务端会话与浏览器 passport cookie，完成本地退出登录。
+     */
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         var session = request.getSession(false);
         if (session != null) {
@@ -86,8 +104,7 @@ public class AuthService {
         String identify = HashUtils.md5(
             request.getHeader("User-Agent") + IpUtils.getClientIp(request) + currentUser.getPasswordHash()
         );
-        String value = Base64.getEncoder()
-            .encodeToString((currentUser.getUsername() + "@" + identify).getBytes(StandardCharsets.UTF_8));
+        String value = Base64.getEncoder().encodeToString((currentUser.getUsername() + "@" + identify).getBytes(StandardCharsets.UTF_8));
         Cookie cookie = new Cookie(properties.getAuthor().getPassport(), value);
         cookie.setHttpOnly(false);
         cookie.setPath("/");

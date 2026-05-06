@@ -1,5 +1,11 @@
 package org.tinycloud.mmwiki.web;
 
+/**
+ * MM-Wiki Web 层支持组件。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 public class EditorImageResponse {
 
     private int success;

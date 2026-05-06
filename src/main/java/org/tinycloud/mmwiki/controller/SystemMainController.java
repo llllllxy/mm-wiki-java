@@ -7,6 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.tinycloud.mmwiki.service.SystemService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 
+/**
+ * MM-Wiki 页面与接口控制器。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Controller
 public class SystemMainController extends ControllerSupport {
 

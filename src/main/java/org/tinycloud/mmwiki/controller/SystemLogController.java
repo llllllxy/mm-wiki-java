@@ -8,6 +8,12 @@ import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 
+/**
+ * MM-Wiki 页面与接口控制器。
+ *
+ * @author liuxingyu01
+ * @since 2026-05-06
+ */
 @Controller
 public class SystemLogController extends ControllerSupport {
 
