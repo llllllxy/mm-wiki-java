@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-select/css/bootstrap-select.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js"></script>
+    <script src="/static/js/common/common.js"></script>
+    <script src="/static/js/common/date.js"></script>
+    <script src="/static/js/common/form.js"></script>
+    <script src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" action="/document/save" onsubmit="return false">
+                <input type="hidden" name="parent_id" th:value="${parent_id}">
+                <input type="hidden" name="space_id" th:value="${space_id}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 父文档</label>
+                    <div class="col-sm-6 form-comment">
+                        <span class="control-label">
+                            <th:block th:each="parentDocument : ${parent_documents}">
+                                <strong th:if="${parentDocument.parentId == '0'}"><a th:href="@{/document/index(document_id=${parentDocument.documentId})}" target="_parent" th:text="${parentDocument.name}">root</a></strong>
+                                <strong th:if="${parentDocument.parentId != '0'}"> / <a th:href="@{/document/index(document_id=${parentDocument.documentId})}" target="_parent" th:text="${parentDocument.name}">child</a></strong>
+                            </th:block>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>类型</label>
+                    <div class="col-sm-5">
+                        <div class="radio radio-inline radio-primary">
+                            <input type="radio" name="type" id="radio-menu" value="1" checked="checked">
+                            <label for="radio-menu"><i class="fa fa-file fa-fw"></i>页面</label>
+                        </div>
+                        <div class="radio radio-inline radio-primary">
+                            <input type="radio" name="type" id="radio-controller" value="2">
+                            <label for="radio-controller"><i class="fa fa-folder fa-fw"></i>目录</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 名称</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="name" class="form-control" placeholder="请输入文档名称" value="">
+                    </div>
+                    <div class="col-sm-4 form-comment">
+                        <span class="text-danger"> * 不能包含 \ / : * ? " &lt; &gt; | 等非法字符</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

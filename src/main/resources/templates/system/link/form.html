@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" th:action="${link != null} ? '/system/link/modify' : '/system/link/save'">
+                <input type="hidden" name="linkId" th:value="${link != null ? link.linkId : ''}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 名称</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="name" class="form-control" placeholder="请输入链接名称" th:value="${link != null ? link.name : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 地址</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="url" class="form-control" placeholder="请输入链接 URL" th:value="${link != null ? link.url : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>排序号</label>
+                    <div class="col-sm-5">
+                        <input type="number" class="form-control" name="sequence" th:value="${link != null ? link.sequence : 0}" placeholder="数字越小显示越靠前">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

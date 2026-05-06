@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" action="/system/user/save">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 用户名</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="username" class="form-control" placeholder="请输入字母或数字组成的用户名">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 姓名</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="givenName" class="form-control" placeholder="请输入姓名">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 密码</label>
+                    <div class="col-sm-4">
+                        <input type="password" name="password" class="form-control" placeholder="请输入密码">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 角色</label>
+                    <div class="col-sm-4">
+                        <select name="roleId" class="form-control">
+                            <option value="">请选择角色</option>
+                            <option th:each="role : ${roles}" th:value="${role.roleId}" th:text="${role.name}">角色</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 邮箱</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="email" class="form-control" placeholder="请输入邮箱">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 手机号</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="mobile" class="form-control" placeholder="请输入手机号">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">电话</label>
+                    <div class="col-sm-4"><input type="text" name="phone" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">部门</label>
+                    <div class="col-sm-4"><input type="text" name="department" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">职位</label>
+                    <div class="col-sm-4"><input type="text" name="position" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">位置</label>
+                    <div class="col-sm-4"><input type="text" name="location" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">IM</label>
+                    <div class="col-sm-4"><input type="text" name="im" class="form-control"></div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, false);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

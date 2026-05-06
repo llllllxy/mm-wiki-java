@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="page-header">
+                <h4><i class="fa fa-address-card-o"></i> 登录认证方式配置文档</h4>
+            </div>
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#ldap" aria-controls="ldap" role="tab" data-toggle="tab">LDAP 登录</a></li>
+                <li role="presentation"><a href="#http" aria-controls="http" role="tab" data-toggle="tab">HTTP 登录</a></li>
+            </ul>
+            <br>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="ldap">
+                    <div class="panel panel-default">
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <td class="w10p"><strong>认证 URL</strong></td>
+                                <td>格式如 <code>ldap://ldap.server:389</code> 或 <code>ldaps://ldap.server:636</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>附加参数</strong></td>
+                                <td>
+<pre>{
+  "basedn": "dc=example,dc=com",
+  "bind_username": "readonly",
+  "bind_password": "password",
+  "account_pattern": "(&(objectClass=User)(userPrincipalName=%s))",
+  "given_name_key": "displayName",
+  "email_key": "mail",
+  "mobile_key": "mobile",
+  "phone_key": "telephoneNumber",
+  "department_key": "department",
+  "position_key": "Position",
+  "location_key": "physicalDeliveryOfficeName",
+  "im_key": "im"
+}</pre>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>注意事项</strong></td>
+                                <td>附加参数必须是合法 JSON，并且字段值与实际 LDAP 环境匹配。</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="http">
+                    <div class="panel panel-default">
+                        <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                                <td class="w10p"><strong>认证 URL</strong></td>
+                                <td>使用支持 <code>POST</code> 的 HTTP/HTTPS 接口，例如 <code>https://example.com/login</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>请求参数</strong></td>
+                                <td>
+<pre>username=xxx
+password=xxx
+ext_data=xxx</pre>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>返回格式</strong></td>
+                                <td>
+<pre>{
+  "message": "",
+  "data": {
+    "given_name": "张三",
+    "mobile": "13800000000",
+    "phone": "010-12345678",
+    "email": "user@example.com",
+    "department": "研发部",
+    "position": "工程师",
+    "location": "B座 3 层",
+    "im": "wechat"
+  }
+}</pre>
+失败时 `message` 返回错误原因，`data` 可为空。
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

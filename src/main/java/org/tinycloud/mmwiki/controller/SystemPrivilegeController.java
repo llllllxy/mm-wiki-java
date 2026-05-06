@@ -1,0 +1,68 @@
+package org.tinycloud.mmwiki.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.Privilege;
+import org.tinycloud.mmwiki.service.PrivilegeService;
+import org.tinycloud.mmwiki.web.ControllerSupport;
+import org.tinycloud.mmwiki.web.JsonResponse;
+
+@Controller
+public class SystemPrivilegeController extends ControllerSupport {
+
+    private final PrivilegeService privilegeService;
+
+    public SystemPrivilegeController(PrivilegeService privilegeService) {
+        this.privilegeService = privilegeService;
+    }
+
+    @GetMapping("/system/privilege/list")
+    public String list(Model model) {
+        PrivilegeService.PrivilegeGroups groups = privilegeService.groups();
+        model.addAttribute("menus", groups.menus());
+        model.addAttribute("controllers", groups.controllers());
+        model.addAttribute("mode", privilegeService.mode());
+        return "system/privilege/list";
+    }
+
+    @GetMapping("/system/privilege/add")
+    public String add(Model model) {
+        model.addAttribute("menus", privilegeService.groups().menus());
+        model.addAttribute("mode", privilegeService.mode());
+        return "system/privilege/form";
+    }
+
+    @GetMapping("/system/privilege/edit")
+    public String edit(@RequestParam("privilege_id") Integer privilegeId, Model model) {
+        Privilege privilege = privilegeService.findById(privilegeId);
+        if (privilege == null) {
+            throw new IllegalStateException("权限不存在");
+        }
+        model.addAttribute("privilege", privilege);
+        model.addAttribute("menus", privilegeService.groups().menus());
+        model.addAttribute("mode", privilegeService.mode());
+        return "system/privilege/form";
+    }
+
+    @PostMapping("/system/privilege/save")
+    @ResponseBody
+    public JsonResponse<Void> save(Privilege privilege) {
+        return privilegeService.save(privilege);
+    }
+
+    @PostMapping("/system/privilege/modify")
+    @ResponseBody
+    public JsonResponse<Void> modify(Privilege privilege) {
+        return privilegeService.update(privilege);
+    }
+
+    @PostMapping("/system/privilege/delete")
+    @ResponseBody
+    public JsonResponse<Void> delete(@RequestParam("privilege_id") Integer privilegeId) {
+        return privilegeService.delete(privilegeId);
+    }
+}

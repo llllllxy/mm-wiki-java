@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <br>
+        <div class="panel-body">
+            <form class="form-horizontal" method="post" action="/system/config/modify">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>系统版本号</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="system_version" class="form-control" th:value="${configValue['system_version']}" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>系统名称</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="system_name" class="form-control" th:value="${configValue['system_name']}" placeholder="请输入系统名称">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>主页标题</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="main_title" class="form-control" th:value="${configValue['main_title']}" placeholder="请输入主页标题">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>主页描述</label>
+                    <div class="col-sm-4">
+                        <textarea name="main_description" class="form-control" rows="4" placeholder="请输入主页描述" th:text="${configValue['main_description']}"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>开启自动关注</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" name="auto_follow_doc_open" value="1" th:checked="${configValue['auto_follow_doc_open'] == '1'}">
+                    </div>
+                    <div class="col-sm-3 form-comment">
+                        <span class="text-danger"> * 用户创建、编辑过的文档会被自动关注</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>开启邮件通知</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" name="send_email_open" value="1" th:checked="${configValue['send_email_open'] == '1'}">
+                    </div>
+                    <div class="col-sm-3 form-comment">
+                        <span class="text-danger"> * 开启前必须先添加并启用邮件服务器</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>开启统一登录</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" name="sso_open" value="1" th:checked="${configValue['sso_open'] == '1'}">
+                    </div>
+                    <div class="col-sm-3 form-comment">
+                        <span class="text-danger"> * 开启前必须先添加并启用登录认证</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>开启全文搜索</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" name="fulltext_search_open" value="1" th:checked="${configValue['fulltext_search_open'] == '1'}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>索引更新间隔</label>
+                    <div class="col-sm-1">
+                        <input type="text" name="doc_search_timer" class="form-control" th:value="${configValue['doc_search_timer']}">
+                    </div>
+                    <div class="col-sm-8 form-comment">
+                        <span class="text-danger"> * 单位秒，默认 3600</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, false);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("input[type='checkbox']").bootstrapSwitch({
+            size: 'small',
+            onText: '是',
+            offText: '否'
+        });
+    });
+</script>
+</body>
+</html>

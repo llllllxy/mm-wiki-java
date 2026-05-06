@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <table class="table">
+                <thead>
+                <tr>
+                    <td class="w10p text-left"><strong>用户</strong></td>
+                    <td class="w10p text-left"><strong>操作</strong></td>
+                    <td class=""><strong>备注</strong></td>
+                    <td class="w20p center"><strong>时间</strong></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="logDocument : ${logDocuments}">
+                    <td th:text="${logDocument.username}">user</td>
+                    <td>
+                        <label class="text text-info" th:if="${logDocument.action == 1}">创建</label>
+                        <label class="text text-primary" th:if="${logDocument.action == 2}">修改</label>
+                        <label class="text text-danger" th:if="${logDocument.action == 3}">删除</label>
+                    </td>
+                    <td th:text="${logDocument.comment}">备注</td>
+                    <td class="center" th:text="${logDocument.createTimeText}">2026-05-06 10:00:00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>

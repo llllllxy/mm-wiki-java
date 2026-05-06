@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>MM-Wiki - Login</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link href="/static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/animate.css" rel="stylesheet" />
+    <link href="/static/css/login.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script src="/static/js/modules/login.js"></script>
+</head>
+<body>
+<div class="login_box">
+    <div class="login_l_img animated bounceInLeft">
+        <span>快速构建团队协作与知识分享平台</span>
+        <img src="/static/images/logo_new.png" />
+    </div>
+    <div class="login">
+        <div class="tabs">
+            <input type="radio" id="tab1" name="tab-control" checked>
+            <input type="radio" id="tab2" name="tab-control">
+            <ul>
+                <li title="普通登录" style="border-right: 2px solid #929daf">
+                    <label for="tab1" role="button"><br><span>普通登录</span></label>
+                </li>
+                <li title="统一登录">
+                    <label for="tab2" role="button"><br><span>统一登录</span></label>
+                </li>
+            </ul>
+            <div class="slider"><div class="indicator"></div></div>
+            <div class="content">
+                <section>
+                    <form role="form" action="/author/login" method="post" onsubmit="return false">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="username"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input type="text" name="username" class="form-control" placeholder="请输入系统用户名" autocomplete="new-username" onkeydown="KeyDown('#default_login')">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="password"><i class="glyphicon glyphicon-lock"></i></span>
+                                    <input type="password" name="password" class="form-control" placeholder="请输入密码" autocomplete="new-password" onkeydown="KeyDown('#default_login')">
+                                </div>
+                            </div>
+                            <input id="default_login" name="submit" type="button" value="登录" class="btn btn-primary btn-block" onclick="Login.ajaxSubmit(this.form)">
+                        </fieldset>
+                    </form>
+                </section>
+                <section>
+                    <form role="form" action="/author/authLogin" method="post" onsubmit="return false">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                    <input type="text" name="username" class="form-control" placeholder="请输入统一登录用户名" autocomplete="new-username" onkeydown="KeyDown('#auth_login')" th:disabled="${sso_open != '1'}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                                    <input type="password" name="password" class="form-control" placeholder="请输入统一登录密码" autocomplete="new-password" onkeydown="KeyDown('#auth_login')" th:disabled="${sso_open != '1'}">
+                                </div>
+                            </div>
+                            <input id="auth_login" name="submit" type="button" value="登录" class="btn btn-primary" onclick="Login.ajaxSubmit(this.form)" th:disabled="${sso_open != '1'}">
+                        </fieldset>
+                    </form>
+                </section>
+            </div>
+            <div class="text-center" style="margin-top: 30px; font-size: 10px;color: #7d7d7d;">
+                * 请使用 Firefox, Chrome, IE9+ 浏览器以获得更好的体验 *
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        © <span th:text="${copyright}">2018 phachon</span>
+        &nbsp;<i class="glyphicon glyphicon-hand-right"></i>
+        <a style="color: gray;" target="_blank" href="https://github.com/phachon/MM-Wiki">MM-Wiki Version <span th:text="${version}">v0.2.1</span></a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (self != top ) {
+        parent.location.href = "/"
+    }
+    function KeyDown(element) {
+        if (event.keyCode == 13) {
+            event.returnValue = false;
+            event.cancel = true;
+            $(element).click();
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-switch/css/bootstrap-switch.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-iconpicker/css/bootstrap-iconpicker.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-iconpicker/js/bootstrap-iconpicker-iconset-all.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-iconpicker/js/bootstrap-iconpicker.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" th:class="${#strings.contains(#strings.toLowerCase(mode), 'dev')} ? 'hide' : ''">
+        <div th:if="${!#strings.contains(#strings.toLowerCase(mode), 'dev')}" class="alert alert-danger" style="margin-bottom: 8px">
+            <a class="close" href="#" onclick="$(this).parent().hide();">x</a>
+            <strong><i class="glyphicon glyphicon-warning-sign"></i> 警告：</strong>只允许在开发模式下维护权限。
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <br>
+        <div class="panel-body">
+            <form class="form-horizontal" method="post" th:action="${privilege != null} ? '/system/privilege/modify' : '/system/privilege/save'">
+                <input type="hidden" name="privilegeId" th:value="${privilege != null ? privilege.privilegeId : ''}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>权限名称</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="name" class="form-control" th:value="${privilege != null ? privilege.name : ''}" placeholder="请输入权限名称">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>所属导航</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="module" class="form-control" value="系统(system)" readonly="readonly">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>权限类型</label>
+                    <div class="col-sm-4">
+                        <label class="radio-inline">
+                            <input type="radio" name="type" value="menu" th:checked="${privilege == null or privilege.type == 'menu'}"> 菜单
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="type" value="controller" th:checked="${privilege != null and privilege.type == 'controller'}"> 控制器
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group controller-type hidden">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>上级菜单</label>
+                    <div class="col-sm-4">
+                        <select name="parentId" class="form-control">
+                            <option th:each="menu : ${menus}" th:value="${menu.privilegeId}" th:selected="${privilege != null and privilege.parentId == menu.privilegeId}" th:text="${menu.name}">菜单</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group controller-type hidden">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>控制器名称</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="controller" class="form-control" th:value="${privilege != null ? privilege.controller : ''}" placeholder="请输入控制器名称">
+                    </div>
+                </div>
+                <div class="form-group controller-type hidden">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>方法名称</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="action" class="form-control" th:value="${privilege != null ? privilege.action : ''}" placeholder="请输入方法名称">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>选择图标</label>
+                    <div class="col-sm-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="icon" th:value="${privilege != null ? privilege.icon : 'glyphicon-list'}" placeholder="选择菜单图标">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" id="icon" th:attr="data-icon=${privilege != null ? privilege.icon : 'glyphicon-list'}" role="iconpicker"></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>是否显示</label>
+                    <div class="col-sm-4">
+                        <input type="checkbox" name="isDisplay" value="1" th:checked="${privilege != null and privilege.isDisplay == 1}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span>排序数字</label>
+                    <div class="col-sm-4">
+                        <input type="number" class="form-control" name="sequence" th:value="${privilege != null ? privilege.sequence : 0}" placeholder="数字越小显示越靠前">
+                    </div>
+                </div>
+                <div class="form-group controller-type hidden">
+                    <label class="col-sm-2 control-label">目标地址</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="target" class="form-control" th:value="${privilege != null ? privilege.target : ''}" placeholder="链接到外部的地址">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" th:if="${#strings.contains(#strings.toLowerCase(mode), 'dev')}" th:onclick="${privilege != null} ? 'Form.ajaxSubmit(this.form, true);' : 'Form.ajaxSubmit(this.form, false);'" class="btn btn-primary">保存</button>
+                        <button type="button" th:if="${!#strings.contains(#strings.toLowerCase(mode), 'dev')}" class="btn btn-primary" disabled="disabled">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    $(function () {
+        $("input[name='isDisplay']").bootstrapSwitch({
+            size: 'small',
+            onText: '是',
+            offText: '否'
+        });
+        $("#icon").iconpicker({
+            searchText: '搜索',
+            cols: 6,
+            rows: 3
+        });
+        $('#icon').on('change', function(e) {
+            $("input[name='icon']").val(e.icon);
+        });
+        var defaultType = /*[[${privilege != null ? privilege.type : 'menu'}]]*/ 'menu';
+        changeSelect(defaultType);
+        $("input[name='type']").on('change', function () {
+            changeSelect($("input[name='type']:checked").val());
+        });
+        function changeSelect(privilegeType) {
+            if (privilegeType === "controller") {
+                $(".controller-type").removeClass("hidden");
+            } else {
+                $(".controller-type").addClass("hidden");
+            }
+        }
+    });
+</script>
+</body>
+</html>

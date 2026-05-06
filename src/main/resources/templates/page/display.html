@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title th:text="${document.name + ' Powered by MM-Wiki'}">MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link href="/static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/editor.md/css/editormd.preview.css" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/editor.md/css/editormd.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/scrollup/css/themes/image.css" />
+    <link href="/static/css/share.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/scrollup/js/jquery.scrollUp.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery-qrcode/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/editormd.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/marked.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/prettify.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/raphael.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/underscore.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/sequence-diagram.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/flowchart.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/jquery.flowchart.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+</head>
+<body id="frame-body">
+<div class="container">
+    <div class="row center">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="panel panel-body">
+                <div id="document_page_view">
+                    <h3 class="view-page-title"><i class="fa fa-file-word-o"></i> <span th:text="${document.name}">文档</span></h3>
+                    <p class="view-page-path">
+                        <i class="fa fa-folder fa-fw"></i>
+                        <th:block th:each="parentDocument, status : ${parent_documents}">
+                            <span th:text="${status.index == 0 ? parentDocument.name : ' / ' + parentDocument.name}">路径</span>
+                        </th:block>
+                    </p>
+                    <p class="view-page-time">
+                        <i class="fa fa-newspaper-o fa-fw"></i>
+                        创建于 <span th:text="${document_create_time}">2026/05/06 10:00:00</span>
+                        By <span th:text="${create_user.username + '（' + create_user.givenName + '）'}">创建者</span>
+                    </p>
+                    <p class="view-page-time">
+                        <i class="fa fa-edit fa-fw"></i>
+                        更新于 <span th:text="${document_update_time}">2026/05/06 10:00:00</span>
+                        By <span th:text="${edit_user.username + '（' + edit_user.givenName + '）'}">修改者</span>
+                    </p>
+                    <hr style="margin: 0">
+                    <textarea style="display:none;" th:text="${page_content}"></textarea>
+                </div>
+            </div>
+            <div class="panel panel-body">
+                <div class="text-center">
+                    © <span th:text="${copyright}">2018 phachon</span>
+                    &nbsp;<i class="glyphicon glyphicon-hand-right"></i>
+                    <a target="_blank" href="https://github.com/phachon/MM-Wiki">Powered by MM Wiki <span th:text="${version}">v0.2.1</span></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1" id="display_section">
+            <div class="share-popup center">
+                <label>分享到 <i class="fa fa-wechat"></i> <i class="fa fa-qq"></i></label>
+                <div id="document-qrcode"></div>
+                <label>打开微信扫一扫</label>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        if (Common.isMobile()) {
+            $("#display_section").hide();
+        }
+
+        editormd.katexURL = {
+            js  : "/static/plugins/editor.md/lib/katex/katex.min",
+            css : "/static/plugins/editor.md/lib/katex/katex.min"
+        };
+        editormd.markdownToHTML("document_page_view", {
+            path : "/static/plugins/editor.md/lib/",
+            htmlDecode      : "style,script,iframe",
+            tocm            : true,
+            emoji           : false,
+            taskList        : true,
+            tex             : true,
+            flowChart       : true,
+            sequenceDiagram : true
+        });
+
+        $.scrollUp({
+            animation: "fade",
+            scrollImg: {
+                active: true,
+                type: "background",
+                src: "img/top.png"
+            }
+        });
+
+        $("#document-qrcode").qrcode({
+            width: 120,
+            height: 120,
+            text: window.location.href
+        });
+    });
+</script>
+</body>
+</html>

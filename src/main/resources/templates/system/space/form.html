@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" th:action="${space != null} ? '/system/space/modify' : '/system/space/save'">
+                <input type="hidden" name="spaceId" th:value="${space != null ? space.spaceId : ''}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 空间名称</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="name" class="form-control" placeholder="请输入空间名称" th:value="${space != null ? space.name : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">空间描述</label>
+                    <div class="col-sm-5">
+                        <textarea name="description" class="form-control" rows="4" placeholder="请输入空间描述" th:text="${space != null ? space.description : ''}"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">标签</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="tags" class="form-control" data-role="tagsinput" placeholder="输入标签后回车" th:value="${space != null ? space.tags : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">访问级别</label>
+                    <div class="col-sm-4">
+                        <select name="visitLevel" class="form-control">
+                            <option value="public" th:selected="${space == null or space.visitLevel == 'public'}">Public</option>
+                            <option value="private" th:selected="${space != null and space.visitLevel == 'private'}">Private</option>
+                        </select>
+                        <span class="help-block">Public 对所有登录用户可见，Private 仅空间成员可见。</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">文档分享</label>
+                    <div class="col-sm-4">
+                        <select name="isShare" class="form-control">
+                            <option value="1" th:selected="${space == null or space.isShare == 1}">允许</option>
+                            <option value="0" th:selected="${space != null and space.isShare != 1}">禁止</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">文档导出</label>
+                    <div class="col-sm-4">
+                        <select name="isExport" class="form-control">
+                            <option value="1" th:selected="${space == null or space.isExport == 1}">允许</option>
+                            <option value="0" th:selected="${space != null and space.isExport != 1}">禁止</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, false);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

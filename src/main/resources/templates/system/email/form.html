@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+    <script type="text/javascript" src="/static/js/modules/system/email.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" th:action="${email != null} ? '/system/email/modify' : '/system/email/save'">
+                <input type="hidden" name="emailId" th:value="${email != null ? email.emailId : ''}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 服务名称</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="name" class="form-control" placeholder="请输入邮件服务器名称" th:value="${email != null ? email.name : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 服务器主机</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="host" class="form-control" placeholder="请输入 smtp host" th:value="${email != null ? email.host : ''}">
+                    </div>
+                    <div class="col-sm-4 form-comment">
+                        <span class="text-danger"> * 例如：smtp.163.com</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 服务器端口</label>
+                    <div class="col-sm-4">
+                        <input type="number" name="port" class="form-control" placeholder="25" th:value="${email != null ? email.port : 25}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 发件人邮箱</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="senderAddress" class="form-control" placeholder="请输入发件人邮箱" th:value="${email != null ? email.senderAddress : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 邮箱用户名</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="username" class="form-control" placeholder="请输入邮箱用户名" th:value="${email != null ? email.username : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 邮箱密码</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="mailPassword" class="form-control" placeholder="请输入邮箱密码" th:value="${email != null ? email.password : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 是否使用 SSL</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" name="isSsl" value="1" th:checked="${email != null and email.isSsl == 1}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"> 发件人显示名</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="senderName" class="form-control" placeholder="请输入显示名" th:value="${email != null ? email.senderName : 'MM-Wiki'}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"> 邮件标题前缀</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="senderTitlePrefix" class="form-control" placeholder="请输入标题前缀" th:value="${email != null ? email.senderTitlePrefix : '[MM-Wiki]'}">
+                    </div>
+                    <input type="hidden" name="emails" value="">
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Email.testSend(this.form, '/system/email/test');" class="btn btn-success">测试</button>
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("input[type='checkbox']").bootstrapSwitch({
+            size: 'small',
+            onText: '是',
+            offText: '否'
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: mmwiki
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/mm_wiki?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&sslMode=DISABLED
+    username: root
+    password: 123654
+    hikari:
+      minimum-idle: 30
+      maximum-pool-size: 200
+  thymeleaf:
+    cache: false
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
+server:
+  address: 0.0.0.0
+  port: 8081
+  servlet:
+    session:
+      cookie:
+        name: mmwikissid
+      timeout: 20h
+
+logging:
+  file:
+    name: logs/mm-wiki.log
+
+mybatis:
+  type-aliases-package: org.tinycloud.mmwiki.domain
+  configuration:
+    map-underscore-to-camel-case: true
+
+mmwiki:
+  version: v0.2.1-java-migration
+  copyright: 2018 phachon
+  system-name-fallback: Markdown Mini Wiki
+  document-root-dir: ./data
+  search:
+    interval-time: 30
+    batch-update-doc-num: 100
+  author:
+    passport: mmwikipassport
+    cookie-expired: 72000

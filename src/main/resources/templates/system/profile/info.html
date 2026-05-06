@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="page-header">
+                <h3><i class="fa fa-address-card-o"></i> <span th:text="${user.username + '（' + user.givenName + '）'}">用户</span></h3>
+            </div>
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="/system/profile/info">用户信息</a></li>
+                <li><a href="/system/profile/followUser">关注用户</a></li>
+                <li><a href="/system/profile/followDoc">关注文档</a></li>
+            </ul>
+            <br>
+            <div class="row">
+                <div class="col-md-7" style="padding-left: 30px">
+                    <h3>最近活动</h3>
+                    <div class="user-activity">
+                        <div th:if="${count == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                            <p><i class="glyphicon glyphicon-volume-up"></i> 还没有任何活动。</p>
+                        </div>
+                        <ul th:if="${count > 0}">
+                            <li th:each="logDocument : ${logDocuments}">
+                                <div th:if="${logDocument.action == 3}">
+                                    <i th:class="${logDocument.documentType == 1} ? 'fa fa-file-word-o' : 'fa fa-folder-o'"></i>
+                                    <span th:text="${logDocument.documentName}">文档</span>
+                                </div>
+                                <div th:unless="${logDocument.action == 3}">
+                                    <a th:href="@{/document/index(document_id=${logDocument.documentId})}" target="_parent" class="text text-info text-font-15">
+                                        <i th:class="${logDocument.documentType == 1} ? 'fa fa-file-word-o' : 'fa fa-folder-o'"></i>
+                                        <span th:text="${logDocument.documentName}">文档</span>
+                                    </a>
+                                </div>
+                                <span class="text text-font-12 activity-time">
+                                    <span th:text="${logDocument.action == 1 ? '创建' : (logDocument.action == 2 ? '修改' : '删除')}">修改</span>
+                                    于 <span th:text="${logDocument.createTimeText}">2026-01-01 00:00:00</span>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <h3>个人资料 <a class="fa fa-edit" name="edit" data-link="/system/profile/edit"></a></h3>
+                    <div class="user-info">
+                        <div class="user-group"><label class="text-right text-font-15">用户名</label><span th:text="${user.username}">user</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">姓名</label><span th:text="${user.givenName}">name</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">邮箱</label><span th:text="${user.email}">email</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">手机</label><span th:text="${user.mobile}">mobile</span></div>
+                        <hr>
+                        <div class="user-group"><label class="text-right text-font-15">电话</label><span th:text="${user.phone}">phone</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">部门</label><span th:text="${user.department}">department</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">职位</label><span th:text="${user.position}">position</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">位置</label><span th:text="${user.location}">location</span></div>
+                        <div class="user-group"><label class="text-right text-font-15">IM</label><span th:text="${user.im}">im</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("[name='edit']", "修改个人资料", "390px", "1000px");
+</script>
+</body>
+</html>

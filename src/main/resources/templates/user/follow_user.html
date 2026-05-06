@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="page-header">
+                <h3><i class="fa fa-address-card-o"></i> <span th:text="${user.username + '（' + user.givenName + '）'}">用户</span></h3>
+            </div>
+            <ul class="nav nav-tabs">
+                <li><a th:href="@{/user/info(user_id=${user.userId})}">用户信息</a></li>
+                <li class="active"><a th:href="@{/user/followUser(user_id=${user.userId})}">关注用户</a></li>
+                <li><a th:href="@{/user/followPage(user_id=${user.userId})}">关注文档</a></li>
+            </ul>
+            <br>
+            <div class="row">
+                <div class="col-md-6">
+                    <div style="margin: 10px 0 15px 0"><span class="label label-default">他的关注</span></div>
+                    <div th:if="${followCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                        <p><i class="glyphicon glyphicon-volume-up"></i> 还没有关注任何用户</p>
+                    </div>
+                    <table th:if="${followCount > 0}" class="table">
+                        <thead>
+                        <tr>
+                            <td class="w25p text-left"><strong>用户名</strong></td>
+                            <td class="text-left"><strong>姓名</strong></td>
+                            <td class="text-left"><strong>邮箱</strong></td>
+                            <td class="w12p center"><strong>取消</strong></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${users}">
+                            <td><strong><a th:href="@{/user/info(user_id=${item.userId})}" th:text="${item.username}">user</a></strong></td>
+                            <td th:text="${item.givenName}">name</td>
+                            <td th:text="${item.email}">email</td>
+                            <td class="center"><a th:onclick="|Common.ajaxSubmit('/follow/cancel?follow_id=${item.followId}')|"><i class="glyphicon glyphicon-heart"></i></a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <div style="margin: 10px 0 15px 0"><span class="label label-default">他的粉丝</span></div>
+                    <div th:if="${fansCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                        <p><i class="glyphicon glyphicon-volume-up"></i> 暂时还没有粉丝</p>
+                    </div>
+                    <table th:if="${fansCount > 0}" class="table">
+                        <thead>
+                        <tr>
+                            <td class="w25p text-left"><strong>用户名</strong></td>
+                            <td class="text-left"><strong>姓名</strong></td>
+                            <td class="text-left"><strong>邮箱</strong></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="fansUser : ${fansUsers}">
+                            <td>
+                                <strong th:if="${fansUser.userId == login_user_id}"><a href="/system/main/index" target="_parent" th:text="${fansUser.username}">user</a></strong>
+                                <strong th:if="${fansUser.userId != login_user_id}"><a th:href="@{/user/info(user_id=${fansUser.userId})}" th:text="${fansUser.username}">user</a></strong>
+                            </td>
+                            <td th:text="${fansUser.givenName}">name</td>
+                            <td th:text="${fansUser.email}">email</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

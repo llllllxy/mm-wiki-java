@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/morris/morris.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/morris/raphael-min.js"></script>
+    <script type="text/javascript" src="/static/plugins/morris/morris.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-blue">
+                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-user fa-5x"></i></div><div class="col-xs-9 text-right"><div class="huge" th:text="${normalUserCount}">0</div><div>正常用户数</div></div></div></div>
+                        <div class="panel-footer"><span class="pull-left text-primary"><strong>正常用户</strong></span><span class="pull-right text-primary"><i class="fa fa-user"></i></span><div class="clearfix"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="panel panel-red">
+                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-user-times fa-5x"></i></div><div class="col-xs-9 text-right"><div class="huge" th:text="${forbiddenUserCount}">0</div><div>屏蔽用户数</div></div></div></div>
+                        <div class="panel-footer"><span class="pull-left text-danger"><strong>屏蔽用户</strong></span><span class="pull-right text-danger"><i class="fa fa-user-times"></i></span><div class="clearfix"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-cube fa-5x"></i></div><div class="col-xs-9 text-right"><div class="huge" th:text="${spaceCount}">0</div><div>空间数</div></div></div></div>
+                        <div class="panel-footer"><span class="pull-left text-warning"><strong>空间</strong></span><span class="pull-right text-warning"><i class="fa fa-cube"></i></span><div class="clearfix"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="panel panel-green">
+                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-file-word-o fa-5x"></i></div><div class="col-xs-9 text-right"><div class="huge" th:text="${documentCount}">0</div><div>文档数</div></div></div></div>
+                        <div class="panel-footer"><span class="pull-left text-success"><strong>文档</strong></span><span class="pull-right text-success"><i class="fa fa-file-word-o"></i></span><div class="clearfix"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-line-chart"></i> 文档数量增长趋势(天)</strong></div>
+                        <div class="panel-body"><div id="docs-line"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-bar-chart"></i> 空间文档数排行</strong></div>
+                        <div class="panel-body"><div id="space-docs-rank"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-pie-chart"></i> 空间文档数占比</strong></div>
+                        <div class="panel-body"><div id="space-docs-percent"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-bar-chart"></i> 文档收藏排行</strong></div>
+                        <div class="panel-body"><div id="docs-collect-rank"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-user"></i> 用户数据统计</strong></div>
+                        <div class="panel-body" style="min-height: 370px">
+                            <br><br>
+                            <table class="table table-hover">
+                                <tbody>
+                                <tr><td><strong>今日登录用户数</strong></td><td class="center" th:text="${todayLoginUserCount}">0</td></tr>
+                                <tr><td><strong>创建文档最多用户</strong></td><td class="center" th:text="${createMaxUser.username}"></td></tr>
+                                <tr><td><strong>修改文档最多用户</strong></td><td class="center" th:text="${editMaxUser.username}"></td></tr>
+                                <tr><td><strong>收藏文档最多用户</strong></td><td class="center" th:text="${collectMaxUser.username}"></td></tr>
+                                <tr><td><strong>粉丝数最多用户</strong></td><td class="center" th:text="${fansMaxUser.username}"></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/js/modules/system/statics.js"></script>
+<script type="text/javascript">
+    $(window).load(function(){
+        Statics.GetDocCountByTime("docs-line", "/system/static/docCountByTime");
+        Statics.GetSpaceDocsRank("space-docs-rank", "space-docs-percent", "/system/static/spaceDocsRank");
+        Statics.GetCollectDocsRank("docs-collect-rank", "/system/static/collectDocRank");
+    });
+</script>
+</body>
+</html>

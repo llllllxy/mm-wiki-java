@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/popover/css/jquery.webui-popover.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/popover/js/jquery.webui-popover.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery-ui-1.11.0.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery.layout.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <script type="text/javascript" src="/static/js/modules/common.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div id="main-left" class="ui-layout-west">
+    <div class="left-space">
+        <ul class="nav nav-sidebar menu-nav">
+            <li class="active"><a href="/space/list" target="mainFrame"><i class="fa fa-cube" aria-hidden="true"></i>&nbsp;&nbsp;全部空间 <span class="sr-only">(current)</span></a></li>
+            <li><a href="/space/collection" target="mainFrame"><i class="glyphicon glyphicon-star"></i>&nbsp;&nbsp;收藏空间</a></li>
+        </ul>
+    </div>
+    <div class="widget">
+        <h4 class="title">标签</h4>
+        <hr>
+        <div class="content tag-cloud">
+            <a th:each="tagName : ${spaceTags}" th:href="@{/space/search(tag=${tagName})}" target="mainFrame" th:text="${tagName}">tag</a>
+        </div>
+    </div>
+</div>
+<iframe class="ui-layout-center" id="mainFrame" name="mainFrame" width="100%" frameborder="0" scrolling="yes" style="overflow-y: auto" src="/space/list"></iframe>
+</body>
+</html>

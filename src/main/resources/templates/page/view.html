@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link href="/static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/popover/css/jquery.webui-popover.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/editor.md/css/editormd.preview.css" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/editor.md/css/editormd.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-switch/css/bootstrap-switch.min.css">
+    <link href="/static/css/common.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/popover/js/jquery.webui-popover.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/base64.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/editormd.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/marked.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/prettify.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/raphael.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/underscore.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/sequence-diagram.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/flowchart.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/editor.md/lib/jquery.flowchart.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/date.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <script type="text/javascript" src="/static/js/common/storage.js"></script>
+    <script type="text/javascript" src="/static/js/modules/page.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3 class="view-page-title" th:text="${document.name}">文档名</h3>
+                        <p class="view-page-path">
+                            <i class="fa fa-folder fa-fw"></i>
+                            <th:block th:each="parentDocument : ${parent_documents}">
+                                <strong th:if="${parentDocument.parentId == '0'}"><a class="text text-info" target="_parent" th:href="@{/document/index(document_id=${parentDocument.documentId})}" th:text="${parentDocument.name}">根</a></strong>
+                                <strong th:if="${parentDocument.parentId != '0'}"> / <a target="_parent" th:href="@{/document/index(document_id=${parentDocument.documentId})}" th:text="${parentDocument.name}">子</a></strong>
+                            </th:block>
+                        </p>
+                        <p class="view-page-time">
+                            <i class="fa fa-calendar fa-fw"></i>
+                            由
+                            <a class="text text-info" th:href="@{/user/info(user_id=${create_user.userId})}" th:text="${create_user.username + '（' + create_user.givenName + '）'}">创建者</a>
+                            创建于 <span th:text="${document_create_time}">2026/05/06 10:00:00</span>，由
+                            <a class="text text-info" th:href="@{/user/info(user_id=${edit_user.userId})}" th:text="${edit_user.username + '（' + edit_user.givenName + '）'}">修改者</a>
+                            最后更新于 <span th:text="${document_update_time}">2026/05/06 10:00:00</span>
+                            <a name="history" th:attr="data-link=@{/document/history(document_id=${document.documentId})}">&nbsp;<i class="fa fa-history item">查看修改历史</i></a>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <div class="btn-group" role="group" aria-label="...">
+                            <a th:if="${is_editor}" type="button" class="btn btn-default" th:href="@{/page/edit(document_id=${document.documentId})}"><i class="glyphicon glyphicon-pencil"></i>&nbsp;编辑</a>
+                            <a th:if="${collection_id == 0}" type="button" class="btn btn-default" th:onclick="|Common.ajaxSubmit('/collection/add?type=1&resource_id=${document.documentId}')|"><i class="glyphicon glyphicon-star-empty"></i>&nbsp;收藏</a>
+                            <a th:if="${collection_id != 0}" type="button" class="btn btn-default" th:onclick="|Common.ajaxSubmit('/collection/cancel?collection_id=${collection_id}')|"><i class="glyphicon glyphicon-star"></i>&nbsp;取消</a>
+                        </div>
+                    </div>
+                </div>
+                <hr style="margin: 0">
+            </div>
+            <div class="panel-body md-view-box">
+                <div class="dir-preview-box">
+                    <div class="dir-preview-btn">展开目录</div>
+                    <div class="page-view-dir-toc" id="page-view-dir-toc"></div>
+                </div>
+                <div id="document_page_view" style="padding: 0 10px 10px 10px;">
+                    <textarea style="display:none;" th:text="${page_content}"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/plugins/md-toc/md-toc.js"></script>
+<script type="text/javascript">
+    Layers.bindIframe("[name='history']", "文档修改历史", "508px", "1000px");
+    $("[data-toggle='web-popover']").webuiPopover({animation: 'pop',autoHide:3000});
+    if (parent.layoutOpen) {
+        parent.layoutOpen();
+    }
+    $(function() {
+        editormd.katexURL = {
+            js  : "/static/plugins/editor.md/lib/katex/katex.min",
+            css : "/static/plugins/editor.md/lib/katex/katex.min"
+        };
+        editormd.markdownToHTML("document_page_view", {
+            path : '/static/plugins/editor.md/lib/',
+            htmlDecode      : "style,script,iframe",
+            tocm            : true,
+            emoji           : false,
+            taskList        : true,
+            tex             : true,
+            flowChart       : true,
+            sequenceDiagram : true
+        });
+        $("#document_page_view").find("a").each(function () {
+            var target = $(this).attr("target") || "_parent";
+            $(this).attr("target", target);
+        });
+        new Toc("document_page_view", {
+            clazz: "page-view-dir-toc",
+            level: 7,
+            top: -2,
+            targetId: "page-view-dir-toc"
+        });
+        window.onscroll = function(){
+            var scrollHeight = document.documentElement.scrollTop || document.body.scrollTop;
+            var dirPreviewBox = $(".dir-preview-box");
+            if (scrollHeight >  120) {
+                dirPreviewBox.css({ position: "fixed", top: "20px" })
+            } else {
+                dirPreviewBox.css({ position: "absolute", top: "0" })
+            }
+        };
+        $(".dir-preview-btn").click(function () {
+            var pageViewDirToc = $(".page-view-dir-toc");
+            if (this.innerText === "展开目录") {
+                this.innerText = "隐藏目录";
+                pageViewDirToc.show();
+                pageViewDirToc.css({ position: "absolute", top: "25px", right: 0 })
+            } else {
+                this.innerText = "展开目录";
+                pageViewDirToc.hide();
+            }
+        })
+    });
+</script>
+</body>
+</html>

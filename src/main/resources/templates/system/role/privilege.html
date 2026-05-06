@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+    <script type="text/javascript" src="/static/js/modules/system/role.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form class="form-horizontal" method="post" action="/system/role/grantPrivilege">
+                <input type="hidden" name="role_id" th:value="${role.roleId}" />
+                <h4><span class="label label-default" th:text="${role.name + '权限'}">角色权限</span></h4>
+                <hr>
+                <ul th:each="menu : ${menus}" class="list-group w240 inline-group">
+                    <li class="list-group-item">
+                        <strong th:text="${menu.name}">菜单</strong>
+                        <span class="pull-right">
+                            <input name="privilege_id" type="checkbox" data-type="menu" th:value="${menu.privilegeId}" onclick="Role.privilege(this)"
+                                   th:checked="${#lists.contains(rolePrivileges, menu.privilegeId)}"
+                                   th:disabled="${#lists.contains(disabledPrivilegeIds, menu.privilegeId)}" />
+                        </span>
+                    </li>
+                    <li th:each="controller : ${controllers}" th:if="${controller.parentId == menu.privilegeId}" class="list-group-item">
+                        <span th:text="${controller.name}">权限</span>
+                        <span class="pull-right">
+                            <input name="privilege_id" type="checkbox" data-type="controller" th:value="${controller.privilegeId}" onclick="Role.privilege(this)"
+                                   th:checked="${#lists.contains(rolePrivileges, controller.privilegeId)}"
+                                   th:disabled="${#lists.contains(disabledPrivilegeIds, controller.privilegeId)}" />
+                        </span>
+                    </li>
+                </ul>
+                <div class="form-group">
+                    <div class="col-md-8" style="margin-left:10px;">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, true)" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    var navigators = [];
+    var menus = /*[[${menus}]]*/ [];
+    var controllers = /*[[${controllers}]]*/ [];
+</script>
+</body>
+</html>

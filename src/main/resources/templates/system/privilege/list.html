@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default" style="margin-bottom:80px;">
+        <div class="panel-body">
+            <div class="clearfix">
+                <h4 class="pull-left"><span class="label label-default">系统权限</span></h4>
+                <button type="button" name="add" data-link="/system/privilege/add" class="btn btn-primary pull-right"><i class="glyphicon glyphicon-plus"></i> 添加权限</button>
+            </div>
+            <br>
+            <ul th:each="menu : ${menus}" class="list-group w240 inline-group">
+                <li class="list-group-item">
+                    <strong th:text="${menu.name}">菜单</strong>
+                    <span class="pull-right" th:if="${#strings.contains(#strings.toLowerCase(mode), 'dev')}">
+                        <a name="edit" th:attr="data-link=@{/system/privilege/edit(privilege_id=${menu.privilegeId})}">改</a> |
+                        <a th:onclick="|Layers.confirm('确定要删除权限吗？', '/system/privilege/delete?privilege_id=${menu.privilegeId}');|">删</a>
+                    </span>
+                </li>
+                <li th:each="controller : ${controllers}" th:if="${controller.parentId == menu.privilegeId}" class="list-group-item">
+                    <span th:text="${controller.name}">权限</span>
+                    <span class="pull-right" th:if="${#strings.contains(#strings.toLowerCase(mode), 'dev')}">
+                        <a name="edit" th:attr="data-link=@{/system/privilege/edit(privilege_id=${controller.privilegeId})}">改</a> |
+                        <a th:onclick="|Layers.confirm('确定要删除权限吗？', '/system/privilege/delete?privilege_id=${controller.privilegeId}');|">删</a>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("button[name='add']", "添加权限", "560px", "1000px");
+    Layers.bindIframe("[name='edit']", "修改权限信息", "560px", "1000px");
+</script>
+</body>
+</html>

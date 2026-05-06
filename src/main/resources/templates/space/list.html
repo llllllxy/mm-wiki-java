@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-select/css/bootstrap-select.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js"></script>
+    <script src="/static/js/common/common.js"></script>
+    <script src="/static/js/common/date.js"></script>
+    <script src="/static/js/common/form.js"></script>
+    <script src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="page-header">
+                <h2>全部空间 <small><span class="badge" th:text="${count}">0</span></small></h2>
+            </div>
+            <div th:if="${count == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                <p><i class="glyphicon glyphicon-volume-up"></i> 暂时还没有空间！</p>
+            </div>
+            <th:block th:if="${count > 0}">
+                <div class="row">
+                    <form action="" method="get">
+                        <div class="col-md-9"><div class="input-group"></div></div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="空间名称/描述">
+                                <span class="input-group-btn">
+				                    <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+				                </span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <table class="table" style="margin-bottom: 0">
+                    <thead>
+                    <tr>
+                        <td class="w15p text-left"><strong>名称</strong></td>
+                        <td class="text-left"><strong>描述</strong></td>
+                        <td class="w15p text-left"><strong>标签</strong></td>
+                        <td class="w15p center"><strong>访问级别</strong></td>
+                        <td class="w13p center"><strong>创建时间</strong></td>
+                        <td class="w13p center"><strong>操作</strong></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="space-list" th:each="space : ${spaces}">
+                        <td><a th:href="@{/space/document(space_id=${space.spaceId})}" target="_parent" title="查看空间文档"><strong th:text="${space.name}">空间</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a></td>
+                        <td th:text="${space.description}">描述</td>
+                        <td class="tags-show" th:text="${space.tags}">tag1,tag2</td>
+                        <td class="center">
+                            <label class="text text-danger" th:if="${space.visitLevel == 'private'}">Private</label>
+                            <label class="text text-warning" th:if="${space.visitLevel == 'internal'}">Internal</label>
+                            <label class="text text-primary" th:if="${space.visitLevel != 'private' and space.visitLevel != 'internal'}">Public</label>
+                        </td>
+                        <td class="center" th:text="${space.createDateText}">2026-05-06</td>
+                        <td class="center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:if="${space.collection}" name="collection_space" th:onclick="|Common.ajaxSubmit('/collection/cancel?collection_id=${space.collectionId}')|" type="button" class="btn btn-default"><i class="glyphicon glyphicon-star"> </i></a>
+                                <a th:unless="${space.collection}" name="collection_space" th:onclick="|Common.ajaxSubmit('/collection/add?type=2&resource_id=${space.spaceId}')|" type="button" class="btn btn-default"><i class="glyphicon glyphicon-star-empty"> </i></a>
+                                <a name="user" th:attr="data-link=@{/space/member(space_id=${space.spaceId})}" type="button" class="btn btn-default"><i class="fa fa-group"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </th:block>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li class="pagination-select">
+                    <span>
+                        <select class="pagination-select-xs" onchange="window.location=this.value">
+                            <option th:each="option : ${paginator.perPageOptions}" th:value="${option.url}" th:selected="${option.selected}" th:text="${option.value + '条/页'}">20条/页</option>
+                        </select>
+                    </span>
+                </li>
+                <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkFirst}">首页</a></li>
+                <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkPrev}"><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
+                <li th:unless="${paginator.hasPrev}" class="disabled"><a>首页</a></li>
+                <li th:unless="${paginator.hasPrev}" class="disabled"><a><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+                <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkNext}"><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
+                <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkLast}">尾页</a></li>
+                <li th:unless="${paginator.hasNext}" class="disabled"><a><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
+                <li th:unless="${paginator.hasNext}" class="disabled"><a>尾页</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $(".tags-show").each(function () {
+            var tags = $(this).text();
+            if (tags !== "") {
+                var html = "";
+                var tagList = tags.split(",");
+                for (var i = 0; i < tagList.length; i++) {
+                    html += "<span class='label label-default'>" + tagList[i] + "</span> ";
+                }
+                $(this).html(html);
+            }
+        });
+    });
+    Layers.bindIframe("[name='user']", "空间成员列表", "500px", "1000px");
+</script>
+</body>
+</html>

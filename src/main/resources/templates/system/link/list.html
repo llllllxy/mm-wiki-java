@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="" method="get">
+                    <div class="col-md-2">
+                        <button type="button" name="add" data-link="/system/link/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加链接</button>
+                    </div>
+                    <div class="col-md-7"></div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="链接名称">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w8p">ID</th>
+                    <th class="w25p">名称</th>
+                    <th>URL</th>
+                    <th class="w10p">排序号</th>
+                    <th class="w13p">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="link : ${links}">
+                    <td class="center" th:text="${link.linkId}">1</td>
+                    <td th:text="${link.name}">name</td>
+                    <td><a th:href="${link.url}" target="_blank" th:text="${link.url}">url</a></td>
+                    <td class="center" th:text="${link.sequence}">0</td>
+                    <td class="center">
+                        <a name="edit" th:attr="data-link=@{/system/link/edit(link_id=${link.linkId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
+                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/link/delete?link_id=${link.linkId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("button[name='add']", "添加链接", "340px", "900px");
+    Layers.bindIframe("[name='edit']", "修改链接", "340px", "900px");
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MM-Wiki</title>
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+</head>
+<body id="frame-body">
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" style="table-layout:fixed">
+                <tbody>
+                <tr><th class="w15p">GET</th><td th:text="${log.get}">get</td></tr>
+                <tr><th>POST</th><td th:text="${log.post}">post</td></tr>
+                <tr><th>User Agent</th><td th:text="${log.userAgent}">ua</td></tr>
+                <tr><th>Referer</th><td th:text="${log.referer}">referer</td></tr>
+                <tr><th>IP</th><td th:text="${log.ip}">ip</td></tr>
+                <tr><th>CreateTime</th><td th:text="${log.createTimeText}">time</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

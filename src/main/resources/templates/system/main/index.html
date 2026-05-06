@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="wiki markdown">
+    <meta name="author" content="phachon">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/metisMenu/metisMenu.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/popover/css/jquery.webui-popover.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/metisMenu/metisMenu.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/popover/js/jquery.webui-popover.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery-ui-1.11.0.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery.layout.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <script type="text/javascript" src="/static/js/modules/common.js"></script>
+    <script type="text/javascript" src="/static/js/modules/main.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div id="main-left" class="ui-layout-west" style="padding: 0">
+    <ul class="nav" id="side-menu">
+        <li class="sidebar-search"></li>
+        <li th:each="group : ${menuGroups}">
+            <a href="javascript:;">
+                <i class="glyphicon" th:classappend="${group.menu.icon}"></i>
+                <span th:text="${group.menu.name}">菜单</span>
+                <span class="fa arrow"></span>
+            </a>
+            <ul class="nav nav-second-level">
+                <li th:each="item : ${group.items}">
+                    <a th:href="${'/system/' + item.controller + '/' + item.action}" target="mainFrame">
+                        <i class="glyphicon" th:classappend="${item.icon}"></i>
+                        <span th:text="${item.name}">子菜单</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<script type="text/javascript">
+    $('#side-menu').metisMenu();
+</script>
+<iframe class="ui-layout-center" id="mainFrame" name="mainFrame" width="100%" frameborder="0" scrolling="yes" style="overflow-y: auto" src="/system/profile/info"></iframe>
+</body>
+</html>

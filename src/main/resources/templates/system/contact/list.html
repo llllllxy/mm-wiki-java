@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-1">
+                    <div class="input-group">
+                        <a name="add" data-link="/system/contact/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加联系人</a>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="input-group">
+                        <a name="import" data-link="/system/contact/import" class="btn btn-primary"><i class="glyphicon glyphicon-import"></i> 导入联系人</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w5p">ID</th>
+                    <th class="w10p">姓名</th>
+                    <th class="w11p">职位</th>
+                    <th class="w9p">联系电话</th>
+                    <th class="w13p">邮箱</th>
+                    <th class="w10p">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="contact : ${contacts}">
+                    <td class="center" th:text="${contact.contactId}">1</td>
+                    <td th:text="${contact.name}">name</td>
+                    <td class="center" th:text="${contact.position}">position</td>
+                    <td class="center" th:text="${contact.mobile}">mobile</td>
+                    <td class="center" th:text="${contact.email}">email</td>
+                    <td class="center">
+                        <a name="edit" th:attr="data-link=@{/system/contact/edit(contact_id=${contact.contactId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
+                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/contact/delete?contact_id=${contact.contactId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="panel-footer"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("[name='add']", "添加系统联系人", "400px", "850px");
+    Layers.bindIframe("[name='import']", "导入联系人", "500px", "1000px");
+    Layers.bindIframe("[name='edit']", "修改系统联系人", "400px", "850px");
+</script>
+</body>
+</html>

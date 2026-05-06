@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki 安装</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+</head>
+<body>
+<div class="container" style="padding-top: 70px;">
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>MM-Wiki 安装向导 - <span th:text="${step}">步骤</span></strong></div>
+        <div class="panel-body">
+            <p class="lead" th:text="${message}">安装说明</p>
+            <div class="alert alert-info">
+                Spring Boot 迁移版优先保护已有数据库和文档数据，因此安装页只提供兼容路径与配置说明，不自动覆盖现有表结构。
+            </div>
+            <a class="btn btn-primary" th:href="${nextUrl}">继续</a>
+            <a class="btn btn-default" href="/author/index">进入登录页</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-select/css/bootstrap-select.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js"></script>
+    <script src="/static/js/common/common.js"></script>
+    <script src="/static/js/common/date.js"></script>
+    <script src="/static/js/common/form.js"></script>
+    <script src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 10px">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4><i class="glyphicon glyphicon-volume-up"></i> <span th:text="${panel_title}">公告</span></h4>
+                <p th:text="${panel_description}">欢迎使用 MM-Wiki</p>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading"><strong><i class="fa fa-file-word-o"></i> 最近更新文档</strong></div>
+                <div class="panel-body" style="min-height: 550px">
+                    <div class="document-update">
+                        <ul>
+                            <th:block th:each="logDocument : ${logDocuments}">
+                                <li>
+                                    <div th:if="${logDocument.action == 3}">
+                                        <i class="fa fa-file-word-o" th:if="${logDocument.documentType == 1}"></i>
+                                        <i class="fa fa-folder-o" th:unless="${logDocument.documentType == 1}"></i>
+                                        <span th:text="${logDocument.documentName}">文档名</span>
+                                    </div>
+                                    <div th:unless="${logDocument.action == 3}">
+                                        <a th:href="@{/document/index(document_id=${logDocument.documentId})}" target="_parent" class="text text-info text-font-15">
+                                            <i class="fa fa-file-word-o" th:if="${logDocument.documentType == 1}"></i>
+                                            <i class="fa fa-folder-o" th:unless="${logDocument.documentType == 1}"></i>
+                                            <span th:text="${logDocument.documentName}">文档名</span>
+                                        </a>
+                                    </div>
+                                    <span class="text text-font-12 document-user-time">
+                                        <i class="fa fa-calendar"></i>
+                                        由
+                                        <a th:if="${logDocument.userId == login_user_id}" href="/system/main/index" target="_parent">
+                                            <span th:text="${logDocument.username}">admin</span>（<span th:text="${logDocument.givenName}">管理员</span>）
+                                        </a>
+                                        <a th:unless="${logDocument.userId == login_user_id}" th:href="@{/user/info(user_id=${logDocument.userId})}">
+                                            <span th:text="${logDocument.username}">admin</span>（<span th:text="${logDocument.givenName}">管理员</span>）
+                                        </a>
+                                        <span th:text="${logDocument.action == 1 ? '创建' : (logDocument.action == 2 ? '修改' : '删除')}">修改</span>
+                                        于 <span th:text="${logDocument.createTimeText}">2026-05-06 10:00:00</span>
+                                    </span>
+                                </li>
+                                <hr>
+                            </th:block>
+                        </ul>
+                    </div>
+                    <div class="center" th:if="${paginator.nums > 0}">
+                        <ul class="pagination pagination-sm">
+                            <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                            <li class="pagination-select">
+                                <span>
+                                    <select class="pagination-select-xs" onchange="window.location=this.value">
+                                        <option th:each="option : ${paginator.perPageOptions}" th:value="${option.url}" th:selected="${option.selected}" th:text="${option.value + '条/页'}">10条/页</option>
+                                    </select>
+                                </span>
+                            </li>
+                            <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkFirst}">首页</a></li>
+                            <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkPrev}"><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
+                            <li th:unless="${paginator.hasPrev}" class="disabled"><a>首页</a></li>
+                            <li th:unless="${paginator.hasPrev}" class="disabled"><a><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
+
+                            <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                                <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                            </li>
+
+                            <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkNext}"><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
+                            <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkLast}">尾页</a></li>
+                            <li th:unless="${paginator.hasNext}" class="disabled"><a><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
+                            <li th:unless="${paginator.hasNext}" class="disabled"><a>尾页</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="panel panel-default" style="min-height: 300px">
+                <div class="panel-heading"><strong><i class="fa fa-internet-explorer"></i> 快捷链接</strong></div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6 fast-link" th:each="link : ${links}">
+                            <label><a th:href="${link.url}" target="_blank"><i class="fa fa-angle-double-right fa-lg"></i> <span th:text="${link.name}">链接</span> <i class="fa fa-external-link"></i></a></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="panel panel-default" style="min-height: 300px">
+                <div class="panel-heading"><strong><i class="fa fa-address-book-o"></i> 系统联系人</strong></div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item" th:each="contact : ${contacts}">
+                            <span th:text="${contact.position}">职位</span>(<span th:text="${contact.name}">姓名</span>)，
+                            <i class="glyphicon glyphicon-phone"></i><span th:text="${contact.mobile}">123456</span>
+                            <i class="glyphicon glyphicon-envelope"></i> <span th:text="${contact.email}">mail@example.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

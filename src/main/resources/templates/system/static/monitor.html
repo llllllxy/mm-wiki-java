@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-clock-o"></i> 服务器时间</strong></div>
+                        <div class="panel-body center"><div class="faces"><div class="face face4"><svg id="serverTime" class="clock"></svg></div></div></div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-calendar"></i> 系统已正常运行</strong></div>
+                        <div class="panel-body">
+                            <div id="system-runtime">
+                                <ul class="countdown">
+                                    <li><span class="days number-roll" id="run-days">00</span><p class="days_ref">Days</p></li>
+                                    <li class="seperator">.</li>
+                                    <li><span class="hours number-roll" id="run-hours">00</span><p class="hours_ref">Hours</p></li>
+                                    <li class="seperator">:</li>
+                                    <li><span class="minutes number-roll" id="run-minutes">00</span><p class="minutes_ref">Minutes</p></li>
+                                    <li class="seperator">:</li>
+                                    <li><span class="seconds number-roll" id="run-seconds">00</span><p class="seconds_ref">Seconds</p></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-warning"></i> 系统错误日志数（<a href="/system/log/system?level=3">查看</a>）</strong></div>
+                        <div class="panel-body"><div class="metric-text number-roll" th:text="${errorLogCount}">0</div></div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-bars"></i> 系统最近错误日志（<a href="/system/log/system?level=3">查看更多</a>）</strong></div>
+                        <div class="panel-body" style="height: 240px;overflow-y: auto">
+                            <table class="table table-hover">
+                                <thead><tr><td class="w15p"><strong>用户</strong></td><td><strong>错误描述</strong></td><td class="w20p center"><strong>时间</strong></td></tr></thead>
+                                <tbody>
+                                <tr th:each="errLog : ${errLogs}">
+                                    <td th:text="${errLog.username}"></td>
+                                    <td th:text="${errLog.message}"></td>
+                                    <td class="center" th:text="${errLog.createTimeText}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-server"></i> 服务器版本信息</strong></div>
+                        <div class="panel-body">
+                            <br>
+                            <ul class="list-group">
+                                <li class="list-group-item"><i class="fa fa-globe fa-fw"></i> IP：<span th:text="${serverInfo['localIp']}"></span></li>
+                                <li class="list-group-item"><i class="fa fa-user-circle-o fa-fw"></i> 主机名：<span th:text="${serverInfo['hostname']}"></span></li>
+                                <li class="list-group-item"><i class="fa fa-desktop fa-fw"></i> 操作系统：<span th:text="${serverInfo['os']}"></span></li>
+                                <li class="list-group-item"><i class="fa fa-flag fa-fw"></i> 系统版本：<span th:text="${serverInfo['platform']}"></span></li>
+                                <li class="list-group-item"><i class="fa fa-flag-checkered fa-fw"></i> 版本架构：<span th:text="${serverInfo['platformFamily']}"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong><i class="fa fa-align-left"></i> 服务器状态</strong></div>
+                        <div class="panel-body">
+                            <br>
+                            <p>CPU使用率：<strong class="cpu_text">0%</strong></p>
+                            <div class="progress" style="height: 14px"><div id="cpu_progress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" style="min-width: 2em; width: 0"><div style="font-size:10px;line-height:14px;" class="cpu_text">0%</div></div></div>
+                            <p>磁盘使用率：<strong class="disk_text">0%</strong></p>
+                            <div class="progress" style="height: 14px"><div id="disk_progress" class="progress-bar progress-bar-warning progress-bar-striped active" role="progressbar" style="width: 0"><div style="font-size:10px;line-height:14px;" class="disk_text">0%</div></div></div>
+                            <p>内存使用率：<strong class="memory_text">0%</strong></p>
+                            <div class="progress" style="height: 14px"><div id="memory_progress" class="progress-bar progress-bar-danger progress-bar-striped active" role="progressbar" style="width: 0"><div style="font-size:10px;line-height:14px;" class="memory_text">0%</div></div></div>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/plugins/clock/js/snap.svg-min.js"></script>
+<script type="text/javascript" src="/static/js/modules/system/statics.js"></script>
+<script type="text/javascript">
+    Statics.GetServerTime("serverTime", "/system/static/serverTime");
+    Statics.GetServerStatus("/system/static/serverStatus");
+    $(window).load(function(){
+        setInterval('Statics.GetServerStatus("/system/static/serverStatus")', 2000);
+    });
+</script>
+</body>
+</html>

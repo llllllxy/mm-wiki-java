@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="" method="get">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">日志级别</span>
+                            <select class="form-control" name="level">
+                                <option value="">全部</option>
+                                <option value="7" th:selected="${level == 7}">DEBUG</option>
+                                <option value="6" th:selected="${level == 6}">INFO</option>
+                                <option value="4" th:selected="${level == 4}">WARNING</option>
+                                <option value="3" th:selected="${level == 3}">ERROR</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">用户名</span>
+                            <input class="form-control" name="username" type="text" th:value="${username}" placeholder="用户名">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <input class="form-control" name="message" type="text" th:value="${message}" placeholder="描述">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w7p">ID</th>
+                    <th class="w10p">级别</th>
+                    <th class="w9p">用户</th>
+                    <th>描述</th>
+                    <th class="w20p">动作</th>
+                    <th class="w10p">IP</th>
+                    <th class="w15p">时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="log : ${logs}">
+                    <td class="center" th:text="${log.logId}">1</td>
+                    <td class="center"><span class="label" th:classappend="${log.levelCss}" th:text="${log.levelText}">INFO</span></td>
+                    <td class="center" th:text="${log.username}">user</td>
+                    <td><a name="info" th:attr="data-link=@{/system/log/info(log_id=${log.logId})}" th:text="${log.message}">message</a></td>
+                    <td th:text="${log.path}">path</td>
+                    <td class="center" th:text="${log.ip}">ip</td>
+                    <td class="center" th:text="${log.createTimeText}">time</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("[name='info']", "日志详细信息", "400px", "800px");
+</script>
+</body>
+</html>

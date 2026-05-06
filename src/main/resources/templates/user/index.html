@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery-ui-1.11.0.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery.layout.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <script type="text/javascript" src="/static/js/modules/common.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div id="main-left" class="ui-layout-west">
+    <div class="left-space">
+        <ul class="nav nav-sidebar menu-nav">
+            <li class="active"><a href="/user/list" target="mainFrame"><i class="fa fa-user-circle-o"></i>&nbsp;&nbsp;全部用户</a></li>
+            <li><a href="/user/follow" target="mainFrame"><i class="glyphicon glyphicon-heart"></i>&nbsp;&nbsp;关注用户</a></li>
+        </ul>
+    </div>
+</div>
+<iframe class="ui-layout-center" id="mainFrame" name="mainFrame" width="100%" frameborder="0" scrolling="yes" style="overflow-y: auto" src="/user/list"></iframe>
+</body>
+</html>

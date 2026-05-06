@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <div class="row">
+                <form class="form-horizontal" method="post" action="/system/profile/modify">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-3 control-label"><span class="text-danger"> * </span> 姓名</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="given_name" class="form-control" th:value="${user.givenName}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-3 control-label"><span class="text-danger"> * </span> 邮箱</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="email" class="form-control" th:value="${user.email}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-3 control-label"><span class="text-danger"> * </span> 手机</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="mobile" class="form-control" th:value="${user.mobile}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-3 control-label">电话</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="phone" class="form-control" th:value="${user.phone}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-sm-offset-3">
+                                    <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-2 control-label">部门</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="department" class="form-control" th:value="${user.department}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-2 control-label">职位</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="position" class="form-control" th:value="${user.position}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-2 control-label">位置</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="location" class="form-control" th:value="${user.location}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="row">
+                                <label class="col-sm-2 control-label">IM</label>
+                                <div class="col-sm-7">
+                                    <input type="text" name="im" class="form-control" th:value="${user.im}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <tbody>
+                    <tr><th class="w15p">用户名</th><td th:text="${user.username}">user</td></tr>
+                    <tr><th class="w15p">姓名</th><td th:text="${user.givenName}">name</td></tr>
+                    <tr><th class="w15p">角色</th><td><label class="text text-info" th:text="${roleName}">角色</label></td></tr>
+                    <tr><th class="w15p">邮箱</th><td th:text="${user.email}">email</td></tr>
+                    <tr><th class="w15p">手机</th><td th:text="${user.mobile}">mobile</td></tr>
+                    <tr><th>电话</th><td th:text="${user.phone}">phone</td></tr>
+                    <tr><th>部门</th><td th:text="${user.department}">department</td></tr>
+                    <tr><th>职位</th><td th:text="${user.position}">position</td></tr>
+                    <tr><th>位置</th><td th:text="${user.location}">location</td></tr>
+                    <tr><th>IM</th><td th:text="${user.im}">im</td></tr>
+                    <tr>
+                        <th>状态</th>
+                        <td>
+                            <span class="label label-danger" th:if="${user.isForbidden == 1}">屏蔽</span>
+                            <span class="label label-success" th:if="${user.isForbidden != 1}">正常</span>
+                        </td>
+                    </tr>
+                    <tr><th>最后登录时间</th><td th:text="${lastTimeText}">0</td></tr>
+                    <tr><th>最后登录 IP</th><td th:text="${user.lastIp}">127.0.0.1</td></tr>
+                    <tr><th>创建时间</th><td th:text="${createTimeText}">2026-01-01 00:00:00</td></tr>
+                    <tr><th>修改时间</th><td th:text="${updateTimeText}">2026-01-01 00:00:00</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

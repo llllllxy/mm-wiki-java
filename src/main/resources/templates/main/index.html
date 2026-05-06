@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="wiki markdown">
+    <meta name="author" content="phachon">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/plugins/popover/css/jquery.webui-popover.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/popover/js/jquery.webui-popover.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery-ui-1.11.0.js"></script>
+    <script type="text/javascript" src="/static/plugins/layout/jquery.layout.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <script type="text/javascript" src="/static/js/modules/common.js"></script>
+    <script type="text/javascript" src="/static/js/modules/main.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div id="main-left" class="ui-layout-west">
+    <div class="left-collection">
+        <div class="collection-search">
+            <form action="#" onsubmit="return false">
+                <div class="form-group has-feedback">
+                    <i class="glyphicon glyphicon-search form-control-feedback" style="line-height: 32px;"></i>
+                    <input class="form-control input-sm" id="collect_doc_search" type="text" value="" placeholder="搜索收藏文档..." style="padding-right: 28px;">
+                </div>
+            </form>
+        </div>
+        <div class="collection-doc">
+            <h3 class="text-left">收藏文档 <span class="badge" th:text="${count}">0</span></h3>
+            <hr>
+            <ul id="collection_documents">
+                <li th:each="document : ${documents}">
+                    <a th:href="@{/document/index(document_id=${document.documentId})}">
+                        <i class="fa fa-file-word-o" th:if="${document.type == 1}"></i>
+                        <i class="fa fa-folder-o" th:unless="${document.type == 1}"></i>
+                        <span th:text="${document.name}">文档</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        Main.Search("#collect_doc_search");
+    })
+</script>
+<iframe class="ui-layout-center" id="mainFrame" name="mainFrame" width="100%" frameborder="0" scrolling="yes" style="overflow-y: auto" src="/main/default"></iframe>
+</body>
+</html>

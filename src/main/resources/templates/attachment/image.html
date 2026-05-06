@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" style="margin: 0 0 6px 0"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <ul class="nav nav-tabs">
+                    <li><a th:href="@{/attachment/page(document_id=${document_id})}">附件</a></li>
+                    <li class="active"><a th:href="@{/attachment/image(document_id=${document_id})}">图片</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <td class="text-left"><strong>图片</strong></td>
+                    <td class="w15p text-left"><strong>上传用户</strong></td>
+                    <td class="w20p text-left"><strong>上传时间</strong></td>
+                    <td class="w11p center"><strong>操作</strong></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="attachment : ${attachments}">
+                    <td>
+                        <a target="_blank" th:href="@{/{path}(path=${attachment.path})}" class="thumbnail" style="width: 100px;height: 80px;margin-bottom: 0">
+                            <img th:src="@{/{path}(path=${attachment.path})}" alt="image">
+                        </a>
+                    </td>
+                    <td th:text="${attachment.username}">user</td>
+                    <td th:text="${attachment.createTime}">time</td>
+                    <td class="center">
+                        <a th:if="${is_delete}" th:onclick="|Layers.confirm('确定删除图片吗？', '/attachment/delete?attachment_id=${attachment.attachmentId}')|"><i class="glyphicon glyphicon-trash"></i></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

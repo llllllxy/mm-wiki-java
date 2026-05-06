@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="/main/search" method="get">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-addon">搜索方式</span>
+                            <select class="form-control" name="search_type">
+                                <option value="title" th:selected="${search_type == 'title'}">文档标题</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="请输入搜索关键字...">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <div th:if="${count == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                <p><i class="glyphicon glyphicon-volume-up"></i> 抱歉，暂时没有搜索到您想要的结果</p>
+            </div>
+            <div th:if="${count > 0}" class="row">
+                <div class="document-update">
+                    <ul>
+                        <th:block th:each="document : ${documents}">
+                            <li>
+                                <div>
+                                    <a th:href="@{/document/index(document_id=${document.documentId})}" target="_parent" class="text text-info text-font-15">
+                                        <i th:class="${document.type == 1} ? 'fa fa-file-word-o' : 'fa fa-folder-o'"></i>
+                                        <span th:text="${document.name}">文档</span>
+                                    </a>
+                                </div>
+                            </li>
+                            <hr>
+                        </th:block>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

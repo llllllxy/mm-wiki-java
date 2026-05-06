@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="" method="get">
+                    <div class="col-md-4">
+                        <button type="button" name="add" data-link="/system/auth/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加登录认证</button>
+                        <button type="button" name="doc" data-link="/system/auth/doc" class="btn btn-info"><i class="glyphicon glyphicon-list-alt"></i> 登录认证文档</button>
+                    </div>
+                    <div class="col-md-5"></div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="认证名称">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w5p">ID</th>
+                    <th class="w13p">名称</th>
+                    <th class="w8p">用户名前缀</th>
+                    <th class="w25p">认证 URL</th>
+                    <th>附加参数</th>
+                    <th class="w8p">是否启用</th>
+                    <th class="w13p">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="auth : ${auths}">
+                    <td class="center" th:text="${auth.loginAuthId}">1</td>
+                    <td th:text="${auth.name}">name</td>
+                    <td th:text="${auth.usernamePrefix}">prefix</td>
+                    <td th:text="${auth.url}">url</td>
+                    <td th:text="${auth.extData}">ext</td>
+                    <td class="center">
+                        <span class="label label-success" th:if="${auth.isUsed == 1}">是</span>
+                        <span class="label label-danger" th:if="${auth.isUsed != 1}">否</span>
+                    </td>
+                    <td class="center">
+                        <a name="edit" th:attr="data-link=@{/system/auth/edit(login_auth_id=${auth.loginAuthId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
+                        <a th:if="${auth.isUsed != 1}" th:onclick="|Layers.confirm('确定要启用该登录认证吗？', '/system/auth/used?login_auth_id=${auth.loginAuthId}');|"><i class="glyphicon glyphicon-ok-circle"></i>启用</a>
+                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/auth/delete?login_auth_id=${auth.loginAuthId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("button[name='add']", "添加登录认证", "400px", "900px");
+    Layers.bindIframe("[name='edit']", "修改登录认证", "400px", "900px");
+    Layers.bindIframe("button[name='doc']", "登录认证文档", "650px", "1150px");
+</script>
+</body>
+</html>

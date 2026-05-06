@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="" method="get">
+                    <div class="col-md-2">
+                        <button type="button" name="add" data-link="/system/email/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加邮件服务器</button>
+                    </div>
+                    <div class="col-md-7"></div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="服务器名称">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w5p">ID</th>
+                    <th>名称</th>
+                    <th class="w18p">SMTP 主机</th>
+                    <th class="w18p">发件人邮箱</th>
+                    <th class="w18p">用户名</th>
+                    <th class="w8p">是否启用</th>
+                    <th class="w13p">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="email : ${emails}">
+                    <td class="center" th:text="${email.emailId}">1</td>
+                    <td th:text="${email.name}">name</td>
+                    <td th:text="${email.host}">host</td>
+                    <td th:text="${email.senderAddress}">sender</td>
+                    <td th:text="${email.username}">username</td>
+                    <td class="center">
+                        <span class="label label-success" th:if="${email.isUsed == 1}">是</span>
+                        <span class="label label-danger" th:if="${email.isUsed != 1}">否</span>
+                    </td>
+                    <td class="center">
+                        <a name="edit" th:attr="data-link=@{/system/email/edit(email_id=${email.emailId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
+                        <a th:if="${email.isUsed != 1}" th:onclick="|Layers.confirm('确定要启用该邮件服务器吗？', '/system/email/used?email_id=${email.emailId}');|"><i class="glyphicon glyphicon-ok-circle"></i>启用</a>
+                        <a th:onclick="|Layers.confirm('确定删除吗？', '/system/email/delete?email_id=${email.emailId}');|"><i class="glyphicon glyphicon-trash"></i>删除</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    Layers.bindIframe("button[name='add']", "添加邮件服务器", "560px", "970px");
+    Layers.bindIframe("[name='edit']", "修改邮件服务器", "560px", "970px");
+</script>
+</body>
+</html>

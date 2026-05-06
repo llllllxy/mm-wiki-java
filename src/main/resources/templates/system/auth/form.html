@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/form.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div id="failedBox" class="hide"></div>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <br>
+            <form class="form-horizontal" method="post" th:action="${auth != null} ? '/system/auth/modify' : '/system/auth/save'">
+                <input type="hidden" name="loginAuthId" th:value="${auth != null ? auth.loginAuthId : ''}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 认证名称</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="name" class="form-control" placeholder="请输入登录认证名称" th:value="${auth != null ? auth.name : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 用户名前缀</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="usernamePrefix" class="form-control" placeholder="例如 ldap" th:value="${auth != null ? auth.usernamePrefix : ''}">
+                    </div>
+                    <div class="col-sm-3 form-comment">
+                        <span class="text-danger"> * 只能由字母和数字组成</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 认证 URL</label>
+                    <div class="col-sm-5">
+                        <input type="text" name="url" class="form-control" placeholder="请输入登录认证接口" th:value="${auth != null ? auth.url : ''}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"> 附加参数</label>
+                    <div class="col-sm-5">
+                        <textarea name="extData" class="form-control" rows="4" placeholder="扩展配置数据" th:text="${auth != null ? auth.extData : ''}"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

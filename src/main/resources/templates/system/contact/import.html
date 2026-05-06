@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
+    <title>MM-Wiki</title>
+    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
+    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
+    <script type="text/javascript" src="/static/js/common/common.js"></script>
+    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+</head>
+<body id="frame-body">
+<div class="container-fluid">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <form action="" method="get">
+                    <div class="col-sm-offset-8 col-sm-4">
+                        <div class="input-group">
+                            <input class="form-control" name="username" type="text" th:value="${username}" placeholder="用户名">
+                            <span class="input-group-btn">
+                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th class="w8p">ID</th>
+                    <th class="w13p">用户名</th>
+                    <th class="w13p">姓名</th>
+                    <th>职位</th>
+                    <th class="w15p">手机号</th>
+                    <th class="w20p">邮箱</th>
+                    <th class="w11p">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td class="center" th:text="${user.userId}">1</td>
+                    <td th:text="${user.username}">user</td>
+                    <td th:text="${user.givenName}">name</td>
+                    <td th:text="${user.position}">position</td>
+                    <td class="center" th:text="${user.mobile}">mobile</td>
+                    <td th:text="${user.email}">email</td>
+                    <td class="center">
+                        <a th:if="${user.isForbidden != 1}" th:onclick="|importContact('确定导入该用户为系统联系人吗？','/system/contact/save','name=${user.givenName}&mobile=${user.mobile}&position=${user.position}&email=${user.email}')|">
+                            <i class="glyphicon glyphicon-import"></i>导入
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
+            <ul class="pagination pagination-sm">
+                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
+                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
+                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function importContact(title, url, data) {
+        Layers.confirmCallback(title, function () {
+            Common.ajaxSubmitCallback(url, data, function (response) {
+                if (response.code === 0) {
+                    Layers.failedMsg(response.message, function () {});
+                    return;
+                }
+                Layers.successMsg(response.message, function () {
+                    parent.location.href = response.redirect.url;
+                });
+            }, function () {});
+        }, function () {});
+    }
+</script>
+</body>
+</html>
