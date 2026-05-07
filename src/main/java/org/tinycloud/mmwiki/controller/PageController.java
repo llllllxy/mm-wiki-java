@@ -66,10 +66,20 @@ public class PageController extends ControllerSupport {
         @RequestParam("name") String name,
         @RequestParam(name = "document_page_editor-markdown-doc", required = false, defaultValue = "") String content,
         @RequestParam(name = "comment", required = false, defaultValue = "") String comment,
+        @RequestParam(name = "is_notice_user", required = false, defaultValue = "0") String isNoticeUser,
         @RequestParam(name = "is_follow_doc", required = false, defaultValue = "0") String isFollowDoc,
         HttpServletRequest request
     ) throws Exception {
-        return documentService.modifyPage(currentUser(request), documentId, name, content, comment, "1".equals(isFollowDoc));
+        return documentService.modifyPage(
+                currentUser(request),
+                documentId,
+                name,
+                content,
+                comment,
+                "1".equals(isFollowDoc),
+                "1".equals(isNoticeUser),
+                documentUrl(request, documentId)
+        );
     }
 
     @GetMapping("/page/display")
@@ -93,5 +103,13 @@ public class PageController extends ControllerSupport {
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .contentLength(payload.resource().contentLength())
             .body(payload.resource());
+    }
+
+    private String documentUrl(HttpServletRequest request, String documentId) {
+        String scheme = request.getScheme();
+        String host = request.getServerName();
+        int port = request.getServerPort();
+        boolean defaultPort = ("http".equalsIgnoreCase(scheme) && port == 80) || ("https".equalsIgnoreCase(scheme) && port == 443);
+        return scheme + "://" + host + (defaultPort ? "" : ":" + port) + "/document/index?document_id=" + documentId;
     }
 }

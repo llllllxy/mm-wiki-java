@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -60,6 +61,7 @@ public class DocumentService {
     private final LogDocumentMapper logDocumentMapper;
     private final AttachmentService attachmentService;
     private final FollowService followService;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper;
 
     public DocumentService(
@@ -73,6 +75,7 @@ public class DocumentService {
         LogDocumentMapper logDocumentMapper,
         AttachmentService attachmentService,
         FollowService followService,
+        EmailService emailService,
         ObjectMapper objectMapper
     ) {
         this.documentMapper = documentMapper;
@@ -85,6 +88,7 @@ public class DocumentService {
         this.logDocumentMapper = logDocumentMapper;
         this.attachmentService = attachmentService;
         this.followService = followService;
+        this.emailService = emailService;
         this.objectMapper = objectMapper;
     }
 
@@ -308,7 +312,9 @@ public class DocumentService {
         String newName,
         String content,
         String comment,
-        boolean followDocument
+        boolean followDocument,
+        boolean noticeUsers,
+        String documentUrl
     ) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -346,6 +352,9 @@ public class DocumentService {
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, comment == null ? "" : comment, now);
         if (followDocument) {
             followService.followDocument(currentUser.getUserId(), documentId);
+        }
+        if (noticeUsers) {
+            CompletableFuture.runAsync(() -> emailService.sendDocumentUpdateNotice(document, currentUser.getUsername(), content, comment, documentUrl));
         }
 
         return JsonResponse.success("文档修改成功", null, "/document/index?document_id=" + documentId, 2000);

@@ -21,7 +21,9 @@
             <div class="row">
                 <form action="" method="get">
                     <div class="col-md-2">
-                        <button type="button" name="add" data-link="/system/email/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加邮件服务器</button>
+                        <button type="button" name="add" data-link="/system/email/add" class="btn btn-primary">
+                            <i class="glyphicon glyphicon-plus"></i> 添加邮件服务器
+                        </button>
                     </div>
                     <div class="col-md-7"></div>
                     <div class="col-md-3">
@@ -41,7 +43,7 @@
                 <tr>
                     <th class="w5p">ID</th>
                     <th>名称</th>
-                    <th class="w18p">SMTP 主机</th>
+                    <th class="w18p">SMTP 服务器主机</th>
                     <th class="w18p">发件人邮箱</th>
                     <th class="w18p">用户名</th>
                     <th class="w8p">是否启用</th>
@@ -61,18 +63,23 @@
                     </td>
                     <td class="center">
                         <a name="edit" th:attr="data-link=@{/system/email/edit(email_id=${email.emailId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:if="${email.isUsed != 1}" data-message="确定要启用该邮件服务器吗？"
+                        <a th:if="${email.isUsed != 1}"
+                           data-message="确定要启用该邮件服务器吗？"
                            th:data-url="|/system/email/used?email_id=${email.emailId}|"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-ok-circle"></i>启用</a>
-                        <a data-message="确定删除吗？" th:data-url="|/system/email/delete?email_id=${email.emailId}|"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-trash"></i>删除</a>
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
+                            <i class="glyphicon glyphicon-ok-circle"></i>启用
+                        </a>
+                        <a data-message="确定删除吗？"
+                           th:data-url="|/system/email/delete?email_id=${email.emailId}|"
+                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
+                            <i class="glyphicon glyphicon-trash"></i>删除
+                        </a>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
+        <div class="panel-footer"></div>
     </div>
 </div>
 <script type="text/javascript">
