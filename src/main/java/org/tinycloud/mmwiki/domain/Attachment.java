@@ -1,21 +1,50 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 附件信息实体。
+ *
+ * <p>对应数据库表：mw_attachment。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Attachment {
 
+    /**
+     * 附件ID
+     */
     private Integer attachmentId;
+    /**
+     * 上传用户ID
+     */
     private Integer userId;
+    /**
+     * 关联文档ID
+     */
     private String documentId;
+    /**
+     * 附件名称
+     */
     private String name;
+    /**
+     * 附件存储路径
+     */
     private String path;
+    /**
+     * 附件来源
+     */
     private Integer source;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
+    /**
+     * 上传用户名，页面展示扩展字段
+     */
     private String username;
 
     public Integer getAttachmentId() {

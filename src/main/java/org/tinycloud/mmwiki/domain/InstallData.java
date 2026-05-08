@@ -4,7 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 安装向导运行期状态数据。
+ * 安装向导运行期状态模型。
+ *
+ * <p>安装流程内存状态，无直接对应数据库表。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -26,14 +28,41 @@ public class InstallData {
     public static final int INSTALL_FAILED = 1;
     public static final int INSTALL_SUCCESS = 2;
 
+    /**
+     * 授权协议确认状态
+     */
     private int license = LICENSE_DISAGREE;
+    /**
+     * 环境检查状态
+     */
     private int env = ENV_NOT_ACCESS;
+    /**
+     * 系统配置检查状态
+     */
     private int system = SYS_NOT_ACCESS;
+    /**
+     * 数据库配置检查状态
+     */
     private int database = DATABASE_NOT_ACCESS;
+    /**
+     * 系统配置表单数据
+     */
     private Map<String, String> systemConf = defaultSystemConf();
+    /**
+     * 数据库配置表单数据
+     */
     private Map<String, String> databaseConf = defaultDatabaseConf();
+    /**
+     * 安装执行状态
+     */
     private int status = INSTALL_READY;
+    /**
+     * 安装执行结果说明
+     */
     private String result = "";
+    /**
+     * 安装是否成功
+     */
     private int isSuccess = INSTALL_DEFAULT;
 
     public int getLicense() {

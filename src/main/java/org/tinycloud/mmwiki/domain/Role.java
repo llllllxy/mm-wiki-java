@@ -1,19 +1,42 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 角色信息实体。
+ *
+ * <p>对应数据库表：mw_role。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Role {
 
+    /**
+     * 角色ID
+     */
     private Integer roleId;
+    /**
+     * 角色名称
+     */
     private String name;
+    /**
+     * 角色类型
+     */
     private Integer type;
+    /**
+     * 是否删除，0否1是
+     */
     private Integer isDelete;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
+    /**
+     * 更新时间文本，页面展示扩展字段
+     */
     private String updateTimeText;
 
     public Integer getRoleId() {

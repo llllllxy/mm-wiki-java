@@ -1,18 +1,38 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 系统链接信息实体。
+ *
+ * <p>对应数据库表：mw_link。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Link {
 
+    /**
+     * 链接ID
+     */
     private Integer linkId;
+    /**
+     * 链接名称
+     */
     private String name;
+    /**
+     * 链接地址
+     */
     private String url;
+    /**
+     * 排序序号
+     */
     private Integer sequence;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
 
     public Integer getLinkId() {

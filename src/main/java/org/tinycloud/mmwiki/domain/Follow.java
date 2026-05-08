@@ -1,17 +1,34 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 关注信息实体。
+ *
+ * <p>对应数据库表：mw_follow。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Follow {
 
+    /**
+     * 关注ID
+     */
     private Integer followId;
+    /**
+     * 用户ID
+     */
     private Integer userId;
+    /**
+     * 关注类型
+     */
     private Integer type;
+    /**
+     * 关注对象ID
+     */
     private String objectId;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
 
     public Integer getFollowId() {

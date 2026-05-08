@@ -1,20 +1,46 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 文档历史记录视图模型。
+ *
+ * <p>基于 mw_log_document 关联 mw_user 查询生成。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class DocumentHistoryView {
 
+    /**
+     * 文档日志ID
+     */
     private Integer logDocumentId;
+    /**
+     * 文档ID
+     */
     private String documentId;
+    /**
+     * 操作用户ID
+     */
     private Integer userId;
+    /**
+     * 操作类型
+     */
     private Integer action;
+    /**
+     * 操作备注
+     */
     private String comment;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 操作用户名，页面展示扩展字段
+     */
     private String username;
+    /**
+     * 创建时间文本，页面展示扩展字段
+     */
     private String createTimeText;
 
     public Integer getLogDocumentId() {

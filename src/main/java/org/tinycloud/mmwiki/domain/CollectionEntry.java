@@ -1,17 +1,34 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 收藏信息实体。
+ *
+ * <p>对应数据库表：mw_collection。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class CollectionEntry {
 
+    /**
+     * 收藏ID
+     */
     private Integer collectionId;
+    /**
+     * 用户ID
+     */
     private Integer userId;
+    /**
+     * 收藏类型
+     */
     private Integer type;
+    /**
+     * 收藏资源ID
+     */
     private String resourceId;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
 
     public Integer getCollectionId() {

@@ -1,24 +1,62 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 权限信息实体。
+ *
+ * <p>对应数据库表：mw_privilege。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Privilege {
 
+    /**
+     * 权限ID
+     */
     private Integer privilegeId;
+    /**
+     * 权限名称
+     */
     private String name;
+    /**
+     * 父级权限ID
+     */
     private Integer parentId;
+    /**
+     * 权限类型
+     */
     private String type;
+    /**
+     * 控制器名称
+     */
     private String controller;
+    /**
+     * 方法名称
+     */
     private String action;
+    /**
+     * 菜单图标
+     */
     private String icon;
+    /**
+     * 链接打开目标
+     */
     private String target;
+    /**
+     * 是否展示，0否1是
+     */
     private Integer isDisplay;
+    /**
+     * 排序序号
+     */
     private Integer sequence;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
 
     public Integer getPrivilegeId() {

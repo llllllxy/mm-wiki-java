@@ -1,25 +1,66 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 系统日志实体。
+ *
+ * <p>对应数据库表：mw_log。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class LogEntry {
 
+    /**
+     * 系统日志ID
+     */
     private Long logId;
+    /**
+     * 日志级别
+     */
     private Integer level;
+    /**
+     * 请求路径
+     */
     private String path;
+    /**
+     * GET请求参数
+     */
     private String get;
+    /**
+     * POST请求参数
+     */
     private String post;
+    /**
+     * 日志消息
+     */
     private String message;
+    /**
+     * 请求IP
+     */
     private String ip;
+    /**
+     * 用户代理
+     */
     private String userAgent;
+    /**
+     * 请求来源
+     */
     private String referer;
+    /**
+     * 用户ID
+     */
     private Integer userId;
+    /**
+     * 用户名
+     */
     private String username;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 创建时间文本，页面展示扩展字段
+     */
     private String createTimeText;
 
     public Long getLogId() {

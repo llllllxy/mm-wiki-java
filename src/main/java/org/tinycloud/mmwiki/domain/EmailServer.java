@@ -1,25 +1,66 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 邮件服务器配置实体。
+ *
+ * <p>对应数据库表：mw_email。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class EmailServer {
 
+    /**
+     * 邮件服务器ID
+     */
     private Integer emailId;
+    /**
+     * 邮件服务器名称
+     */
     private String name;
+    /**
+     * 发件邮箱地址
+     */
     private String senderAddress;
+    /**
+     * 发件人名称
+     */
     private String senderName;
+    /**
+     * 邮件标题前缀
+     */
     private String senderTitlePrefix;
+    /**
+     * SMTP服务器地址
+     */
     private String host;
+    /**
+     * SMTP服务器端口
+     */
     private Integer port;
+    /**
+     * SMTP登录用户名
+     */
     private String username;
+    /**
+     * SMTP登录密码或授权码
+     */
     private String password;
+    /**
+     * 是否启用SSL，0否1是
+     */
     private Integer isSsl;
+    /**
+     * 是否启用，0否1是
+     */
     private Integer isUsed;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
 
     public Integer getEmailId() {

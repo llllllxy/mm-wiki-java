@@ -1,18 +1,38 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 空间用户权限关系实体。
+ *
+ * <p>对应数据库表：mw_space_user。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class SpaceUser {
 
+    /**
+     * 空间用户关系ID
+     */
     private Integer spaceUserId;
+    /**
+     * 用户ID
+     */
     private Integer userId;
+    /**
+     * 空间ID
+     */
     private Integer spaceId;
+    /**
+     * 空间权限
+     */
     private Integer privilege;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
 
     public Integer getSpaceUserId() {

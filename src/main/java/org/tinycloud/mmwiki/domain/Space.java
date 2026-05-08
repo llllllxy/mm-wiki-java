@@ -1,25 +1,66 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 空间信息实体。
+ *
+ * <p>对应数据库表：mw_space。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Space {
 
+    /**
+     * 空间ID
+     */
     private Integer spaceId;
+    /**
+     * 空间名称
+     */
     private String name;
+    /**
+     * 空间描述
+     */
     private String description;
+    /**
+     * 空间标签
+     */
     private String tags;
+    /**
+     * 访问级别
+     */
     private String visitLevel;
+    /**
+     * 是否允许分享，0否1是
+     */
     private Integer isShare;
+    /**
+     * 是否允许导出，0否1是
+     */
     private Integer isExport;
+    /**
+     * 是否删除，0否1是
+     */
     private Integer isDelete;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
+    /**
+     * 当前用户是否收藏，页面展示扩展字段
+     */
     private boolean collection;
+    /**
+     * 当前用户收藏ID，页面展示扩展字段
+     */
     private Integer collectionId;
+    /**
+     * 创建日期文本，页面展示扩展字段
+     */
     private String createDateText;
 
     public Integer getSpaceId() {

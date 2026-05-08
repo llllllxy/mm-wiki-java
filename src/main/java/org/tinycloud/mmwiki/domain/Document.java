@@ -1,23 +1,58 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 文档信息实体。
+ *
+ * <p>对应数据库表：mw_document。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class Document {
 
+    /**
+     * 文档ID
+     */
     private String documentId;
+    /**
+     * 父级文档ID
+     */
     private String parentId;
+    /**
+     * 空间ID
+     */
     private Integer spaceId;
+    /**
+     * 文档名称
+     */
     private String name;
+    /**
+     * 文档类型
+     */
     private Integer type;
+    /**
+     * 文档文件路径
+     */
     private String path;
+    /**
+     * 排序序号
+     */
     private Integer sequence;
+    /**
+     * 创建用户ID
+     */
     private Integer createUserId;
+    /**
+     * 最后编辑用户ID
+     */
     private Integer editUserId;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
 
     public String getDocumentId() {

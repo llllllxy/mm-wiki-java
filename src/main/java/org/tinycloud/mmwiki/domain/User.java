@@ -1,32 +1,94 @@
 package org.tinycloud.mmwiki.domain;
 
 /**
- * MM-Wiki 数据模型。
+ * 用户信息实体。
+ *
+ * <p>对应数据库表：mw_user。</p>
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 public class User {
 
+    /**
+     * 用户ID
+     */
     private Integer userId;
+    /**
+     * 用户名
+     */
     private String username;
+    /**
+     * 密码
+     */
     private String password;
+    /**
+     * 姓名
+     */
     private String givenName;
+    /**
+     * 手机号
+     */
     private String mobile;
+    /**
+     * 电话
+     */
     private String phone;
+    /**
+     * 邮箱
+     */
     private String email;
+    /**
+     * 部门
+     */
     private String department;
+    /**
+     * 职位
+     */
     private String position;
+    /**
+     * 位置
+     */
     private String location;
+    /**
+     * 即时通讯账号
+     */
     private String im;
+    /**
+     * 最后登录IP
+     */
     private String lastIp;
+    /**
+     * 最后登录时间
+     */
     private Integer lastTime;
+    /**
+     * 角色ID
+     */
     private Integer roleId;
+    /**
+     * 是否禁用，0否1是
+     */
     private Integer isForbidden;
+    /**
+     * 是否删除，0否1是
+     */
     private Integer isDelete;
+    /**
+     * 创建时间
+     */
     private Integer createTime;
+    /**
+     * 更新时间
+     */
     private Integer updateTime;
+    /**
+     * 当前登录用户是否关注该用户，页面展示扩展字段，非 mw_user 表字段
+     */
     private boolean follow;
+    /**
+     * 关注关系ID，页面展示扩展字段，非 mw_user 表字段
+     */
     private Integer followId;
 
     public Integer getUserId() {
