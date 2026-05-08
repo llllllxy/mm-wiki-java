@@ -56,7 +56,11 @@
 <script type="text/javascript" src="/static/js/modules/document.js"></script>
 <script th:inline="javascript">
     var documentsData = JSON.parse(/*[[${documentsJson}]]*/ "[]");
-    Document.ListTree("#dir_tree", documentsData, [[${default_document_id}]], [[${is_editor}]], [[${is_delete}]]);
+    var defaultDocumentId = /*[[${default_document_id}]]*/ "";
+    var isEditor = /*[[${is_editor}]]*/ false;
+    var isDelete = /*[[${is_delete}]]*/ false;
+    Document.ListTree("#dir_tree", documentsData, defaultDocumentId, isEditor, isDelete);
+
     Layers.bindIframe("[name='create_document']", "创建文档", "345px", "800px");
 </script>
 <iframe class="ui-layout-center" id="mainFrame" name="mainFrame" width="100%" frameborder="0" scrolling="yes"
