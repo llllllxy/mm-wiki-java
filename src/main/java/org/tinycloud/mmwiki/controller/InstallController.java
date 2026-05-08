@@ -1,4 +1,4 @@
-﻿package org.tinycloud.mmwiki.controller;
+package org.tinycloud.mmwiki.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,13 +57,13 @@ public class InstallController {
     @ResponseBody
     public JsonResponse<Void> acceptLicense(@RequestParam(value = "license_agree", defaultValue = "0") String agree) {
         if (installService.installed()) {
-            return JsonResponse.error("系统已经安装完成，不能重复安装", null, "/author/index", 1000);
+            return JsonResponse.error("系统已经安装完成，不能重复安装", "/author/index", 1000);
         }
         if (!"1".equals(agree)) {
-            return JsonResponse.error("请先同意协议后再继续", null, "", 2000);
+            return JsonResponse.error("请先同意协议后再继续");
         }
         installService.data().setLicense(InstallData.LICENSE_AGREE);
-        return JsonResponse.success("", null, "/install/env", 300);
+        return JsonResponse.success("", "/install/env", 300);
     }
 
     /**
@@ -88,10 +88,10 @@ public class InstallController {
     @ResponseBody
     public JsonResponse<Void> acceptEnv() {
         if (installService.data().getEnv() == InstallData.ENV_NOT_ACCESS) {
-            return JsonResponse.error("环境检测未通过", null, "", 2000);
+            return JsonResponse.error("环境检测未通过");
         }
         installService.data().setEnv(InstallData.ENV_ACCESS);
-        return JsonResponse.success("", null, "/install/config", 300);
+        return JsonResponse.success("", "/install/config", 300);
     }
 
     /**
@@ -118,9 +118,9 @@ public class InstallController {
     ) {
         String error = installService.saveSystemConfig(addr, port, documentDir);
         if (!error.isBlank()) {
-            return JsonResponse.error(error, null, "", 2000);
+            return JsonResponse.error(error);
         }
-        return JsonResponse.success("", null, "/install/database", 300);
+        return JsonResponse.success("", "/install/database", 300);
     }
 
     /**
@@ -163,9 +163,9 @@ public class InstallController {
         conf.put("admin_pass", adminPass);
         String error = installService.saveDatabaseConfig(conf);
         if (!error.isBlank()) {
-            return JsonResponse.error(error, null, "", 2000);
+            return JsonResponse.error(error);
         }
-        return JsonResponse.success("", null, "/install/ready", 300);
+        return JsonResponse.success("", "/install/ready", 300);
     }
 
     /**
@@ -189,9 +189,9 @@ public class InstallController {
     public JsonResponse<Void> acceptReady() {
         String error = installService.startInstall();
         if (!error.isBlank()) {
-            return JsonResponse.error(error, null, "", 2000);
+            return JsonResponse.error(error);
         }
-        return JsonResponse.success("", null, "/install/end", 300);
+        return JsonResponse.success("", "/install/end", 300);
     }
 
     /**

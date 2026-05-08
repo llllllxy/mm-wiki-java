@@ -309,11 +309,10 @@ public class InstallService {
                   port: %s
                   address: %s
                   servlet:
-                    session:
-                      cookie:
-                        name: mmwikissid
-                      timeout: 20h
-                
+                    encoding:
+                      charset: UTF-8
+                      force: true
+                      enabled: true
                 spring:
                   application:
                     name: mmwiki
@@ -366,9 +365,6 @@ public class InstallService {
                   search:
                     interval-time: 30
                     batch-update-doc-num: 100
-                  author:
-                    passport: mmwikipassport
-                    cookie-expired: 72000
                 """.formatted(
                 sys.get("port"),
                 yamlValue(sys.get("addr")),

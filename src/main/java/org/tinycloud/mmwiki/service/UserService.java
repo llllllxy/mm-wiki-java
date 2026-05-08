@@ -160,14 +160,14 @@ public class UserService {
             return validation;
         }
         if (userMapper.countByUsername(user.getUsername()) > 0) {
-            return JsonResponse.error("用户名已经存在！", null, "", 2000);
+            return JsonResponse.error("用户名已经存在！");
         }
         int now = Math.toIntExact(Instant.now().getEpochSecond());
         user.setPassword(encodePassword(user.getPassword()));
         user.setCreateTime(now);
         user.setUpdateTime(now);
         userMapper.insert(user);
-        return JsonResponse.success("添加用户成功", null, "/system/user/list", 2000);
+        return JsonResponse.success("添加用户成功", "/system/user/list");
     }
 
     /**
@@ -175,14 +175,14 @@ public class UserService {
      */
     public JsonResponse<Void> updateSystemUser(User user, CurrentUser operator) {
         if (user == null || user.getUserId() == null) {
-            return JsonResponse.error("用户不存在！", null, "", 2000);
+            return JsonResponse.error("用户不存在！");
         }
         User existing = findActiveById(user.getUserId());
         if (existing == null) {
-            return JsonResponse.error("用户不存在！", null, "", 2000);
+            return JsonResponse.error("用户不存在！");
         }
         if (isRootRole(existing.getRoleId()) && !isRoot(operator)) {
-            return JsonResponse.error("没有权限修改超级管理员！", null, "", 2000);
+            return JsonResponse.error("没有权限修改超级管理员！");
         }
         if (isRootRole(existing.getRoleId())) {
             user.setRoleId(RoleService.ROOT_ROLE_ID);
@@ -198,7 +198,7 @@ public class UserService {
         } else {
             userMapper.updateSystemUser(user);
         }
-        return JsonResponse.success("修改用户成功", null, "/system/user/list", 2000);
+        return JsonResponse.success("修改用户成功", "/system/user/list");
     }
 
     /**
@@ -210,7 +210,7 @@ public class UserService {
 
     private JsonResponse<Void> validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {
         if (user == null) {
-            return JsonResponse.error("用户信息不能为空！", null, "", 2000);
+            return JsonResponse.error("用户信息不能为空！");
         }
         user.setUsername(trim(user.getUsername()));
         user.setGivenName(trim(user.getGivenName()));
@@ -225,35 +225,35 @@ public class UserService {
 
         if (requirePassword) {
             if (!StringUtils.hasText(user.getUsername())) {
-                return JsonResponse.error("用户名不能为空！", null, "", 2000);
+                return JsonResponse.error("用户名不能为空！");
             }
             if (!ALPHA_NUMERIC.matcher(user.getUsername()).matches()) {
-                return JsonResponse.error("用户名格式不正确！", null, "", 2000);
+                return JsonResponse.error("用户名格式不正确！");
             }
             if (!StringUtils.hasText(user.getPassword())) {
-                return JsonResponse.error("密码不能为空！", null, "", 2000);
+                return JsonResponse.error("密码不能为空！");
             }
         }
         if (!StringUtils.hasText(user.getGivenName())) {
-            return JsonResponse.error("姓名不能为空！", null, "", 2000);
+            return JsonResponse.error("姓名不能为空！");
         }
         if (!StringUtils.hasText(user.getEmail())) {
-            return JsonResponse.error("邮箱不能为空！", null, "", 2000);
+            return JsonResponse.error("邮箱不能为空！");
         }
         if (!EMAIL.matcher(user.getEmail()).matches()) {
-            return JsonResponse.error("邮箱格式不正确！", null, "", 2000);
+            return JsonResponse.error("邮箱格式不正确！");
         }
         if (!StringUtils.hasText(user.getMobile())) {
-            return JsonResponse.error("手机号不能为空！", null, "", 2000);
+            return JsonResponse.error("手机号不能为空！");
         }
         if (user.getRoleId() == null) {
-            return JsonResponse.error("没有选择角色！", null, "", 2000);
+            return JsonResponse.error("没有选择角色！");
         }
         if (roleService.findActiveById(user.getRoleId()) == null) {
-            return JsonResponse.error("角色不存在！", null, "", 2000);
+            return JsonResponse.error("角色不存在！");
         }
         if (isRootRole(user.getRoleId()) && !isRoot(operator)) {
-            return JsonResponse.error("没有权限分配超级管理员角色！", null, "", 2000);
+            return JsonResponse.error("没有权限分配超级管理员角色！");
         }
         return null;
     }

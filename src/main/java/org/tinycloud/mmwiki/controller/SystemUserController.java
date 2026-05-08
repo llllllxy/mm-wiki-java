@@ -110,17 +110,17 @@ public class SystemUserController extends ControllerSupport {
     @ResponseBody
     public JsonResponse<Void> forbidden(HttpServletRequest request, @RequestParam("user_id") Integer userId) {
         if (currentUser(request).getUserId().equals(userId)) {
-            return JsonResponse.error("不能屏蔽当前登录用户。", null, "", 2000);
+            return JsonResponse.error("不能屏蔽当前登录用户。");
         }
         User user = userService.findActiveById(userId);
         if (user == null) {
-            return JsonResponse.error("用户不存在。", null, "", 2000);
+            return JsonResponse.error("用户不存在。");
         }
         if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            return JsonResponse.error("不能操作超级管理员。", null, "", 2000);
+            return JsonResponse.error("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 1);
-        return JsonResponse.success("屏蔽用户成功", null, "/system/user/list", 2000);
+        return JsonResponse.success("屏蔽用户成功", "/system/user/list");
     }
 
     @PostMapping("/system/user/recover")
@@ -128,13 +128,13 @@ public class SystemUserController extends ControllerSupport {
     public JsonResponse<Void> recover(@RequestParam("user_id") Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            return JsonResponse.error("用户不存在。", null, "", 2000);
+            return JsonResponse.error("用户不存在。");
         }
         if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            return JsonResponse.error("不能操作超级管理员。", null, "", 2000);
+            return JsonResponse.error("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 0);
-        return JsonResponse.success("恢复用户成功", null, "/system/user/list", 2000);
+        return JsonResponse.success("恢复用户成功", "/system/user/list");
     }
 
     private String rolePart(Integer roleId) {

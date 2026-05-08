@@ -72,16 +72,16 @@ public class SystemProfileService {
         String im
     ) {
         if (!StringUtils.hasText(givenName)) {
-            return JsonResponse.error("姓名不能为空。", null, "", 2000);
+            return JsonResponse.error("姓名不能为空。");
         }
         if (!StringUtils.hasText(email)) {
-            return JsonResponse.error("邮箱不能为空。", null, "", 2000);
+            return JsonResponse.error("邮箱不能为空。");
         }
         if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
-            return JsonResponse.error("邮箱格式不正确。", null, "", 2000);
+            return JsonResponse.error("邮箱格式不正确。");
         }
         if (!StringUtils.hasText(mobile)) {
-            return JsonResponse.error("手机号不能为空。", null, "", 2000);
+            return JsonResponse.error("手机号不能为空。");
         }
 
         userService.updateProfile(
@@ -95,7 +95,7 @@ public class SystemProfileService {
             trim(location),
             trim(im)
         );
-        return JsonResponse.success("个人资料修改成功", null, "/system/profile/info", 2000);
+        return JsonResponse.success("个人资料修改成功", "/system/profile/info");
     }
 
     /**
@@ -190,18 +190,18 @@ public class SystemProfileService {
      */
     public JsonResponse<Void> savePassword(Integer userId, String password, String passwordNew, String passwordConfirm) {
         if (!StringUtils.hasText(password) || !StringUtils.hasText(passwordNew) || !StringUtils.hasText(passwordConfirm)) {
-            return JsonResponse.error("密码不能为空。", null, "", 2000);
+            return JsonResponse.error("密码不能为空。");
         }
         User user = requireUser(userId);
         String currentEncoded = userService.encodePassword(password);
         if (!currentEncoded.equals(user.getPassword())) {
-            return JsonResponse.error("当前密码错误。", null, "", 2000);
+            return JsonResponse.error("当前密码错误。");
         }
         if (!passwordNew.equals(passwordConfirm)) {
-            return JsonResponse.error("确认密码和新密码不一致。", null, "", 2000);
+            return JsonResponse.error("确认密码和新密码不一致。");
         }
         userService.updatePassword(userId, userService.encodePassword(passwordNew));
-        return JsonResponse.success("密码修改成功，下次登录生效。", null, "/system/profile/password", 2000);
+        return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
     }
 
     private User requireUser(Integer userId) {

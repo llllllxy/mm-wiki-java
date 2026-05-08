@@ -254,27 +254,27 @@ public class DocumentService {
     public JsonResponse<Void> createDocument(CurrentUser currentUser, Integer spaceId, String parentId, Integer type, String name) throws IOException {
         String cleanName = name == null ? "" : name.trim();
         if (spaceId == null || !StringUtils.hasText(parentId) || cleanName.isBlank()) {
-            return JsonResponse.error("参数错误。", null, "", 2000);
+            return JsonResponse.error("参数错误。");
         }
         if (!isValidName(cleanName)) {
-            return JsonResponse.error("文档名称格式不正确。", null, "", 2000);
+            return JsonResponse.error("文档名称格式不正确。");
         }
         if (!Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_PAGE) && !Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("文档类型错误。", null, "", 2000);
+            return JsonResponse.error("文档类型错误。");
         }
 
         Space space = spaceService.requireSpace(spaceId);
         AccessService.Access access = accessService.access(currentUser, space);
         if (!access.editor()) {
-            return JsonResponse.error("您没有权限在该空间创建文档。", null, "", 2000);
+            return JsonResponse.error("您没有权限在该空间创建文档。");
         }
 
         Document parentDocument = requireDocument(parentId);
         if (parentDocument.getType() == null || parentDocument.getType() != DocumentFileService.DOCUMENT_TYPE_DIR) {
-            return JsonResponse.error("父文档不是目录。", null, "", 2000);
+            return JsonResponse.error("父文档不是目录。");
         }
         if (documentMapper.findByNameParentIdAndSpaceId(cleanName, parentId, spaceId, type) != null) {
-            return JsonResponse.error("该文档名称已经存在。", null, "", 2000);
+            return JsonResponse.error("该文档名称已经存在。");
         }
 
         int now = Math.toIntExact(Instant.now().getEpochSecond());
@@ -299,7 +299,7 @@ public class DocumentService {
         logDocumentMapper.insert(document.getDocumentId(), spaceId, currentUser.getUserId(), 1, "创建了文档", now);
         followService.autoFollowDocument(currentUser.getUserId(), document.getDocumentId());
 
-        return JsonResponse.success("创建文档成功", null, "/document/index?document_id=" + document.getDocumentId(), 2000);
+        return JsonResponse.success("创建文档成功", "/document/index?document_id=" + document.getDocumentId());
     }
 
     @Transactional
@@ -320,7 +320,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         AccessService.Access access = accessService.access(currentUser, space);
         if (!access.editor()) {
-            return JsonResponse.error("您没有权限修改该空间文档。", null, "", 2000);
+            return JsonResponse.error("您没有权限修改该空间文档。");
         }
 
         String targetName = StringUtils.hasText(newName) ? newName.trim() : document.getName();
@@ -328,12 +328,12 @@ public class DocumentService {
             targetName = document.getName();
         } else {
             if (!isValidName(targetName)) {
-                return JsonResponse.error("文档名称格式不正确。", null, "", 2000);
+                return JsonResponse.error("文档名称格式不正确。");
             }
             if (!targetName.equals(document.getName())) {
                 Document duplicate = documentMapper.findByNameParentIdAndSpaceId(targetName, document.getParentId(), document.getSpaceId(), document.getType());
                 if (duplicate != null) {
-                    return JsonResponse.error("该文档名称已经存在。", null, "", 2000);
+                    return JsonResponse.error("该文档名称已经存在。");
                 }
             }
         }
@@ -357,7 +357,7 @@ public class DocumentService {
             asyncServiceExecutor.execute(() -> emailService.sendDocumentUpdateNotice(document, currentUser.getUsername(), content, comment, documentUrl));
         }
 
-        return JsonResponse.success("文档修改成功", null, "/document/index?document_id=" + documentId, 2000);
+        return JsonResponse.success("文档修改成功", "/document/index?document_id=" + documentId);
     }
 
     @Transactional
@@ -366,18 +366,18 @@ public class DocumentService {
      */
     public JsonResponse<Void> moveDocument(CurrentUser currentUser, String documentId, String targetId, String moveType) throws IOException {
         if (!StringUtils.hasText(documentId) || !StringUtils.hasText(targetId)) {
-            return JsonResponse.error("缺少文档参数。", null, "", 2000);
+            return JsonResponse.error("缺少文档参数。");
         }
         Document document = requireDocument(documentId);
         Document targetDocument = requireDocument(targetId);
         if (!Objects.equals(document.getSpaceId(), targetDocument.getSpaceId())) {
-            return JsonResponse.error("文档和目标文档不在同一空间。", null, "", 2000);
+            return JsonResponse.error("文档和目标文档不在同一空间。");
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
         AccessService.Access access = accessService.access(currentUser, space);
         if (!access.editor()) {
-            return JsonResponse.error("您没有权限移动该空间文档。", null, "", 2000);
+            return JsonResponse.error("您没有权限移动该空间文档。");
         }
 
         int now = Math.toIntExact(Instant.now().getEpochSecond());
@@ -391,14 +391,14 @@ public class DocumentService {
             document.setEditUserId(currentUser.getUserId());
             document.setUpdateTime(now);
             documentMapper.updateSequence(document);
-            return JsonResponse.success("移动文档成功", null, "/document/index?document_id=" + documentId, 2000);
+            return JsonResponse.success("移动文档成功", "/document/index?document_id=" + documentId);
         }
 
         if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("目录不能移动到其他目录中。", null, "", 2000);
+            return JsonResponse.error("目录不能移动到其他目录中。");
         }
         if (!Objects.equals(targetDocument.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("目标文档必须是目录。", null, "", 2000);
+            return JsonResponse.error("目标文档必须是目录。");
         }
 
         List<Document> oldParents = getParentDocuments(document);
@@ -419,7 +419,7 @@ public class DocumentService {
         documentMapper.updateParentPathEditor(movedDocument);
         documentFileService.movePageOrDirectory(oldPageFile, newPageFile, document.getType());
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, "移动文档到 " + targetDocument.getName(), now);
-        return JsonResponse.success("移动文档成功", null, "/document/index?document_id=" + documentId, 2000);
+        return JsonResponse.success("移动文档成功", "/document/index?document_id=" + documentId);
     }
 
     @Transactional
@@ -428,17 +428,17 @@ public class DocumentService {
      */
     public JsonResponse<Void> deleteDocument(CurrentUser currentUser, String documentId) throws IOException {
         if (!StringUtils.hasText(documentId)) {
-            return JsonResponse.error("没有选择文档。", null, "", 2000);
+            return JsonResponse.error("没有选择文档。");
         }
         Document document = requireDocument(documentId);
         if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR) && !documentMapper.findByParentId(documentId).isEmpty()) {
-            return JsonResponse.error("请先删除或移动目录下所有文档。", null, "", 2000);
+            return JsonResponse.error("请先删除或移动目录下所有文档。");
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
         AccessService.Access access = accessService.access(currentUser, space);
         if (!access.manager()) {
-            return JsonResponse.error("您没有权限删除该空间文档。", null, "", 2000);
+            return JsonResponse.error("您没有权限删除该空间文档。");
         }
 
         List<Document> parents = getParentDocuments(document);
@@ -451,7 +451,7 @@ public class DocumentService {
         attachmentService.deleteByDocumentId(documentId);
         followService.deleteDocumentFollowers(documentId);
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, "删除文档", now);
-        return JsonResponse.success("删除文档成功", null, "/document/index?document_id=" + document.getParentId(), 2000);
+        return JsonResponse.success("删除文档成功", "/document/index?document_id=" + document.getParentId());
     }
 
     /**

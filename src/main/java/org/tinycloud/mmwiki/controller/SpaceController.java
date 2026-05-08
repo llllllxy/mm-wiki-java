@@ -113,7 +113,7 @@ public class SpaceController extends ControllerSupport {
         HttpServletRequest request
     ) {
         spaceService.addMember(currentUser(request), spaceId, userId, privilege);
-        return JsonResponse.success("添加成员成功", null, "/space/member?space_id=" + spaceId, 2000);
+        return JsonResponse.success("添加成员成功", "/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/space/removeMember")
@@ -125,7 +125,7 @@ public class SpaceController extends ControllerSupport {
         HttpServletRequest request
     ) {
         spaceService.removeMember(currentUser(request), spaceId, userId, spaceUserId);
-        return JsonResponse.success("移除成员成功", null, "/space/member?space_id=" + spaceId, 2000);
+        return JsonResponse.success("移除成员成功", "/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/space/modifyMember")
@@ -137,6 +137,6 @@ public class SpaceController extends ControllerSupport {
         HttpServletRequest request
     ) {
         spaceService.updateMemberPrivilege(currentUser(request), spaceId, spaceUserId, privilege);
-        return JsonResponse.success("更新权限成功", null, "", 2000);
+        return JsonResponse.success("更新权限成功");
     }
 }

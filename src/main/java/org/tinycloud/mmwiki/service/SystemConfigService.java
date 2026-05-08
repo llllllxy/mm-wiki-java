@@ -56,13 +56,13 @@ public class SystemConfigService {
         String systemName
     ) {
         if (!StringUtils.hasText(systemName)) {
-            return JsonResponse.error("系统名称不能为空。", null, "", 2000);
+            return JsonResponse.error("系统名称不能为空。");
         }
         if ("1".equals(normalizeSwitch(sendEmailOpen)) && emailService.findUsed() == null) {
-            return JsonResponse.error("开启邮件通知前必须先启用一个邮件服务器配置。", null, "", 2000);
+            return JsonResponse.error("开启邮件通知前必须先启用一个邮件服务器配置。");
         }
         if ("1".equals(normalizeSwitch(ssoOpen)) && loginAuthService.findUsed() == null) {
-            return JsonResponse.error("开启统一登录前必须先启用一个登录认证配置。", null, "", 2000);
+            return JsonResponse.error("开启统一登录前必须先启用一个登录认证配置。");
         }
 
         updateIfChanged("main_title", safe(mainTitle));
@@ -73,7 +73,7 @@ public class SystemConfigService {
         updateIfChanged("fulltext_search_open", normalizeSwitch(fulltextSearchOpen));
         updateIfChanged("doc_search_timer", safe(docSearchTimer, "3600"));
         updateIfChanged("system_name", safe(systemName));
-        return JsonResponse.success("修改全局配置成功", null, "/system/config/global", 2000);
+        return JsonResponse.success("修改全局配置成功", "/system/config/global");
     }
 
     private void updateIfChanged(String key, String newValue) {

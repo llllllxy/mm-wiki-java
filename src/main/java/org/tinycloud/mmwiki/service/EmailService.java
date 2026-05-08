@@ -86,7 +86,7 @@ public class EmailService {
         emailServer.setUpdateTime(now);
         emailServer.setIsUsed(0);
         emailMapper.insert(emailServer);
-        return JsonResponse.success("添加邮件服务器成功", null, "/system/email/list", 2000);
+        return JsonResponse.success("添加邮件服务器成功", "/system/email/list");
     }
 
     /**
@@ -94,7 +94,7 @@ public class EmailService {
      */
     public JsonResponse<Void> update(EmailServer emailServer) {
         if (emailServer.getEmailId() == null || findById(emailServer.getEmailId()) == null) {
-            return JsonResponse.error("邮件服务器不存在。", null, "", 2000);
+            return JsonResponse.error("邮件服务器不存在。");
         }
         JsonResponse<Void> validation = validate(emailServer, emailServer.getEmailId());
         if (validation != null) {
@@ -102,7 +102,7 @@ public class EmailService {
         }
         emailServer.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
         emailMapper.update(emailServer);
-        return JsonResponse.success("修改邮件服务器成功", null, "/system/email/list", 2000);
+        return JsonResponse.success("修改邮件服务器成功", "/system/email/list");
     }
 
     /**
@@ -111,11 +111,11 @@ public class EmailService {
     public JsonResponse<Void> markUsed(Integer emailId) {
         EmailServer email = findById(emailId);
         if (email == null) {
-            return JsonResponse.error("邮件服务器不存在。", null, "", 2000);
+            return JsonResponse.error("邮件服务器不存在。");
         }
         emailMapper.clearUsed();
         emailMapper.markUsed(emailId);
-        return JsonResponse.success("启用邮件服务器成功", null, "/system/email/list", 2000);
+        return JsonResponse.success("启用邮件服务器成功", "/system/email/list");
     }
 
     /**
@@ -124,10 +124,10 @@ public class EmailService {
     public JsonResponse<Void> delete(Integer emailId) {
         EmailServer email = findById(emailId);
         if (email == null) {
-            return JsonResponse.error("邮件服务器不存在。", null, "", 2000);
+            return JsonResponse.error("邮件服务器不存在。");
         }
         emailMapper.deleteById(emailId);
-        return JsonResponse.success("删除邮件服务器成功", null, "/system/email/list", 2000);
+        return JsonResponse.success("删除邮件服务器成功", "/system/email/list");
     }
 
     /**
@@ -140,7 +140,7 @@ public class EmailService {
         }
         List<String> recipients = parseEmails(emails);
         if (recipients.isEmpty()) {
-            return JsonResponse.error("收件人邮箱地址不能为空。", null, "", 2000);
+            return JsonResponse.error("收件人邮箱地址不能为空。");
         }
 
         Context context = baseContext();
@@ -152,9 +152,9 @@ public class EmailService {
 
         boolean sent = send(emailServer, recipients, "测试邮件服务器", body);
         if (!sent) {
-            return JsonResponse.error("测试邮件发送失败，请检查 SMTP 地址、端口、SSL、发件邮箱和授权码。", null, "", 2000);
+            return JsonResponse.error("测试邮件发送失败，请检查 SMTP 地址、端口、SSL、发件邮箱和授权码。");
         }
-        return JsonResponse.success("测试邮件发送成功", null, "", 2000);
+        return JsonResponse.success("测试邮件发送成功");
     }
 
     /**
@@ -263,31 +263,31 @@ public class EmailService {
 
     private JsonResponse<Void> validate(EmailServer emailServer, Integer currentId) {
         if (emailServer == null) {
-            return JsonResponse.error("邮件服务器参数错误。", null, "", 2000);
+            return JsonResponse.error("邮件服务器参数错误。");
         }
         if (!StringUtils.hasText(emailServer.getName())) {
-            return JsonResponse.error("邮件服务器名称不能为空。", null, "", 2000);
+            return JsonResponse.error("邮件服务器名称不能为空。");
         }
         if (!StringUtils.hasText(emailServer.getHost())) {
-            return JsonResponse.error("邮件服务器主机不能为空。", null, "", 2000);
+            return JsonResponse.error("邮件服务器主机不能为空。");
         }
         if (emailServer.getPort() == null || emailServer.getPort() <= 0 || emailServer.getPort() > 65535) {
-            return JsonResponse.error("邮件服务器端口格式不正确。", null, "", 2000);
+            return JsonResponse.error("邮件服务器端口格式不正确。");
         }
         if (!StringUtils.hasText(emailServer.getSenderAddress())) {
-            return JsonResponse.error("发件人邮箱不能为空。", null, "", 2000);
+            return JsonResponse.error("发件人邮箱不能为空。");
         }
         if (!StringUtils.hasText(emailServer.getUsername())) {
-            return JsonResponse.error("邮箱用户名不能为空。", null, "", 2000);
+            return JsonResponse.error("邮箱用户名不能为空。");
         }
         if (!StringUtils.hasText(emailServer.getPassword())) {
-            return JsonResponse.error("邮箱密码不能为空。", null, "", 2000);
+            return JsonResponse.error("邮箱密码不能为空。");
         }
         long duplicateCount = currentId == null
             ? emailMapper.countByName(emailServer.getName().trim())
             : emailMapper.countByNameAndNotId(currentId, emailServer.getName().trim());
         if (duplicateCount > 0) {
-            return JsonResponse.error("邮件服务器名称已经存在。", null, "", 2000);
+            return JsonResponse.error("邮件服务器名称已经存在。");
         }
         emailServer.setName(emailServer.getName().trim());
         emailServer.setHost(emailServer.getHost().trim());

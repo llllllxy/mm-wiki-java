@@ -42,12 +42,12 @@ public class ContactService {
         contact.setCreateTime(now);
         contact.setUpdateTime(now);
         contactMapper.insert(contact);
-        return JsonResponse.success("添加联系人成功", null, "/system/contact/list", 2000);
+        return JsonResponse.success("添加联系人成功", "/system/contact/list");
     }
 
     public JsonResponse<Void> update(Contact contact) {
         if (contact.getContactId() == null || findById(contact.getContactId()) == null) {
-            return JsonResponse.error("联系人不存在。", null, "", 2000);
+            return JsonResponse.error("联系人不存在。");
         }
         JsonResponse<Void> validation = validate(contact);
         if (validation != null) {
@@ -55,15 +55,15 @@ public class ContactService {
         }
         contact.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
         contactMapper.update(contact);
-        return JsonResponse.success("修改联系人成功", null, "/system/contact/list", 2000);
+        return JsonResponse.success("修改联系人成功", "/system/contact/list");
     }
 
     public JsonResponse<Void> delete(Integer contactId) {
         if (findById(contactId) == null) {
-            return JsonResponse.error("联系人不存在。", null, "", 2000);
+            return JsonResponse.error("联系人不存在。");
         }
         contactMapper.deleteById(contactId);
-        return JsonResponse.success("删除联系人成功", null, "/system/contact/list", 2000);
+        return JsonResponse.success("删除联系人成功", "/system/contact/list");
     }
 
     public ImportPage importCandidates(String username, int page, int number) {
@@ -80,19 +80,19 @@ public class ContactService {
 
     private JsonResponse<Void> validate(Contact contact) {
         if (contact == null) {
-            return JsonResponse.error("联系人参数错误。", null, "", 2000);
+            return JsonResponse.error("联系人参数错误。");
         }
         if (!StringUtils.hasText(contact.getName())) {
-            return JsonResponse.error("联系人姓名不能为空。", null, "", 2000);
+            return JsonResponse.error("联系人姓名不能为空。");
         }
         if (!StringUtils.hasText(contact.getPosition())) {
-            return JsonResponse.error("职位不能为空。", null, "", 2000);
+            return JsonResponse.error("职位不能为空。");
         }
         if (!StringUtils.hasText(contact.getMobile())) {
-            return JsonResponse.error("联系电话不能为空。", null, "", 2000);
+            return JsonResponse.error("联系电话不能为空。");
         }
         if (!StringUtils.hasText(contact.getEmail()) || !contact.getEmail().contains("@")) {
-            return JsonResponse.error("邮箱格式不正确。", null, "", 2000);
+            return JsonResponse.error("邮箱格式不正确。");
         }
         contact.setName(contact.getName().trim());
         contact.setPosition(contact.getPosition().trim());

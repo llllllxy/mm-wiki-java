@@ -77,15 +77,15 @@ public class AttachmentController extends ControllerSupport {
         Document document = requireDocument(documentId);
         AccessService.Access access = requireAccess(request, document);
         if (!access.editor()) {
-            return JsonResponse.error("您没有权限操作该空间文档。", null, "", 2000);
+            return JsonResponse.error("您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {
-            return JsonResponse.error("上传附件错误。", null, "", 2000);
+            return JsonResponse.error("上传附件错误。");
         }
         Path saveDir = documentFileService.ensureAttachmentDirectory("attachment", String.valueOf(document.getSpaceId()), documentId);
         Path saveFile = saveDir.resolve(file.getOriginalFilename());
         if (Files.exists(saveFile)) {
-            return JsonResponse.error("该附件已经存在。", null, "", 2000);
+            return JsonResponse.error("该附件已经存在。");
         }
         file.transferTo(saveFile);
         try {
@@ -96,7 +96,7 @@ public class AttachmentController extends ControllerSupport {
                 "attachment/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename(),
                 AttachmentService.SOURCE_ATTACHMENT
             );
-            return JsonResponse.success("附件上传成功", null, "/attachment/page?document_id=" + documentId, 2000);
+            return JsonResponse.success("附件上传成功", "/attachment/page?document_id=" + documentId);
         } catch (Exception ex) {
             Files.deleteIfExists(saveFile);
             throw ex;
@@ -108,18 +108,18 @@ public class AttachmentController extends ControllerSupport {
     public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId, HttpServletRequest request) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
-            return JsonResponse.error("附件不存在。", null, "", 2000);
+            return JsonResponse.error("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
         AccessService.Access access = requireAccess(request, document);
         if (!access.manager()) {
-            return JsonResponse.error("您没有权限删除该空间文档附件。", null, "", 2000);
+            return JsonResponse.error("您没有权限删除该空间文档附件。");
         }
         attachmentService.deleteById(attachmentId);
         String redirect = attachment.getSource() != null && attachment.getSource() == AttachmentService.SOURCE_IMAGE
             ? "/attachment/image?document_id=" + document.getDocumentId()
             : "/attachment/page?document_id=" + document.getDocumentId();
-        return JsonResponse.success("删除成功", null, redirect, 2000);
+        return JsonResponse.success("删除成功", redirect);
     }
 
     @GetMapping("/attachment/download")

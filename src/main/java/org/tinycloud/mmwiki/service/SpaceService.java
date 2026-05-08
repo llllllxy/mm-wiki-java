@@ -221,7 +221,7 @@ public class SpaceService {
         documentMapper.insert(defaultDocument);
         documentFileService.createEmptyPage(documentFileService.getDefaultPageFileBySpaceName(space.getName()));
         spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), SPACE_MANAGER_PRIVILEGE);
-        return JsonResponse.success("添加空间成功", null, "/system/space/list", 2000);
+        return JsonResponse.success("添加空间成功", "/system/space/list");
     }
 
     @Transactional
@@ -230,11 +230,11 @@ public class SpaceService {
      */
     public JsonResponse<Void> updateSpace(CurrentUser currentUser, Space space) throws IOException {
         if (space == null || space.getSpaceId() == null) {
-            return JsonResponse.error("空间不存在！", null, "", 2000);
+            return JsonResponse.error("空间不存在！");
         }
         Space existing = spaceMapper.findActiveById(space.getSpaceId());
         if (existing == null) {
-            return JsonResponse.error("空间不存在！", null, "", 2000);
+            return JsonResponse.error("空间不存在！");
         }
         JsonResponse<Void> validation = validateSpace(space, space.getSpaceId());
         if (validation != null) {
@@ -258,7 +258,7 @@ public class SpaceService {
             defaultDocument.setUpdateTime(now);
             documentMapper.updateDefaultDocumentName(defaultDocument);
         }
-        return JsonResponse.success("修改空间成功", null, "/system/space/list", 2000);
+        return JsonResponse.success("修改空间成功", "/system/space/list");
     }
 
     @Transactional
@@ -268,14 +268,14 @@ public class SpaceService {
     public JsonResponse<Void> deleteSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
-            return JsonResponse.error("空间不存在！", null, "", 2000);
+            return JsonResponse.error("空间不存在！");
         }
         List<Document> documents = documentMapper.findActiveBySpaceId(spaceId);
         if (documents.size() > 1) {
-            return JsonResponse.error("不能删除空间，请先删除该空间下文档。", null, "", 2000);
+            return JsonResponse.error("不能删除空间，请先删除该空间下文档。");
         }
         if (documents.size() == 1 && !Objects.equals(documents.get(0).getName(), space.getName())) {
-            return JsonResponse.error("不能删除空间，请先删除该空间下文档。", null, "", 2000);
+            return JsonResponse.error("不能删除空间，请先删除该空间下文档。");
         }
         if (documents.size() == 1) {
             Document defaultDocument = documents.get(0);
@@ -289,7 +289,7 @@ public class SpaceService {
         }
         spaceUserService.deleteBySpaceId(spaceId);
         spaceMapper.markDeleted(spaceId);
-        return JsonResponse.success("删除空间成功", null, "/system/space/list", 2000);
+        return JsonResponse.success("删除空间成功", "/system/space/list");
     }
 
     /**
@@ -370,7 +370,7 @@ public class SpaceService {
 
     private JsonResponse<Void> validateSpace(Space space, Integer currentId) {
         if (space == null) {
-            return JsonResponse.error("空间信息不能为空！", null, "", 2000);
+            return JsonResponse.error("空间信息不能为空！");
         }
         space.setName(trim(space.getName()));
         space.setDescription(trim(space.getDescription()));
@@ -380,19 +380,19 @@ public class SpaceService {
             space.setVisitLevel("public");
         }
         if (!"public".equals(space.getVisitLevel()) && !"private".equals(space.getVisitLevel())) {
-            return JsonResponse.error("访问级别不正确！", null, "", 2000);
+            return JsonResponse.error("访问级别不正确！");
         }
         space.setIsShare(Objects.equals(space.getIsShare(), 1) ? 1 : 0);
         space.setIsExport(Objects.equals(space.getIsExport(), 1) ? 1 : 0);
         if (!StringUtils.hasText(space.getName())) {
-            return JsonResponse.error("空间名称不能为空！", null, "", 2000);
+            return JsonResponse.error("空间名称不能为空！");
         }
         if (INVALID_SPACE_NAME.matcher(space.getName()).find()) {
-            return JsonResponse.error("空间名称格式不正确！", null, "", 2000);
+            return JsonResponse.error("空间名称格式不正确！");
         }
         long duplicate = currentId == null ? spaceMapper.countByName(space.getName()) : spaceMapper.countByNameAndNotId(currentId, space.getName());
         if (duplicate > 0) {
-            return JsonResponse.error("空间名已经存在！", null, "", 2000);
+            return JsonResponse.error("空间名已经存在！");
         }
         return null;
     }

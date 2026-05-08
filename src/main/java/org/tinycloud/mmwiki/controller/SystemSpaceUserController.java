@@ -31,7 +31,7 @@ public class SystemSpaceUserController extends ControllerSupport {
         @RequestParam("privilege") Integer privilege
     ) {
         spaceService.addMember(currentUser(request), spaceId, userId, privilege);
-        return JsonResponse.success("添加成员成功", null, "/system/space/member?space_id=" + spaceId, 2000);
+        return JsonResponse.success("添加成员成功", "/system/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/system/space_user/remove")
@@ -43,7 +43,7 @@ public class SystemSpaceUserController extends ControllerSupport {
         @RequestParam("space_user_id") Integer spaceUserId
     ) {
         spaceService.removeMember(currentUser(request), spaceId, userId, spaceUserId);
-        return JsonResponse.success("移除成员成功", null, "/system/space/member?space_id=" + spaceId, 2000);
+        return JsonResponse.success("移除成员成功", "/system/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/system/space_user/modify")
@@ -55,6 +55,6 @@ public class SystemSpaceUserController extends ControllerSupport {
         @RequestParam("privilege") Integer privilege
     ) {
         spaceService.updateMemberPrivilege(currentUser(request), spaceId, spaceUserId, privilege);
-        return JsonResponse.success("更新权限成功", null, "", 2000);
+        return JsonResponse.success("更新权限成功");
     }
 }

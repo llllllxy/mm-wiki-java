@@ -66,16 +66,16 @@ public class FollowService {
 
     public JsonResponse<Void> add(Integer currentUserId, Integer type, String objectId, String redirect) {
         if (objectId == null || objectId.isBlank()) {
-            return JsonResponse.error("没有选择关注对象。", null, "", 2000);
+            return JsonResponse.error("没有选择关注对象。");
         }
         if (!TYPE_DOCEquals(type) && !TYPE_USEREquals(type)) {
-            return JsonResponse.error("关注类型错误。", null, "", 2000);
+            return JsonResponse.error("关注类型错误。");
         }
         if (TYPE_USEREquals(type) && objectId.equals(String.valueOf(currentUserId))) {
-            return JsonResponse.error("不能关注自己。", null, "", 2000);
+            return JsonResponse.error("不能关注自己。");
         }
         if (followMapper.findByUserTypeAndObjectId(currentUserId, type, objectId) != null) {
-            return JsonResponse.error("您已关注过，不能重复关注。", null, "", 2000);
+            return JsonResponse.error("您已关注过，不能重复关注。");
         }
         Follow follow = new Follow();
         follow.setUserId(currentUserId);
@@ -83,22 +83,22 @@ public class FollowService {
         follow.setObjectId(objectId);
         follow.setCreateTime(Math.toIntExact(Instant.now().getEpochSecond()));
         followMapper.insert(follow);
-        return JsonResponse.success("关注成功", null, redirect, 2000);
+        return JsonResponse.success("关注成功", redirect);
     }
 
     public JsonResponse<Void> cancel(Integer currentUserId, Integer followId, String redirect) {
         if (followId == null) {
-            return JsonResponse.error("没有选择关注对象。", null, "", 2000);
+            return JsonResponse.error("没有选择关注对象。");
         }
         Follow follow = followMapper.findById(followId);
         if (follow == null) {
-            return JsonResponse.error("关注对象不存在。", null, "", 2000);
+            return JsonResponse.error("关注对象不存在。");
         }
         if (!currentUserId.equals(follow.getUserId())) {
-            return JsonResponse.error("您只能取消自己的关注。", null, "", 2000);
+            return JsonResponse.error("您只能取消自己的关注。");
         }
         followMapper.deleteById(followId);
-        return JsonResponse.success("已取消关注", null, redirect, 2000);
+        return JsonResponse.success("已取消关注", redirect);
     }
 
     public void deleteDocumentFollowers(String documentId) {

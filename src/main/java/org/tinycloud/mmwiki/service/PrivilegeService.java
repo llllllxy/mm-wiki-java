@@ -53,7 +53,7 @@ public class PrivilegeService {
 
     public JsonResponse<Void> save(Privilege privilege) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下添加权限", null, "", 2000);
+            return JsonResponse.error("只允许在开发模式下添加权限");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -63,15 +63,15 @@ public class PrivilegeService {
         privilege.setCreateTime(now);
         privilege.setUpdateTime(now);
         privilegeMapper.insert(privilege);
-        return JsonResponse.success("添加权限成功", null, "/system/privilege/list", 2000);
+        return JsonResponse.success("添加权限成功", "/system/privilege/list");
     }
 
     public JsonResponse<Void> update(Privilege privilege) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下修改权限", null, "", 2000);
+            return JsonResponse.error("只允许在开发模式下修改权限");
         }
         if (privilege == null || privilege.getPrivilegeId() == null || findById(privilege.getPrivilegeId()) == null) {
-            return JsonResponse.error("权限不存在", null, "", 2000);
+            return JsonResponse.error("权限不存在");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -79,36 +79,36 @@ public class PrivilegeService {
         }
         privilege.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
         privilegeMapper.update(privilege);
-        return JsonResponse.success("修改权限成功", null, "/system/privilege/list", 2000);
+        return JsonResponse.success("修改权限成功", "/system/privilege/list");
     }
 
     @Transactional
     public JsonResponse<Void> delete(Integer privilegeId) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下删除权限", null, "", 2000);
+            return JsonResponse.error("只允许在开发模式下删除权限");
         }
         Privilege privilege = findById(privilegeId);
         if (privilege == null) {
-            return JsonResponse.error("权限不存在", null, "", 2000);
+            return JsonResponse.error("权限不存在");
         }
         if (privilegeMapper.countChildren(privilegeId) > 0) {
-            return JsonResponse.error("请先删除该菜单下的权限", null, "", 2000);
+            return JsonResponse.error("请先删除该菜单下的权限");
         }
         rolePrivilegeMapper.deleteByPrivilegeId(privilegeId);
         privilegeMapper.deleteById(privilegeId);
-        return JsonResponse.success("删除权限成功", null, "/system/privilege/list", 2000);
+        return JsonResponse.success("删除权限成功", "/system/privilege/list");
     }
 
     private JsonResponse<Void> validate(Privilege privilege) {
         if (privilege == null || !StringUtils.hasText(privilege.getName())) {
-            return JsonResponse.error("权限名称不能为空", null, "", 2000);
+            return JsonResponse.error("权限名称不能为空");
         }
         if (!StringUtils.hasText(privilege.getType())) {
-            return JsonResponse.error("没有选择权限类型", null, "", 2000);
+            return JsonResponse.error("没有选择权限类型");
         }
         String type = privilege.getType().trim();
         if (!"menu".equals(type) && !"controller".equals(type)) {
-            return JsonResponse.error("权限类型错误", null, "", 2000);
+            return JsonResponse.error("权限类型错误");
         }
         privilege.setName(privilege.getName().trim());
         privilege.setType(type);
@@ -118,13 +118,13 @@ public class PrivilegeService {
         privilege.setIsDisplay(privilege.getIsDisplay() == null ? 0 : privilege.getIsDisplay());
         if ("controller".equals(type)) {
             if (privilege.getParentId() == null || privilege.getParentId() <= 0) {
-                return JsonResponse.error("控制器必须选择上级菜单", null, "", 2000);
+                return JsonResponse.error("控制器必须选择上级菜单");
             }
             if (!StringUtils.hasText(privilege.getController())) {
-                return JsonResponse.error("控制器名称不能为空", null, "", 2000);
+                return JsonResponse.error("控制器名称不能为空");
             }
             if (!StringUtils.hasText(privilege.getAction())) {
-                return JsonResponse.error("方法名称不能为空", null, "", 2000);
+                return JsonResponse.error("方法名称不能为空");
             }
             privilege.setController(privilege.getController().trim());
             privilege.setAction(privilege.getAction().trim());

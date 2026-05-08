@@ -46,12 +46,12 @@ public class LinkService {
         link.setCreateTime(now);
         link.setUpdateTime(now);
         linkMapper.insert(link);
-        return JsonResponse.success("添加链接成功", null, "/system/link/list", 2000);
+        return JsonResponse.success("添加链接成功", "/system/link/list");
     }
 
     public JsonResponse<Void> update(Link link) {
         if (link.getLinkId() == null || findById(link.getLinkId()) == null) {
-            return JsonResponse.error("链接不存在。", null, "", 2000);
+            return JsonResponse.error("链接不存在。");
         }
         JsonResponse<Void> validation = validate(link, link.getLinkId());
         if (validation != null) {
@@ -59,38 +59,38 @@ public class LinkService {
         }
         link.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
         linkMapper.update(link);
-        return JsonResponse.success("修改链接成功", null, "/system/link/list", 2000);
+        return JsonResponse.success("修改链接成功", "/system/link/list");
     }
 
     public JsonResponse<Void> delete(Integer linkId) {
         if (findById(linkId) == null) {
-            return JsonResponse.error("链接不存在。", null, "", 2000);
+            return JsonResponse.error("链接不存在。");
         }
         linkMapper.deleteById(linkId);
-        return JsonResponse.success("删除链接成功", null, "/system/link/list", 2000);
+        return JsonResponse.success("删除链接成功", "/system/link/list");
     }
 
     private JsonResponse<Void> validate(Link link, Integer currentId) {
         if (link == null) {
-            return JsonResponse.error("链接参数错误。", null, "", 2000);
+            return JsonResponse.error("链接参数错误。");
         }
         if (!StringUtils.hasText(link.getName())) {
-            return JsonResponse.error("链接名称不能为空。", null, "", 2000);
+            return JsonResponse.error("链接名称不能为空。");
         }
         if (!StringUtils.hasText(link.getUrl())) {
-            return JsonResponse.error("链接地址不能为空。", null, "", 2000);
+            return JsonResponse.error("链接地址不能为空。");
         }
         try {
             java.net.URI uri = java.net.URI.create(link.getUrl().trim());
             if (uri.getScheme() == null || (!"http".equalsIgnoreCase(uri.getScheme()) && !"https".equalsIgnoreCase(uri.getScheme()))) {
-                return JsonResponse.error("链接地址格式不正确。", null, "", 2000);
+                return JsonResponse.error("链接地址格式不正确。");
             }
         } catch (Exception ex) {
-            return JsonResponse.error("链接地址格式不正确。", null, "", 2000);
+            return JsonResponse.error("链接地址格式不正确。");
         }
         long duplicate = currentId == null ? linkMapper.countByName(link.getName().trim()) : linkMapper.countByNameAndNotId(currentId, link.getName().trim());
         if (duplicate > 0) {
-            return JsonResponse.error("链接名称已经存在。", null, "", 2000);
+            return JsonResponse.error("链接名称已经存在。");
         }
         link.setName(link.getName().trim());
         link.setUrl(link.getUrl().trim());

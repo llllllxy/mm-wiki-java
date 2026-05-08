@@ -27,7 +27,7 @@ public class PluginService {
     }
 
     public JsonResponse<Void> updateConfig(Integer pluginId, String confValue) {
-        return JsonResponse.error("当前数据库脚本未包含插件表，插件配置暂不可用", null, "/system/plugin/list", 2000);
+        return JsonResponse.error("当前数据库脚本未包含插件表，插件配置暂不可用", "/system/plugin/list");
     }
 
     public record PluginPage(List<PluginEntry> plugins, String keyword, Paginator paginator) {
