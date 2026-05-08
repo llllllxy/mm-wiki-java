@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -16,8 +15,6 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.util.WebUtils;
-import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
@@ -26,7 +23,6 @@ import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
-import org.tinycloud.mmwiki.util.HashUtils;
 import org.tinycloud.mmwiki.util.IpUtils;
 
 /**
@@ -42,7 +38,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     public static final String CURRENT_USER_ATTR = "currentUser";
 
     private final UserService userService;
-    private final MmwikiProperties properties;
     private final ObjectMapper objectMapper;
     private final PrivilegeMapper privilegeMapper;
     private final RolePrivilegeMapper rolePrivilegeMapper;
@@ -50,14 +45,12 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     public AuthInterceptor(
             UserService userService,
-            MmwikiProperties properties,
             ObjectMapper objectMapper,
             PrivilegeMapper privilegeMapper,
             RolePrivilegeMapper rolePrivilegeMapper,
             LogMapper logMapper
     ) {
         this.userService = userService;
-        this.properties = properties;
         this.objectMapper = objectMapper;
         this.privilegeMapper = privilegeMapper;
         this.rolePrivilegeMapper = rolePrivilegeMapper;
@@ -73,27 +66,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         Object sessionValue = session.getAttribute(SESSION_AUTHOR);
         if (!(sessionValue instanceof CurrentUser currentUser)) {
-            return handleUnauthenticated(request, response);
-        }
-
-        var cookie = WebUtils.getCookie(request, properties.getAuthor().getPassport());
-        if (cookie == null || cookie.getValue() == null || cookie.getValue().isBlank()) {
-            return handleUnauthenticated(request, response);
-        }
-
-        String[] parts = decodePassport(cookie.getValue());
-        if (parts == null || parts.length != 2) {
-            return handleUnauthenticated(request, response);
-        }
-
-        if (!currentUser.getUsername().equals(parts[0])) {
-            return handleUnauthenticated(request, response);
-        }
-
-        String expectedIdentify = HashUtils.md5(
-                request.getHeader("User-Agent") + IpUtils.getClientIp(request) + currentUser.getPasswordHash()
-        );
-        if (!expectedIdentify.equals(parts[1])) {
             return handleUnauthenticated(request, response);
         }
 
@@ -134,15 +106,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
     }
 
-    private String[] decodePassport(String value) {
-        try {
-            String decoded = new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
-            return decoded.split("@", 2);
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
     private boolean handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (isAjax(request)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -150,7 +113,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             objectMapper.writeValue(
                     response.getWriter(),
-                    JsonResponse.error("未登录或登录已失效！", null, "/author/index", 2000)
+                    JsonResponse.error("未登录或登录已失效！", "/author/index")
             );
             return false;
         }
@@ -191,7 +154,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             objectMapper.writeValue(
                     response.getWriter(),
-                    JsonResponse.error("抱歉，您没有权限操作！", null, "/system/main/index", 2000)
+                    JsonResponse.error("抱歉，您没有权限操作！", "/system/main/index")
             );
             return false;
         }

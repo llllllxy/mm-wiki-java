@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * MM-Wiki Spring 配置类。
+ * MM-Wiki 自定义配置类映射
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -12,12 +12,10 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "mmwiki")
 @Component
 public class MmwikiProperties {
-
     private String version = "v0.2.1-java-migration";
-    private String copyright = "2018 phachon";
+    private String copyright = "2026 tinycloud";
     private String systemNameFallback = "Markdown Mini Wiki";
     private String documentRootDir = "./data";
-    private Author author = new Author();
     private Search search = new Search();
 
     public String getVersion() {
@@ -52,41 +50,12 @@ public class MmwikiProperties {
         this.documentRootDir = documentRootDir;
     }
 
-    public Author getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Author author) {
-        this.author = author;
-    }
-
     public Search getSearch() {
         return search;
     }
 
     public void setSearch(Search search) {
         this.search = search;
-    }
-
-    public static class Author {
-        private String passport = "mmwikipassport";
-        private int cookieExpired = 72000;
-
-        public String getPassport() {
-            return passport;
-        }
-
-        public void setPassport(String passport) {
-            this.passport = passport;
-        }
-
-        public int getCookieExpired() {
-            return cookieExpired;
-        }
-
-        public void setCookieExpired(int cookieExpired) {
-            this.cookieExpired = cookieExpired;
-        }
     }
 
     public static class Search {
