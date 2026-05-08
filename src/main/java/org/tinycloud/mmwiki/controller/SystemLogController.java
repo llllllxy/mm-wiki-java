@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +18,8 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 @Controller
 public class SystemLogController extends ControllerSupport {
 
-    private final LogService logService;
-
-    public SystemLogController(LogService logService) {
-        this.logService = logService;
-    }
+    @Autowired
+    private LogService logService;
 
     @GetMapping("/system/log/system")
     public String system(

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.tinycloud.mmwiki.service.AuthService;
+import org.tinycloud.mmwiki.service.InstallService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
@@ -23,14 +25,16 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @RequestMapping("/author")
 public class AuthorController extends ControllerSupport {
 
-    private final AuthService authService;
-
-    public AuthorController(AuthService authService) {
-        this.authService = authService;
-    }
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private InstallService installService;
 
     @GetMapping({"", "/", "/index"})
     public String index(Model model) {
+        if (!installService.installed()) {
+            return "redirect:/install/index";
+        }
         model.addAttribute("sso_open", authService.isSsoOpen() ? "1" : "0");
         return "author/index";
     }

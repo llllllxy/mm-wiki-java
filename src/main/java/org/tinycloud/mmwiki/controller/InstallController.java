@@ -1,14 +1,21 @@
-package org.tinycloud.mmwiki.controller;
+﻿package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.InstallData;
+import org.tinycloud.mmwiki.service.InstallService;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 安装向导页面与接口控制器。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -16,89 +23,227 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class InstallController {
 
+    @Autowired
+    private InstallService installService;
+
+    /**
+     * 安装欢迎页。
+     */
     @GetMapping({"/install", "/install/", "/install/index"})
     public String index(Model model) {
-        model.addAttribute("step", "欢迎");
-        model.addAttribute("message", "当前 Spring Boot 迁移版已使用 application.yaml 管理配置。若数据库已经导入，可直接启动系统使用。");
-        model.addAttribute("nextUrl", "/install/license");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        return "install/index";
     }
 
+    /**
+     * 许可协议页。
+     */
     @GetMapping("/install/license")
     public String license(Model model) {
-        model.addAttribute("step", "许可协议");
-        model.addAttribute("message", "MM-Wiki 使用 MIT License。迁移版保留原项目协议与数据库结构。");
-        model.addAttribute("nextUrl", "/install/env");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        model.addAttribute("license", installService.licenseText());
+        model.addAttribute("license_agree", installService.data().getLicense());
+        return "install/license";
     }
 
+    /**
+     * 保存许可协议确认结果。
+     */
     @PostMapping("/install/license")
     @ResponseBody
-    public JsonResponse<Void> acceptLicense() {
-        return JsonResponse.success("", null, "/install/env", 500);
+    public JsonResponse<Void> acceptLicense(@RequestParam(value = "license_agree", defaultValue = "0") String agree) {
+        if (installService.installed()) {
+            return JsonResponse.error("系统已经安装完成，不能重复安装", null, "/author/index", 1000);
+        }
+        if (!"1".equals(agree)) {
+            return JsonResponse.error("请先同意协议后再继续", null, "", 2000);
+        }
+        installService.data().setLicense(InstallData.LICENSE_AGREE);
+        return JsonResponse.success("", null, "/install/env", 300);
     }
 
+    /**
+     * 环境检测页。
+     */
     @GetMapping("/install/env")
     public String env(Model model) {
-        model.addAttribute("step", "环境检测");
-        model.addAttribute("message", "Java 21、Spring Boot、MySQL 与 Thymeleaf 环境由当前工程管理；请确认 application.yaml 中数据库与文档目录配置正确。");
-        model.addAttribute("nextUrl", "/install/config");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        InstallService.EnvView view = installService.envView();
+        model.addAttribute("server", view.server());
+        model.addAttribute("envData", view.envData());
+        model.addAttribute("dirData", view.dirData());
+        return "install/env";
     }
 
+    /**
+     * 保存环境检测确认。
+     */
     @PostMapping("/install/env")
     @ResponseBody
     public JsonResponse<Void> acceptEnv() {
-        return JsonResponse.success("", null, "/install/config", 500);
+        if (installService.data().getEnv() == InstallData.ENV_NOT_ACCESS) {
+            return JsonResponse.error("环境检测未通过", null, "", 2000);
+        }
+        installService.data().setEnv(InstallData.ENV_ACCESS);
+        return JsonResponse.success("", null, "/install/config", 300);
     }
 
+    /**
+     * 系统配置页。
+     */
     @GetMapping("/install/config")
     public String config(Model model) {
-        model.addAttribute("step", "系统配置");
-        model.addAttribute("message", "Go 版 .conf 配置已迁移到 Spring Boot application.yaml。请在该文件维护端口、文档目录、数据源和会话配置。");
-        model.addAttribute("nextUrl", "/install/database");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        model.addAttribute("sysConf", installService.data().getSystemConf());
+        return "install/config";
     }
 
+    /**
+     * 保存系统配置。
+     */
     @PostMapping("/install/config")
     @ResponseBody
-    public JsonResponse<Void> acceptConfig() {
-        return JsonResponse.success("", null, "/install/database", 500);
+    public JsonResponse<Void> acceptConfig(
+            @RequestParam("addr") String addr,
+            @RequestParam("port") String port,
+            @RequestParam("document_dir") String documentDir
+    ) {
+        String error = installService.saveSystemConfig(addr, port, documentDir);
+        if (!error.isBlank()) {
+            return JsonResponse.error(error, null, "", 2000);
+        }
+        return JsonResponse.success("", null, "/install/database", 300);
     }
 
+    /**
+     * 数据库配置页。
+     */
     @GetMapping("/install/database")
     public String database(Model model) {
-        model.addAttribute("step", "数据库配置");
-        model.addAttribute("message", "迁移版不在安装页自动覆盖数据库，避免误删现有数据。请手动导入 docs/databases/table.sql 与 data.sql。");
-        model.addAttribute("nextUrl", "/install/ready");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        model.addAttribute("databaseConf", installService.data().getDatabaseConf());
+        return "install/database";
     }
 
+    /**
+     * 保存数据库配置。
+     */
     @PostMapping("/install/database")
     @ResponseBody
-    public JsonResponse<Void> acceptDatabase() {
-        return JsonResponse.success("", null, "/install/ready", 500);
+    public JsonResponse<Void> acceptDatabase(
+            @RequestParam("host") String host,
+            @RequestParam("port") String port,
+            @RequestParam("name") String name,
+            @RequestParam("user") String user,
+            @RequestParam("pass") String pass,
+            @RequestParam("conn_max_idle") String connMaxIdle,
+            @RequestParam("conn_max_connection") String connMaxConnection,
+            @RequestParam("admin_name") String adminName,
+            @RequestParam("admin_pass") String adminPass
+    ) {
+        Map<String, String> conf = new LinkedHashMap<>();
+        conf.put("host", host);
+        conf.put("port", port);
+        conf.put("name", name);
+        conf.put("user", user);
+        conf.put("pass", pass);
+        conf.put("conn_max_idle", connMaxIdle);
+        conf.put("conn_max_connection", connMaxConnection);
+        conf.put("admin_name", adminName);
+        conf.put("admin_pass", adminPass);
+        String error = installService.saveDatabaseConfig(conf);
+        if (!error.isBlank()) {
+            return JsonResponse.error(error, null, "", 2000);
+        }
+        return JsonResponse.success("", null, "/install/ready", 300);
     }
 
+    /**
+     * 安装准备页。
+     */
     @GetMapping("/install/ready")
     public String ready(Model model) {
-        model.addAttribute("step", "准备完成");
-        model.addAttribute("message", "如果数据库和 application.yaml 已配置完成，可以进入系统登录页。");
-        model.addAttribute("nextUrl", "/author/index");
-        return "install/simple";
+        if (installed(model)) {
+            return "install/error";
+        }
+        InstallData data = installService.data();
+        model.addAttribute("readyConf", readyConf(data));
+        return "install/ready";
     }
 
+    /**
+     * 开始异步安装。
+     */
     @PostMapping("/install/ready")
     @ResponseBody
     public JsonResponse<Void> acceptReady() {
-        return JsonResponse.success("", null, "/author/index", 500);
+        String error = installService.startInstall();
+        if (!error.isBlank()) {
+            return JsonResponse.error(error, null, "", 2000);
+        }
+        return JsonResponse.success("", null, "/install/end", 300);
     }
 
-    @GetMapping({"/install/end", "/install/status"})
-    public String end(Model model) {
-        model.addAttribute("step", "安装完成");
-        model.addAttribute("message", "系统已切换为 Spring Boot 迁移版，请使用初始化管理员账号登录。");
-        model.addAttribute("nextUrl", "/author/index");
-        return "install/simple";
+    /**
+     * 安装结果页。
+     */
+    @GetMapping("/install/end")
+    public String end() {
+        if (installService.data().getStatus() == InstallData.INSTALL_READY && !installService.installed()) {
+            return "redirect:/install/ready";
+        }
+        return "install/end";
+    }
+
+    /**
+     * 安装状态轮询接口。
+     */
+    @PostMapping("/install/status")
+    @ResponseBody
+    public JsonResponse<Map<String, Object>> status() {
+        InstallData data = installService.data();
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("status", data.getStatus());
+        status.put("is_success", data.getIsSuccess());
+        status.put("result", data.getResult());
+        return JsonResponse.success("ok", status, "", 300);
+    }
+
+    private boolean installed(Model model) {
+        if (!installService.installed()) {
+            return false;
+        }
+        model.addAttribute("message", "系统已经安装完成，不能重复安装。如需重新安装，请先停止服务、备份数据，并手动删除 install.lock。");
+        model.addAttribute("redirect", "/author/index");
+        model.addAttribute("sleep", 3000);
+        return true;
+    }
+
+    private java.util.List<Map<String, Object>> readyConf(InstallData data) {
+        return java.util.List.of(
+                readyRow("许可协议", data.getLicense() == InstallData.LICENSE_AGREE ? "同意" : "未同意", data.getLicense() == InstallData.LICENSE_AGREE, "/install/license"),
+                readyRow("环境检测", data.getEnv() == InstallData.ENV_ACCESS ? "通过" : "未通过", data.getEnv() == InstallData.ENV_ACCESS, "/install/env"),
+                readyRow("系统配置", data.getSystem() == InstallData.SYS_ACCESS ? "完成" : "未完成", data.getSystem() == InstallData.SYS_ACCESS, "/install/config"),
+                readyRow("数据库配置", data.getDatabase() == InstallData.DATABASE_ACCESS ? "完成" : "未完成", data.getDatabase() == InstallData.DATABASE_ACCESS, "/install/database")
+        );
+    }
+
+    private Map<String, Object> readyRow(String name, String value, boolean ok, String url) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("name", name);
+        row.put("value", value);
+        row.put("result", ok ? "1" : "0");
+        row.put("url", url);
+        return row;
     }
 }

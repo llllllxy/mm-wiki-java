@@ -2,6 +2,8 @@ package org.tinycloud.mmwiki.service;
 
 import java.time.Instant;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +22,14 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Service
 public class PrivilegeService {
 
-    private final PrivilegeMapper privilegeMapper;
-    private final RolePrivilegeMapper rolePrivilegeMapper;
-    private final String mode;
+    @Autowired
+    private PrivilegeMapper privilegeMapper;
 
-    public PrivilegeService(
-        PrivilegeMapper privilegeMapper,
-        RolePrivilegeMapper rolePrivilegeMapper,
-        @Value("${spring.profiles.active:dev}") String mode
-    ) {
-        this.privilegeMapper = privilegeMapper;
-        this.rolePrivilegeMapper = rolePrivilegeMapper;
-        this.mode = mode == null || mode.isBlank() ? "dev" : mode;
-    }
+    @Autowired
+    private RolePrivilegeMapper rolePrivilegeMapper;
+
+    @Value("${spring.profiles.active:dev}")
+    private String mode;
 
     public PrivilegeGroups groups() {
         List<Privilege> all = privilegeMapper.findAllOrderBySequence();
@@ -47,11 +44,11 @@ public class PrivilegeService {
     }
 
     public String mode() {
-        return mode;
+        return mode == null || mode.isBlank() ? "dev" : mode;
     }
 
     public boolean devMode() {
-        return mode.toLowerCase().contains("dev");
+        return mode().toLowerCase().contains("dev");
     }
 
     public JsonResponse<Void> save(Privilege privilege) {

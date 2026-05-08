@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +21,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemLinkController extends ControllerSupport {
 
-    private final LinkService linkService;
-
-    public SystemLinkController(LinkService linkService) {
-        this.linkService = linkService;
-    }
+    @Autowired
+    private LinkService linkService;
 
     @GetMapping("/system/link/list")
     public String list(

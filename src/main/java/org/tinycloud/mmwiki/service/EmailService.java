@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -37,28 +38,18 @@ public class EmailService {
     private static final String DOCUMENT_NOTICE_TEMPLATE = "system/email/template";
     private static final String TEST_NOTICE_TEMPLATE = "system/email/template_test";
 
-    private final EmailMapper emailMapper;
-    private final FollowMapper followMapper;
-    private final UserMapper userMapper;
-    private final ConfigService configService;
-    private final TemplateEngine templateEngine;
-    private final MmwikiProperties properties;
-
-    public EmailService(
-            EmailMapper emailMapper,
-            FollowMapper followMapper,
-            UserMapper userMapper,
-            ConfigService configService,
-            TemplateEngine templateEngine,
-            MmwikiProperties properties
-    ) {
-        this.emailMapper = emailMapper;
-        this.followMapper = followMapper;
-        this.userMapper = userMapper;
-        this.configService = configService;
-        this.templateEngine = templateEngine;
-        this.properties = properties;
-    }
+    @Autowired
+    private EmailMapper emailMapper;
+    @Autowired
+    private FollowMapper followMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private TemplateEngine templateEngine;
+    @Autowired
+    private MmwikiProperties properties;
 
     /**
      * 按名称模糊查询邮件服务器配置。

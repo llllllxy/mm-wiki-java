@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +20,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemConfigController extends ControllerSupport {
 
-    private final SystemConfigService systemConfigService;
-
-    public SystemConfigController(SystemConfigService systemConfigService) {
-        this.systemConfigService = systemConfigService;
-    }
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     @GetMapping("/system/config/global")
     public String global(Model model) {

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,13 +23,10 @@ public class AttachmentService {
     public static final int SOURCE_ATTACHMENT = 0;
     public static final int SOURCE_IMAGE = 1;
 
-    private final AttachmentMapper attachmentMapper;
-    private final DocumentFileService documentFileService;
-
-    public AttachmentService(AttachmentMapper attachmentMapper, DocumentFileService documentFileService) {
-        this.attachmentMapper = attachmentMapper;
-        this.documentFileService = documentFileService;
-    }
+    @Autowired
+    private AttachmentMapper attachmentMapper;
+    @Autowired
+    private DocumentFileService documentFileService;
 
     public List<Attachment> findByDocumentId(String documentId) {
         return attachmentMapper.findByDocumentId(documentId);

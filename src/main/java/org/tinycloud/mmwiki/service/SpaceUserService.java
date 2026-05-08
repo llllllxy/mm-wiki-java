@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,8 @@ import org.tinycloud.mmwiki.mapper.SpaceUserMapper;
 @Service
 public class SpaceUserService {
 
-    private final SpaceUserMapper spaceUserMapper;
-
-    public SpaceUserService(SpaceUserMapper spaceUserMapper) {
-        this.spaceUserMapper = spaceUserMapper;
-    }
+    @Autowired
+    private SpaceUserMapper spaceUserMapper;
 
     public List<SpaceUser> findByUserId(Integer userId) {
         return spaceUserMapper.findByUserId(userId);

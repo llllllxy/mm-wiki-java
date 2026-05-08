@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,11 +19,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class FollowController extends ControllerSupport {
 
-    private final FollowService followService;
-
-    public FollowController(FollowService followService) {
-        this.followService = followService;
-    }
+    @Autowired
+    private FollowService followService;
 
     @PostMapping("/follow/add")
     @ResponseBody

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,25 +30,16 @@ public class SystemProfileService {
     private static final Pattern EMAIL_PATTERN =
         Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    private final UserService userService;
-    private final FollowService followService;
-    private final DocumentMapper documentMapper;
-    private final LogDocumentMapper logDocumentMapper;
-    private final ConfigService configService;
-
-    public SystemProfileService(
-        UserService userService,
-        FollowService followService,
-        DocumentMapper documentMapper,
-        LogDocumentMapper logDocumentMapper,
-        ConfigService configService
-    ) {
-        this.userService = userService;
-        this.followService = followService;
-        this.documentMapper = documentMapper;
-        this.logDocumentMapper = logDocumentMapper;
-        this.configService = configService;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private FollowService followService;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private LogDocumentMapper logDocumentMapper;
+    @Autowired
+    private ConfigService configService;
 
     /**
      * 加载个人中心首页资料与最近动态。

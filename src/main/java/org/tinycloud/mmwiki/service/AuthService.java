@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,15 +26,12 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Service
 public class AuthService {
 
-    private final UserService userService;
-    private final ConfigService configService;
-    private final MmwikiProperties properties;
-
-    public AuthService(UserService userService, ConfigService configService, MmwikiProperties properties) {
-        this.userService = userService;
-        this.configService = configService;
-        this.properties = properties;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private MmwikiProperties properties;
 
     /**
      * 判断系统是否开启统一登录。

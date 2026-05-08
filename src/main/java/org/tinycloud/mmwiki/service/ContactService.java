@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,10 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class ContactService {
 
-    private final ContactMapper contactMapper;
-    private final UserService userService;
-
-    public ContactService(ContactMapper contactMapper, UserService userService) {
-        this.contactMapper = contactMapper;
-        this.userService = userService;
-    }
+    @Autowired
+    private ContactMapper contactMapper;
+    @Autowired
+    private UserService userService;
 
     public List<Contact> findAll() {
         return contactMapper.findAll();

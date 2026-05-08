@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -23,13 +24,10 @@ public class UserService {
     private static final Pattern ALPHA_NUMERIC = Pattern.compile("^[A-Za-z0-9]+$");
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
-    private final UserMapper userMapper;
-    private final RoleService roleService;
-
-    public UserService(UserMapper userMapper, RoleService roleService) {
-        this.userMapper = userMapper;
-        this.roleService = roleService;
-    }
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private RoleService roleService;
 
     /**
      * 按用户名查询未删除用户。

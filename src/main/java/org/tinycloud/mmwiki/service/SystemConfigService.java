@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,22 +20,14 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Service
 public class SystemConfigService {
 
-    private final ConfigMapper configMapper;
-    private final MmwikiProperties properties;
-    private final EmailService emailService;
-    private final LoginAuthService loginAuthService;
-
-    public SystemConfigService(
-        ConfigMapper configMapper,
-        MmwikiProperties properties,
-        EmailService emailService,
-        LoginAuthService loginAuthService
-    ) {
-        this.configMapper = configMapper;
-        this.properties = properties;
-        this.emailService = emailService;
-        this.loginAuthService = loginAuthService;
-    }
+    @Autowired
+    private ConfigMapper configMapper;
+    @Autowired
+    private MmwikiProperties properties;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private LoginAuthService loginAuthService;
 
     public Map<String, String> loadConfigMap() {
         Map<String, String> values = new LinkedHashMap<>();

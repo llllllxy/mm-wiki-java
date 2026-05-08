@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +28,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class PageController extends ControllerSupport {
 
-    private final DocumentService documentService;
-
-    public PageController(DocumentService documentService) {
-        this.documentService = documentService;
-    }
+    @Autowired
+    private DocumentService documentService;
 
     @GetMapping("/page/view")
     public String view(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {

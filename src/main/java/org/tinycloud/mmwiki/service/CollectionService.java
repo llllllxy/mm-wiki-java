@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
@@ -18,11 +19,8 @@ public class CollectionService {
     public static final int TYPE_DOC = 1;
     public static final int TYPE_SPACE = 2;
 
-    private final CollectionMapper collectionMapper;
-
-    public CollectionService(CollectionMapper collectionMapper) {
-        this.collectionMapper = collectionMapper;
-    }
+    @Autowired
+    private CollectionMapper collectionMapper;
 
     public CollectionEntry findByUserTypeAndResourceId(Integer userId, int type, String resourceId) {
         return collectionMapper.findByUserTypeAndResourceId(userId, type, resourceId);

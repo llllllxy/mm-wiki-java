@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +17,8 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 @Controller
 public class SystemMainController extends ControllerSupport {
 
-    private final SystemService systemService;
-
-    public SystemMainController(SystemService systemService) {
-        this.systemService = systemService;
-    }
+    @Autowired
+    private SystemService systemService;
 
     @GetMapping("/system/main/index")
     public String index(HttpServletRequest request, Model model) {

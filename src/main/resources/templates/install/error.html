@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{install/layout :: head('MM-Wiki 安装-错误')}"></head>
+<body style="padding-top: 50px; overflow-y: auto">
+<div th:replace="~{install/layout :: nav}"></div>
+<br>
+<div class="container">
+    <div class="alert alert-danger center">
+        <h4><strong th:text="${message}">系统已经安装完成，不能重复安装。</strong></h4>
+        <p>页面即将自动跳转。</p>
+    </div>
+</div>
+<div th:replace="~{install/layout :: footer}"></div>
+<script th:inline="javascript">
+    setTimeout(function () {
+        window.location.href = [[${redirect != null ? redirect : '/author/index'
+    }]]
+        ;
+    }, [[${sleep != null ? sleep : 3000
+    }]])
+    ;
+</script>
+</body>
+</html>

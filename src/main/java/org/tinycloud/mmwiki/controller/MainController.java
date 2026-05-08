@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.stereotype.Controller;
@@ -20,11 +21,8 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 @Controller
 public class MainController extends ControllerSupport {
 
-    private final MainService mainService;
-
-    public MainController(MainService mainService) {
-        this.mainService = mainService;
-    }
+    @Autowired
+    private MainService mainService;
 
     @GetMapping({"/", "/main/index"})
     public String index(HttpServletRequest request, Model model) {

@@ -19,6 +19,10 @@ public final class HashUtils {
         return digest("MD5", text);
     }
 
+    public static String sha256(String text) {
+        return digest("SHA-256", text);
+    }
+
     private static String digest(String algorithm, String text) {
         try {
             MessageDigest digest = MessageDigest.getInstance(algorithm);
@@ -31,5 +35,9 @@ public final class HashUtils {
         } catch (NoSuchAlgorithmException ex) {
             throw new IllegalStateException("Missing digest algorithm: " + algorithm, ex);
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(sha256("123456"));
     }
 }

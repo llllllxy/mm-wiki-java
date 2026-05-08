@@ -41,9 +41,10 @@ var Install = {
 						//成功
 						$("#install_load").addClass("hidden");
 						$("#install_failed").addClass("hidden");
-						var res = eval('(' + response.data.result + ')');
-						$("#install_success span[data-name='success_env_cmd'] code").text("set CODEPUBENV="+res.env);
+                        var res = JSON.parse(response.data.result);
+                        $("#install_success span[data-name='success_env_cmd'] code").text(res.env ? "set CODEPUBENV=" + res.env : "");
 						$("#install_success span[data-name='success_run_cmd'] code").text(res.cmd);
+                        $("#install_success span[data-name='success_config'] code").text(res.config || "");
 						$("#install_success a[data-name='success_message']").text(res.url);
 						$("#install_success a[data-name='success_message']").attr('href', res.url);
 						$("#install_success").removeClass("hidden");

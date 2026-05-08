@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -19,11 +20,8 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class LoginAuthService {
 
-    private final LoginAuthMapper loginAuthMapper;
-
-    public LoginAuthService(LoginAuthMapper loginAuthMapper) {
-        this.loginAuthMapper = loginAuthMapper;
-    }
+    @Autowired
+    private LoginAuthMapper loginAuthMapper;
 
     public AuthPage list(String keyword, int page, int number) {
         int safePage = Math.max(1, page);

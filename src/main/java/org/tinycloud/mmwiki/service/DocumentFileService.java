@@ -6,6 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
@@ -25,10 +28,14 @@ public class DocumentFileService {
     public static final String DEFAULT_FILE_NAME = "README";
     public static final String PAGE_SUFFIX = ".md";
 
-    private final Path documentRootDir;
-    private final Path markdownRootDir;
+    private Path documentRootDir;
+    private Path markdownRootDir;
 
-    public DocumentFileService(MmwikiProperties properties) {
+    @Autowired
+    private MmwikiProperties properties;
+
+    @PostConstruct
+    public void init() {
         this.documentRootDir = Path.of(properties.getDocumentRootDir());
         this.markdownRootDir = this.documentRootDir.resolve("markdowns");
     }

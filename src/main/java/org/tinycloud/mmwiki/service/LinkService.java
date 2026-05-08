@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,11 +18,8 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class LinkService {
 
-    private final LinkMapper linkMapper;
-
-    public LinkService(LinkMapper linkMapper) {
-        this.linkMapper = linkMapper;
-    }
+    @Autowired
+    private LinkMapper linkMapper;
 
     public LinkPage list(String keyword, int page, int number) {
         int safePage = Math.max(1, page);

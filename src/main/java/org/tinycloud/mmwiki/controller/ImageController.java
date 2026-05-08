@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.nio.file.Files;
@@ -29,25 +30,16 @@ import org.tinycloud.mmwiki.web.EditorImageResponse;
 @Controller
 public class ImageController extends ControllerSupport {
 
-    private final DocumentService documentService;
-    private final SpaceService spaceService;
-    private final AccessService accessService;
-    private final AttachmentService attachmentService;
-    private final DocumentFileService documentFileService;
-
-    public ImageController(
-            DocumentService documentService,
-            SpaceService spaceService,
-            AccessService accessService,
-            AttachmentService attachmentService,
-            DocumentFileService documentFileService
-    ) {
-        this.documentService = documentService;
-        this.spaceService = spaceService;
-        this.accessService = accessService;
-        this.attachmentService = attachmentService;
-        this.documentFileService = documentFileService;
-    }
+    @Autowired
+    private DocumentService documentService;
+    @Autowired
+    private SpaceService spaceService;
+    @Autowired
+    private AccessService accessService;
+    @Autowired
+    private AttachmentService attachmentService;
+    @Autowired
+    private DocumentFileService documentFileService;
 
     @PostMapping("/image/upload")
     @ResponseBody

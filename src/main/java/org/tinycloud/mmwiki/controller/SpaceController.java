@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,15 +26,12 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SpaceController extends ControllerSupport {
 
-    private final SpaceService spaceService;
-    private final DocumentService documentService;
-    private final AccessService accessService;
-
-    public SpaceController(SpaceService spaceService, DocumentService documentService, AccessService accessService) {
-        this.spaceService = spaceService;
-        this.documentService = documentService;
-        this.accessService = accessService;
-    }
+    @Autowired
+    private SpaceService spaceService;
+    @Autowired
+    private DocumentService documentService;
+    @Autowired
+    private AccessService accessService;
 
     @GetMapping("/space/index")
     public String index(Model model) {

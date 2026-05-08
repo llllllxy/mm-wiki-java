@@ -4,7 +4,7 @@
 -- --------------------------------
 
 -- 手动安装时首先需要创建数据库
--- CREATE DATABASE IF NOT EXISTS mm_wiki DEFAULT CHARSET utf8;
+-- CREATE DATABASE IF NOT EXISTS mm_wiki DEFAULT CHARSET utf8mb4;
 
 -- --------------------------------
 -- 用户表
@@ -30,7 +30,7 @@ CREATE TABLE `mw_user` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 -- ---------------------------------------------------------------
 -- 系统角色表
@@ -44,7 +44,7 @@ CREATE TABLE `mw_role` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统角色表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统角色表';
 
 -- -------------------------------------------------------
 -- 系统权限表
@@ -64,7 +64,7 @@ CREATE TABLE `mw_privilege` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`privilege_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统权限表';
 
 -- ------------------------------------------------------------------
 -- 系统角色权限对应关系表
@@ -78,7 +78,7 @@ CREATE TABLE `mw_role_privilege` (
   PRIMARY KEY (`role_privilege_id`),
   KEY (`role_id`),
   KEY (`privilege_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统角色权限对应关系表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统角色权限对应关系表';
 
 -- --------------------------------
 -- 空间表
@@ -96,7 +96,7 @@ CREATE TABLE `mw_space` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`space_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='空间表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空间表';
 
 -- --------------------------------
 -- 空间成员表
@@ -113,7 +113,7 @@ CREATE TABLE `mw_space_user` (
   UNIQUE KEY (`user_id`, `space_id`),
   KEY (`user_id`),
   KEY (`space_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='空间成员表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空间成员表';
 
 -- --------------------------------
 -- 文档表
@@ -135,7 +135,7 @@ CREATE TABLE `mw_document` (
   PRIMARY KEY (`document_id`),
   KEY (`parent_id`),
   KEY (`space_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文档表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文档表';
 
 -- --------------------------------
 -- 用户收藏表
@@ -150,7 +150,7 @@ CREATE TABLE `mw_collection` (
   PRIMARY KEY (`collection_id`),
   KEY (`user_id`),
   UNIQUE key (`user_id`, `resource_id`, `type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户收藏表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户收藏表';
 
 -- --------------------------------
 -- 用户关注表
@@ -166,7 +166,7 @@ CREATE TABLE `mw_follow` (
   KEY (`user_id`),
   KEY (`object_id`),
   UNIQUE key (`user_id`, `object_id`, `type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户关注表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户关注表';
 
 -- --------------------------------
 -- 文档日志表
@@ -182,7 +182,7 @@ CREATE TABLE `mw_log_document` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   PRIMARY KEY (`log_document_id`),
   KEY (`document_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='文档日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文档日志表';
 
 -- --------------------------------
 -- 系统操作日志表
@@ -203,7 +203,7 @@ CREATE TABLE `mw_log` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   PRIMARY KEY (`log_id`),
   KEY (`level`, `username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统操作日志表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统操作日志表';
 
 -- --------------------------------
 -- 邮件服务器表
@@ -224,7 +224,7 @@ CREATE TABLE `mw_email` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`email_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='邮件服务器表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='邮件服务器表';
 
 -- --------------------------------
 -- 快捷链接表
@@ -238,7 +238,7 @@ CREATE TABLE `mw_link` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`link_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='快捷链接表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='快捷链接表';
 
 -- --------------------------------
 -- 统一登录认证表
@@ -255,7 +255,7 @@ CREATE TABLE `mw_login_auth` (
   `create_time` int(11) NOT NULL COMMENT '创建时间',
   `update_time` int(11) NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`login_auth_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='统一登录认证表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统一登录认证表';
 
 -- --------------------------------
 -- 全局配置表
@@ -270,7 +270,7 @@ CREATE TABLE `mw_config` (
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`config_id`),
   unique KEY (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='全局配置表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='全局配置表';
 
 -- --------------------------------
 -- 系统联系人表
@@ -285,7 +285,7 @@ CREATE TABLE `mw_contact` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`contact_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='联系人表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='联系人表';
 
 -- --------------------------------
 -- 附件信息表
@@ -302,4 +302,33 @@ CREATE TABLE `mw_attachment` (
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`attachment_id`),
   KEY (`document_id`, `source`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='附件信息表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='附件信息表';
+
+
+
+-- --------------------------------
+-- spring_session相关表
+-- --------------------------------
+CREATE TABLE `spring_session`
+(
+    `PRIMARY_ID`            char(36) NOT NULL,
+    `SESSION_ID`            char(36) NOT NULL,
+    `CREATION_TIME`         bigint(20) NOT NULL,
+    `LAST_ACCESS_TIME`      bigint(20) NOT NULL,
+    `MAX_INACTIVE_INTERVAL` int(11) NOT NULL,
+    `EXPIRY_TIME`           bigint(20) NOT NULL,
+    `PRINCIPAL_NAME`        varchar(100) DEFAULT NULL,
+    PRIMARY KEY (`PRIMARY_ID`),
+    UNIQUE KEY `SPRING_SESSION_IX1` (`SESSION_ID`),
+    KEY                     `SPRING_SESSION_IX2` (`EXPIRY_TIME`),
+    KEY                     `SPRING_SESSION_IX3` (`PRINCIPAL_NAME`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE `spring_session_attributes`
+(
+    `SESSION_PRIMARY_ID` char(36)     NOT NULL,
+    `ATTRIBUTE_NAME`     varchar(200) NOT NULL,
+    `ATTRIBUTE_BYTES`    blob         NOT NULL,
+    PRIMARY KEY (`SESSION_PRIMARY_ID`, `ATTRIBUTE_NAME`),
+    CONSTRAINT `SPRING_SESSION_ATTRIBUTES_FK` FOREIGN KEY (`SESSION_PRIMARY_ID`) REFERENCES `spring_session` (`PRIMARY_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;

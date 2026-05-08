@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.ConfigEntry;
@@ -14,11 +15,8 @@ import org.tinycloud.mmwiki.mapper.ConfigMapper;
 @Service
 public class ConfigService {
 
-    private final ConfigMapper configMapper;
-
-    public ConfigService(ConfigMapper configMapper) {
-        this.configMapper = configMapper;
-    }
+    @Autowired
+    private ConfigMapper configMapper;
 
     public String getValue(String key, String defaultValue) {
         String value = configMapper.findValueByKey(key);

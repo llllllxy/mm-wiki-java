@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
@@ -48,34 +49,22 @@ public class SpaceService {
     private static final Pattern INVALID_SPACE_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
     private static final int SPACE_MANAGER_PRIVILEGE = 2;
 
-    private final SpaceMapper spaceMapper;
-    private final DocumentMapper documentMapper;
-    private final CollectionService collectionService;
-    private final SpaceUserService spaceUserService;
-    private final UserService userService;
-    private final AccessService accessService;
-    private final DocumentFileService documentFileService;
-    private final AttachmentService attachmentService;
-
-    public SpaceService(
-        SpaceMapper spaceMapper,
-        DocumentMapper documentMapper,
-        CollectionService collectionService,
-        SpaceUserService spaceUserService,
-        UserService userService,
-        AccessService accessService,
-        DocumentFileService documentFileService,
-        AttachmentService attachmentService
-    ) {
-        this.spaceMapper = spaceMapper;
-        this.documentMapper = documentMapper;
-        this.collectionService = collectionService;
-        this.spaceUserService = spaceUserService;
-        this.userService = userService;
-        this.accessService = accessService;
-        this.documentFileService = documentFileService;
-        this.attachmentService = attachmentService;
-    }
+    @Autowired
+    private SpaceMapper spaceMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private CollectionService collectionService;
+    @Autowired
+    private SpaceUserService spaceUserService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AccessService accessService;
+    @Autowired
+    private DocumentFileService documentFileService;
+    @Autowired
+    private AttachmentService attachmentService;
 
     /**
      * 查询空间并在不存在时中断当前业务流程。

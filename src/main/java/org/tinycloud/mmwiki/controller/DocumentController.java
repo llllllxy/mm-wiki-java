@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,11 +22,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class DocumentController extends ControllerSupport {
 
-    private final DocumentService documentService;
-
-    public DocumentController(DocumentService documentService) {
-        this.documentService = documentService;
-    }
+    @Autowired
+    private DocumentService documentService;
 
     @GetMapping("/document/index")
     public String index(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {

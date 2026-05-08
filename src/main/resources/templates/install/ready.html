@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{install/layout :: head('MM-Wiki 安装-准备安装')}"></head>
+<body style="padding-top: 50px; overflow-y: auto">
+<div th:replace="~{install/layout :: nav}"></div>
+<br>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+            <div class="panel-body">
+                <div th:replace="~{install/layout :: steps('ready')}"></div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-9">
+            <div id="failedBox" style="margin-bottom: 0; margin-top: 10px;" class="hide"></div>
+            <div class="panel-body">
+                <div class="row">
+                    <form class="form-horizontal" method="post" action="/install/ready">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><strong><i class="fa fa-hourglass-start"></i> 安装准备</strong>
+                            </div>
+                            <div class="panel-body"></div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th class="w15p">准备项</th>
+                                        <th>准备结果</th>
+                                        <th class="w11p">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="ready : ${readyConf}">
+                                        <td class="center" th:text="${ready.name}">准备项</td>
+                                        <td class="center">
+                                            <span th:text="${ready.value}">完成</span>
+                                            <i th:class="${ready.result == '1'} ? 'glyphicon glyphicon-ok text-success' : 'glyphicon glyphicon-remove text-danger'"></i>
+                                        </td>
+                                        <td class="center">
+                                            <i class="glyphicon glyphicon-pencil"></i><a th:href="${ready.url}">查看</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="panel-footer"></div>
+                        </div>
+                        <div class="center">
+                            <a href="/install/database">
+                                <button type="button" class="btn btn-warning">上一步</button>
+                            </a>
+                            <button type="button" onclick="Install.Submit(this.form, $(this))" class="btn btn-primary">
+                                开始安装
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{install/layout :: footer}"></div>
+</body>
+</html>

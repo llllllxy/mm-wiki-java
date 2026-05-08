@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -22,13 +23,10 @@ public class FollowService {
     public static final int TYPE_DOC = 1;
     public static final int TYPE_USER = 2;
 
-    private final FollowMapper followMapper;
-    private final ConfigService configService;
-
-    public FollowService(FollowMapper followMapper, ConfigService configService) {
-        this.followMapper = followMapper;
-        this.configService = configService;
-    }
+    @Autowired
+    private FollowMapper followMapper;
+    @Autowired
+    private ConfigService configService;
 
     public void autoFollowDocument(Integer userId, String documentId) {
         if (!"1".equals(configService.getValue("auto_follow_doc_open", "0"))) {

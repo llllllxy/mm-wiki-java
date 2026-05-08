@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{install/layout :: head('MM-Wiki 安装-许可协议')}"></head>
+<body style="padding-top: 50px; overflow-y: auto">
+<div th:replace="~{install/layout :: nav}"></div>
+<br>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+            <div class="panel-body">
+                <div th:replace="~{install/layout :: steps('license')}"></div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-9">
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>阅读许可协议</strong></div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label>本软件遵循 MIT 开源协议</label>
+                            <pre th:text="${license}">MIT License</pre>
+                        </div>
+                        <form class="form-inline" action="/install/license" method="post">
+                            <div class="col-md-offset-8 pull-right">
+                                <label><input type="checkbox" name="license_agree" value="1"
+                                              th:checked="${license_agree == 1}"> <strong class="text-danger">我已阅读并同意使用该协议</strong></label>
+                                &nbsp;&nbsp;
+                                <button type="button" onclick="Install.Submit(this.form, $(this))"
+                                        class="btn btn-primary">继续
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{install/layout :: footer}"></div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +27,10 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Controller
 public class SystemUserController extends ControllerSupport {
 
-    private final UserService userService;
-    private final RoleService roleService;
-
-    public SystemUserController(UserService userService, RoleService roleService) {
-        this.userService = userService;
-        this.roleService = roleService;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
     @GetMapping("/system/user/list")
     public String list(

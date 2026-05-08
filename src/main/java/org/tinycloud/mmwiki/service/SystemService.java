@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -46,13 +47,10 @@ public class SystemService {
         "plugin/list"
     );
 
-    private final PrivilegeMapper privilegeMapper;
-    private final RolePrivilegeMapper rolePrivilegeMapper;
-
-    public SystemService(PrivilegeMapper privilegeMapper, RolePrivilegeMapper rolePrivilegeMapper) {
-        this.privilegeMapper = privilegeMapper;
-        this.rolePrivilegeMapper = rolePrivilegeMapper;
-    }
+    @Autowired
+    private PrivilegeMapper privilegeMapper;
+    @Autowired
+    private RolePrivilegeMapper rolePrivilegeMapper;
 
     public List<MenuGroup> loadMenuGroups(CurrentUser currentUser) {
         List<Privilege> displayed = privilegeMapper.findDisplayed();

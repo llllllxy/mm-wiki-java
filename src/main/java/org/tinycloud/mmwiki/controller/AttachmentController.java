@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,25 +35,16 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class AttachmentController extends ControllerSupport {
 
-    private final DocumentService documentService;
-    private final SpaceService spaceService;
-    private final AccessService accessService;
-    private final AttachmentService attachmentService;
-    private final DocumentFileService documentFileService;
-
-    public AttachmentController(
-        DocumentService documentService,
-        SpaceService spaceService,
-        AccessService accessService,
-        AttachmentService attachmentService,
-        DocumentFileService documentFileService
-    ) {
-        this.documentService = documentService;
-        this.spaceService = spaceService;
-        this.accessService = accessService;
-        this.attachmentService = attachmentService;
-        this.documentFileService = documentFileService;
-    }
+    @Autowired
+    private DocumentService documentService;
+    @Autowired
+    private SpaceService spaceService;
+    @Autowired
+    private AccessService accessService;
+    @Autowired
+    private AttachmentService attachmentService;
+    @Autowired
+    private DocumentFileService documentFileService;
 
     @GetMapping("/attachment/page")
     public String page(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) {

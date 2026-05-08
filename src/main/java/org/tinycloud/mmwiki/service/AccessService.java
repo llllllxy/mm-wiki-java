@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
@@ -18,11 +19,8 @@ public class AccessService {
     public static final int SPACE_EDITOR = 1;
     public static final int SPACE_MANAGER = 2;
 
-    private final SpaceUserService spaceUserService;
-
-    public AccessService(SpaceUserService spaceUserService) {
-        this.spaceUserService = spaceUserService;
-    }
+    @Autowired
+    private SpaceUserService spaceUserService;
 
     public Access access(CurrentUser currentUser, Space space) {
         if (currentUser == null || space == null) {

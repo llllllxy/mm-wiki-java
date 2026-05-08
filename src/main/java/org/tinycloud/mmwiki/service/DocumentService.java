@@ -15,12 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -51,46 +53,44 @@ public class DocumentService {
     private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.systemDefault());
     private static final Pattern INVALID_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
 
-    private final DocumentMapper documentMapper;
-    private final SpaceService spaceService;
-    private final AccessService accessService;
-    private final UserService userService;
-    private final CollectionService collectionService;
-    private final DocumentFileService documentFileService;
-    private final ConfigService configService;
-    private final LogDocumentMapper logDocumentMapper;
-    private final AttachmentService attachmentService;
-    private final FollowService followService;
-    private final EmailService emailService;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
 
-    public DocumentService(
-        DocumentMapper documentMapper,
-        SpaceService spaceService,
-        AccessService accessService,
-        UserService userService,
-        CollectionService collectionService,
-        DocumentFileService documentFileService,
-        ConfigService configService,
-        LogDocumentMapper logDocumentMapper,
-        AttachmentService attachmentService,
-        FollowService followService,
-        EmailService emailService,
-        ObjectMapper objectMapper
-    ) {
-        this.documentMapper = documentMapper;
-        this.spaceService = spaceService;
-        this.accessService = accessService;
-        this.userService = userService;
-        this.collectionService = collectionService;
-        this.documentFileService = documentFileService;
-        this.configService = configService;
-        this.logDocumentMapper = logDocumentMapper;
-        this.attachmentService = attachmentService;
-        this.followService = followService;
-        this.emailService = emailService;
-        this.objectMapper = objectMapper;
-    }
+    @Autowired
+    private SpaceService spaceService;
+
+    @Autowired
+    private AccessService accessService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CollectionService collectionService;
+
+    @Autowired
+    private DocumentFileService documentFileService;
+
+    @Autowired
+    private ConfigService configService;
+
+    @Autowired
+    private LogDocumentMapper logDocumentMapper;
+
+    @Autowired
+    private AttachmentService attachmentService;
+
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ThreadPoolTaskExecutor asyncServiceExecutor;
 
     /**
      * 按文档 ID 查询未删除的文档。
@@ -354,7 +354,7 @@ public class DocumentService {
             followService.followDocument(currentUser.getUserId(), documentId);
         }
         if (noticeUsers) {
-            CompletableFuture.runAsync(() -> emailService.sendDocumentUpdateNotice(document, currentUser.getUsername(), content, comment, documentUrl));
+            asyncServiceExecutor.execute(() -> emailService.sendDocumentUpdateNotice(document, currentUser.getUsername(), content, comment, documentUrl));
         }
 
         return JsonResponse.success("文档修改成功", null, "/document/index?document_id=" + documentId, 2000);

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,11 +22,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemEmailController extends ControllerSupport {
 
-    private final EmailService emailService;
-
-    public SystemEmailController(EmailService emailService) {
-        this.emailService = emailService;
-    }
+    @Autowired
+    private EmailService emailService;
 
     /**
      * 邮件服务器列表页。

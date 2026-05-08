@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -21,15 +22,12 @@ public class LogService {
 
     public static final int LEVEL_ERROR = 3;
 
-    private final LogMapper logMapper;
-    private final LogDocumentMapper logDocumentMapper;
-    private final UserMapper userMapper;
-
-    public LogService(LogMapper logMapper, LogDocumentMapper logDocumentMapper, UserMapper userMapper) {
-        this.logMapper = logMapper;
-        this.logDocumentMapper = logDocumentMapper;
-        this.userMapper = userMapper;
-    }
+    @Autowired
+    private LogMapper logMapper;
+    @Autowired
+    private LogDocumentMapper logDocumentMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     public SystemLogPage systemLogs(Integer level, String message, String username, int page, int number) {
         int safePage = Math.max(1, page);

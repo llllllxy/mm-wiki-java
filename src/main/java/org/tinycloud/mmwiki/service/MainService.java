@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -27,28 +28,18 @@ public class MainService {
 
     private static final int COLLECTION_TYPE_DOC = 1;
 
-    private final CollectionMapper collectionMapper;
-    private final DocumentMapper documentMapper;
-    private final LogDocumentMapper logDocumentMapper;
-    private final LinkMapper linkMapper;
-    private final ContactMapper contactMapper;
-    private final ConfigService configService;
-
-    public MainService(
-        CollectionMapper collectionMapper,
-        DocumentMapper documentMapper,
-        LogDocumentMapper logDocumentMapper,
-        LinkMapper linkMapper,
-        ContactMapper contactMapper,
-        ConfigService configService
-    ) {
-        this.collectionMapper = collectionMapper;
-        this.documentMapper = documentMapper;
-        this.logDocumentMapper = logDocumentMapper;
-        this.linkMapper = linkMapper;
-        this.contactMapper = contactMapper;
-        this.configService = configService;
-    }
+    @Autowired
+    private CollectionMapper collectionMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private LogDocumentMapper logDocumentMapper;
+    @Autowired
+    private LinkMapper linkMapper;
+    @Autowired
+    private ContactMapper contactMapper;
+    @Autowired
+    private ConfigService configService;
 
     public List<Document> loadCollectedDocuments(Integer userId) {
         List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(userId, COLLECTION_TYPE_DOC);

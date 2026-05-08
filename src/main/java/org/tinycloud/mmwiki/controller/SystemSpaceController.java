@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -29,11 +30,8 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Controller
 public class SystemSpaceController extends ControllerSupport {
 
-    private final SpaceService spaceService;
-
-    public SystemSpaceController(SpaceService spaceService) {
-        this.spaceService = spaceService;
-    }
+    @Autowired
+    private SpaceService spaceService;
 
     @GetMapping("/system/space/list")
     public String list(

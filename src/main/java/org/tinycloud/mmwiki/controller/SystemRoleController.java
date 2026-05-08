@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,15 +25,12 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Controller
 public class SystemRoleController extends ControllerSupport {
 
-    private final RoleService roleService;
-    private final PrivilegeService privilegeService;
-    private final UserService userService;
-
-    public SystemRoleController(RoleService roleService, PrivilegeService privilegeService, UserService userService) {
-        this.roleService = roleService;
-        this.privilegeService = privilegeService;
-        this.userService = userService;
-    }
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private PrivilegeService privilegeService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/system/role/list")
     public String list(

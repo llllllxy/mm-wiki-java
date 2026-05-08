@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{install/layout :: head('MM-Wiki 安装-安装完成')}"></head>
+<body style="padding-top: 50px; overflow-y: auto">
+<div th:replace="~{install/layout :: nav}"></div>
+<br>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas">
+            <div class="panel-body">
+                <div th:replace="~{install/layout :: steps('end')}"></div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-9">
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong><i class="fa fa-spinner fa-spin"></i> 安装中</strong></div>
+                    <div class="panel-body center">
+                        <div id="install_load">
+                            <img src="/static/images/install/loading1.gif"
+                                 style="padding-top: 70px;padding-bottom: 70px" alt="loading">
+                            <h5 class="text-danger"><strong>正在努力安装中，请耐心等待...</strong></h5>
+                        </div>
+                        <div id="install_success" class="hidden">
+                            <img src="/static/images/install/success.png" height="200" width="200" alt="success">
+                            <h5 class="text-success"><strong>恭喜安装成功！</strong></h5>
+                            <h5 class="text-success"><strong>配置文件：</strong><span
+                                    data-name="success_config"><code></code></span></h5>
+                            <h5 class="text-success"><strong>重启命令：</strong><span
+                                    data-name="success_run_cmd"><code></code></span></h5>
+                            <h5 class="text-success"><strong>访问地址：<a href="#" target="_blank"
+                                                                         data-name="success_message"></a></strong></h5>
+                            <h5 class="text-danger"><strong>请停止当前安装服务，然后在当前工作目录重新启动，新的
+                                config/application.yaml 才会生效。</strong></h5>
+                        </div>
+                        <div id="install_failed" class="hidden">
+                            <img src="/static/images/install/cry.png" height="200" width="200" alt="failed">
+                            <h5 class="text-danger"><strong>抱歉，安装失败，错误信息如下：</strong></h5>
+                            <h5 class="text-danger" data-name="error_message"></h5>
+                        </div>
+                    </div>
+                    <div class="panel-footer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{install/layout :: footer}"></div>
+<script type="text/javascript">
+    setInterval(function () {
+        Install.GetInstallStatus("/install/status");
+    }, 3000);
+</script>
+</body>
+</html>

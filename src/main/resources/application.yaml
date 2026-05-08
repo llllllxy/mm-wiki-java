@@ -9,14 +9,16 @@ server:
 spring:
   application:
     name: mmwiki
+  profiles:
+    active: prod
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/mm_wiki?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&sslMode=DISABLED
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 123654
+    url: jdbc:h2:mem:mmwiki_install;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
     hikari:
-      minimum-idle: 10
-      maximum-pool-size: 15
+      minimum-idle: 1
+      maximum-pool-size: 5
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
@@ -31,7 +33,7 @@ spring:
     store-type: jdbc
     timeout: 1800s
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
   # 设置上传文件大小
   servlet:
     multipart:
@@ -43,8 +45,6 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
 
-
-
 logging:
   file:
     name: logs/mm-wiki.log
@@ -53,6 +53,15 @@ mybatis:
   type-aliases-package: org.tinycloud.mmwiki.domain
   configuration:
     map-underscore-to-camel-case: true
+
+async:
+  executor:
+    thread:
+      core-pool-size: 2
+      max-pool-size: 8
+      keep-alive-seconds: 60
+      queue-capacity: 100
+      name-prefix: mmwiki-async-
 
 mmwiki:
   version: v0.2.1-java-migration

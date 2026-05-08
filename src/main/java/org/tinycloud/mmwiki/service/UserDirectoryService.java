@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -21,22 +22,14 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class UserDirectoryService {
 
-    private final UserService userService;
-    private final FollowService followService;
-    private final LogDocumentMapper logDocumentMapper;
-    private final DocumentMapper documentMapper;
-
-    public UserDirectoryService(
-        UserService userService,
-        FollowService followService,
-        LogDocumentMapper logDocumentMapper,
-        DocumentMapper documentMapper
-    ) {
-        this.userService = userService;
-        this.followService = followService;
-        this.logDocumentMapper = logDocumentMapper;
-        this.documentMapper = documentMapper;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private FollowService followService;
+    @Autowired
+    private LogDocumentMapper logDocumentMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
 
     public UserListPage listUsers(CurrentUser currentUser, String username, int page, int number) {
         int safePage = Math.max(1, page);

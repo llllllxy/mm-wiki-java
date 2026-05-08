@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import com.sun.management.OperatingSystemMXBean;
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -30,28 +31,18 @@ import org.tinycloud.mmwiki.mapper.UserMapper;
 public class StaticService {
 
     private final long startTime = Instant.now().getEpochSecond();
-    private final UserMapper userMapper;
-    private final SpaceMapper spaceMapper;
-    private final DocumentMapper documentMapper;
-    private final CollectionMapper collectionMapper;
-    private final FollowMapper followMapper;
-    private final LogMapper logMapper;
-
-    public StaticService(
-        UserMapper userMapper,
-        SpaceMapper spaceMapper,
-        DocumentMapper documentMapper,
-        CollectionMapper collectionMapper,
-        FollowMapper followMapper,
-        LogMapper logMapper
-    ) {
-        this.userMapper = userMapper;
-        this.spaceMapper = spaceMapper;
-        this.documentMapper = documentMapper;
-        this.collectionMapper = collectionMapper;
-        this.followMapper = followMapper;
-        this.logMapper = logMapper;
-    }
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private SpaceMapper spaceMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private CollectionMapper collectionMapper;
+    @Autowired
+    private FollowMapper followMapper;
+    @Autowired
+    private LogMapper logMapper;
 
     public Dashboard dashboard() {
         int todayStart = Math.toIntExact(LocalDate.now()

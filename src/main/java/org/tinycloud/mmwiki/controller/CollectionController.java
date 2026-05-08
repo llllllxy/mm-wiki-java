@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,11 +22,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @RequestMapping("/collection")
 public class CollectionController extends ControllerSupport {
 
-    private final CollectionService collectionService;
-
-    public CollectionController(CollectionService collectionService) {
-        this.collectionService = collectionService;
-    }
+    @Autowired
+    private CollectionService collectionService;
 
     @PostMapping("/add")
     @ResponseBody

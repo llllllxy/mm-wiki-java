@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +21,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemContactController extends ControllerSupport {
 
-    private final ContactService contactService;
-
-    public SystemContactController(ContactService contactService) {
-        this.contactService = contactService;
-    }
+    @Autowired
+    private ContactService contactService;
 
     @GetMapping("/system/contact/list")
     public String list(Model model) {

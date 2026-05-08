@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,15 +33,12 @@ public class RoleService {
     public static final int CUSTOM_ROLE_TYPE = 0;
     public static final List<Integer> DEFAULT_PRIVILEGE_IDS = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-    private final RoleMapper roleMapper;
-    private final RolePrivilegeMapper rolePrivilegeMapper;
-    private final UserMapper userMapper;
-
-    public RoleService(RoleMapper roleMapper, RolePrivilegeMapper rolePrivilegeMapper, UserMapper userMapper) {
-        this.roleMapper = roleMapper;
-        this.rolePrivilegeMapper = rolePrivilegeMapper;
-        this.userMapper = userMapper;
-    }
+    @Autowired
+    private RoleMapper roleMapper;
+    @Autowired
+    private RolePrivilegeMapper rolePrivilegeMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     public List<Role> findAllActive() {
         return roleMapper.findAllActive();

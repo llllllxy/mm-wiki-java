@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,11 +19,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemSpaceUserController extends ControllerSupport {
 
-    private final SpaceService spaceService;
-
-    public SystemSpaceUserController(SpaceService spaceService) {
-        this.spaceService = spaceService;
-    }
+    @Autowired
+    private SpaceService spaceService;
 
     @PostMapping("/system/space_user/save")
     @ResponseBody

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +21,8 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 @Controller
 public class SystemAuthController extends ControllerSupport {
 
-    private final LoginAuthService loginAuthService;
-
-    public SystemAuthController(LoginAuthService loginAuthService) {
-        this.loginAuthService = loginAuthService;
-    }
+    @Autowired
+    private LoginAuthService loginAuthService;
 
     @GetMapping("/system/auth/list")
     public String list(
