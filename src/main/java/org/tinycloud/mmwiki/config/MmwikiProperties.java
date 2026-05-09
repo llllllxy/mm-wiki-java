@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MmwikiProperties {
     private String version = "v0.2.1-java-migration";
-    private String copyright = "2026 tinycloud";
+    private String copyright = "2026 MM-Wiki";
     private String systemNameFallback = "Markdown Mini Wiki";
     private String documentRootDir = "./data";
     private Search search = new Search();

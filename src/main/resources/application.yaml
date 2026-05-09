@@ -1,6 +1,10 @@
 server:
   port: 8081
   servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
     # 设置编码
     encoding:
       charset: UTF-8
@@ -66,8 +70,8 @@ async:
       name-prefix: mmwiki-async-
 
 mmwiki:
-  version: v0.2.1-java-migration
-  copyright: 2018 phachon
+  version: v0.2.1
+  copyright: 2026 TinyCloud
   system-name-fallback: Markdown Mini Wiki
   document-root-dir: ./data
   search:
