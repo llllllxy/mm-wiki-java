@@ -1,7 +1,15 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.vo.Dashboard;
+import org.tinycloud.mmwiki.vo.Monitor;
+import org.tinycloud.mmwiki.vo.TopUser;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import com.sun.management.OperatingSystemMXBean;
+
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -11,6 +19,7 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.User;
@@ -46,18 +55,18 @@ public class StaticService {
 
     public Dashboard dashboard() {
         int todayStart = Math.toIntExact(LocalDate.now()
-            .atStartOfDay(ZoneId.systemDefault())
-            .toEpochSecond());
+                .atStartOfDay(ZoneId.systemDefault())
+                .toEpochSecond());
         return new Dashboard(
-            userMapper.countNormalUsers(),
-            userMapper.countForbiddenUsers(),
-            spaceMapper.countAll(),
-            documentMapper.countActive(),
-            userMapper.countByLastTimeAfter(todayStart),
-            topUser(documentMapper.findTopCreateUserId()),
-            topUser(documentMapper.findTopEditUserId()),
-            topUser(collectionMapper.findTopUserIdByType(CollectionService.TYPE_DOC)),
-            topUser(followMapper.findTopObjectIdByType(FollowService.TYPE_USER))
+                userMapper.countNormalUsers(),
+                userMapper.countForbiddenUsers(),
+                spaceMapper.countAll(),
+                documentMapper.countActive(),
+                userMapper.countByLastTimeAfter(todayStart),
+                topUser(documentMapper.findTopCreateUserId()),
+                topUser(documentMapper.findTopEditUserId()),
+                topUser(collectionMapper.findTopUserIdByType(CollectionService.TYPE_DOC)),
+                topUser(followMapper.findTopObjectIdByType(FollowService.TYPE_USER))
         );
     }
 
@@ -88,9 +97,11 @@ public class StaticService {
         serverInfo.put("os", System.getProperty("os.name", ""));
         serverInfo.put("platform", System.getProperty("os.version", ""));
         serverInfo.put("platformFamily", System.getProperty("os.arch", ""));
-        List<LogEntry> errLogs = logMapper.findByLevel(LogService.LEVEL_ERROR, 0, 5);
-        errLogs.forEach(log -> log.setCreateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(log.getCreateTime())));
-        return new Monitor(serverInfo, logMapper.countByLevel(LogService.LEVEL_ERROR), errLogs);
+        PageInfo<LogEntry> pageInfo = PageHelper.startPage(1, 5)
+                .doSelectPageInfo(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
+        List<LogEntry> errLogs = pageInfo.getList();
+        errLogs.forEach(log -> log.setCreateTimeText(TimeUtils.formatUnix(log.getCreateTime())));
+        return new Monitor(serverInfo, pageInfo.getTotal(), errLogs);
     }
 
     public Map<String, Object> serverStatus() {
@@ -136,24 +147,5 @@ public class StaticService {
         long total = root.getTotalSpace();
         long free = root.getFreeSpace();
         return total <= 0 ? 0 : (int) Math.round((total - free) * 100.0 / total);
-    }
-
-    public record TopUser(Integer userId, String username) {
-    }
-
-    public record Dashboard(
-        long normalUserCount,
-        long forbiddenUserCount,
-        long spaceCount,
-        long documentCount,
-        long todayLoginUserCount,
-        TopUser createMaxUser,
-        TopUser editMaxUser,
-        TopUser collectMaxUser,
-        TopUser fansMaxUser
-    ) {
-    }
-
-    public record Monitor(Map<String, String> serverInfo, long errorLogCount, List<LogEntry> errLogs) {
     }
 }

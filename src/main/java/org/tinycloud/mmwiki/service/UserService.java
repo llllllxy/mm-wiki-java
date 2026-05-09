@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.UserMapper;
@@ -67,43 +68,31 @@ public class UserService {
     /**
      * 统计全部未删除用户数量。
      */
-    public long countAllActive() {
-        return userMapper.countAllActive();
-    }
-
     /**
      * 按用户名关键字统计用户数量。
      */
-    public long countByUsernameLike(String username) {
-        return userMapper.countByUsernameLike(username);
-    }
-
     /**
      * 按筛选条件统计用户数量。
      */
-    public long countByFilters(String username, Integer roleId) {
-        return userMapper.countByFilters(username == null ? "" : username.trim(), roleId);
-    }
-
     /**
      * 分页查询未删除用户。
      */
-    public List<User> findAllActivePaged(int offset, int size) {
-        return userMapper.findAllActivePaged(offset, size);
+    public List<User> pageAllActive() {
+        return userMapper.pageAllActive();
     }
 
     /**
      * 按用户名关键字分页查询用户。
      */
-    public List<User> findByUsernameLikePaged(String username, int offset, int size) {
-        return userMapper.findByUsernameLikePaged(username, offset, size);
+    public List<User> pageByUsernameLike(String username) {
+        return userMapper.pageByUsernameLike(username);
     }
 
     /**
      * 按筛选条件分页查询用户。
      */
-    public List<User> findByFilters(String username, Integer roleId, int offset, int size) {
-        return userMapper.findByFiltersPaged(username == null ? "" : username.trim(), roleId, offset, size);
+    public List<User> pageByFilters(String username, Integer roleId) {
+        return userMapper.pageByFilters(username == null ? "" : username.trim(), roleId);
     }
 
     /**
@@ -111,6 +100,21 @@ public class UserService {
      */
     public int updateLoginSuccess(Integer userId, String clientIp, Integer now) {
         return userMapper.updateLoginSuccess(userId, clientIp, now);
+    }
+
+    /**
+     * 同步统一登录用户资料，不存在时按默认角色自动创建。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public User saveOrUpdateAuthUser(User user) {
+        User existing = findActiveByUsername(user.getUsername());
+        if (existing == null) {
+            user.setRoleId(RoleService.DEFAULT_ROLE_ID);
+            userMapper.insertAuthUser(user);
+        } else {
+            userMapper.updateAuthUserByUsername(user);
+        }
+        return findActiveByUsername(user.getUsername());
     }
 
     /**

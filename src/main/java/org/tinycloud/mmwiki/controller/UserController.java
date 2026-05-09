@@ -1,5 +1,11 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.FollowDocView;
+import org.tinycloud.mmwiki.vo.FollowUserListPage;
+import org.tinycloud.mmwiki.vo.UserFollowView;
+import org.tinycloud.mmwiki.vo.UserListPage;
+import org.tinycloud.mmwiki.vo.UserProfileView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -37,11 +43,11 @@ public class UserController extends ControllerSupport {
         Model model
     ) {
         CurrentUser currentUser = currentUser(request);
-        UserDirectoryService.UserListPage view = userDirectoryService.listUsers(currentUser, username, page, number);
-        model.addAttribute("users", view.users());
-        model.addAttribute("count", view.count());
-        model.addAttribute("username", view.username());
-        model.addAttribute("paginator", view.paginator());
+        UserListPage view = userDirectoryService.listUsers(currentUser, username, page, number);
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("count", view.getCount());
+        model.addAttribute("username", view.getUsername());
+        model.addAttribute("paginator", view.getPaginator());
         model.addAttribute("login_user_id", currentUser.getUserId());
         return "user/list";
     }
@@ -49,9 +55,9 @@ public class UserController extends ControllerSupport {
     @GetMapping("/user/follow")
     public String follow(HttpServletRequest request, Model model) {
         CurrentUser currentUser = currentUser(request);
-        UserDirectoryService.FollowUserListPage view = userDirectoryService.listFollowedUsers(currentUser.getUserId());
-        model.addAttribute("users", view.users());
-        model.addAttribute("count", view.count());
+        FollowUserListPage view = userDirectoryService.listFollowedUsers(currentUser.getUserId());
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("count", view.getCount());
         return "user/follow";
     }
 
@@ -61,32 +67,32 @@ public class UserController extends ControllerSupport {
         if (currentUser.getUserId().equals(userId)) {
             return "redirect:/system/main/index";
         }
-        UserDirectoryService.UserProfileView view = userDirectoryService.loadProfile(userId);
-        model.addAttribute("user", view.user());
-        model.addAttribute("logDocuments", view.logDocuments());
-        model.addAttribute("count", view.count());
+        UserProfileView view = userDirectoryService.loadProfile(userId);
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("logDocuments", view.getLogDocuments());
+        model.addAttribute("count", view.getCount());
         return "user/info";
     }
 
     @GetMapping("/user/followUser")
     public String followUser(@RequestParam("user_id") Integer userId, HttpServletRequest request, Model model) {
         CurrentUser currentUser = currentUser(request);
-        UserDirectoryService.UserFollowView view = userDirectoryService.loadUserFollowView(userId, currentUser.getUserId());
-        model.addAttribute("user", view.user());
-        model.addAttribute("users", view.users());
-        model.addAttribute("fansUsers", view.fansUsers());
-        model.addAttribute("followCount", view.followCount());
-        model.addAttribute("fansCount", view.fansCount());
-        model.addAttribute("login_user_id", view.loginUserId());
+        UserFollowView view = userDirectoryService.loadUserFollowView(userId, currentUser.getUserId());
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("fansUsers", view.getFansUsers());
+        model.addAttribute("followCount", view.getFollowCount());
+        model.addAttribute("fansCount", view.getFansCount());
+        model.addAttribute("login_user_id", view.getLoginUserId());
         return "user/follow_user";
     }
 
     @GetMapping("/user/followPage")
     public String followPage(@RequestParam("user_id") Integer userId, Model model) {
-        UserDirectoryService.FollowDocView view = userDirectoryService.loadFollowDocs(userId);
-        model.addAttribute("user", view.user());
-        model.addAttribute("pages", view.pages());
-        model.addAttribute("count", view.count());
+        FollowDocView view = userDirectoryService.loadFollowDocs(userId);
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("pages", view.getPages());
+        model.addAttribute("count", view.getCount());
         return "user/follow_page";
     }
 }

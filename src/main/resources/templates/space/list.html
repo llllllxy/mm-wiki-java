@@ -37,7 +37,9 @@
             </div>
             <th:block th:if="${count > 0}">
                 <div class="row">
-                    <form action="" method="get">
+                    <form th:action="@{/space/list}" method="get">
+                        <input type="hidden" name="page" value="1">
+                        <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
                         <div class="col-md-9"><div class="input-group"></div></div>
                         <div class="col-md-3">
                             <div class="input-group">
@@ -92,27 +94,7 @@
             </th:block>
         </div>
         <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <ul class="pagination pagination-sm">
-                <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
-                <li class="pagination-select">
-                    <span>
-                        <select class="pagination-select-xs" onchange="window.location=this.value">
-                            <option th:each="option : ${paginator.perPageOptions}" th:value="${option.url}" th:selected="${option.selected}" th:text="${option.value + '条/页'}">20条/页</option>
-                        </select>
-                    </span>
-                </li>
-                <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkFirst}">首页</a></li>
-                <li th:if="${paginator.hasPrev}"><a th:href="${paginator.pageLinkPrev}"><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
-                <li th:unless="${paginator.hasPrev}" class="disabled"><a>首页</a></li>
-                <li th:unless="${paginator.hasPrev}" class="disabled"><a><span><i class="glyphicon glyphicon-backward"></i></span></a></li>
-                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
-                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
-                </li>
-                <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkNext}"><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
-                <li th:if="${paginator.hasNext}"><a th:href="${paginator.pageLinkLast}">尾页</a></li>
-                <li th:unless="${paginator.hasNext}" class="disabled"><a><span><i class="glyphicon glyphicon-forward"></i></span></a></li>
-                <li th:unless="${paginator.hasNext}" class="disabled"><a>尾页</a></li>
-            </ul>
+            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
         </div>
     </div>
 </div>

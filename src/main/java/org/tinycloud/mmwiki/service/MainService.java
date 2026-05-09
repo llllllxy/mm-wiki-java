@@ -1,5 +1,10 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.MainDefaultView;
+import org.tinycloud.mmwiki.vo.SearchView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +59,9 @@ public class MainService {
     }
 
     public MainDefaultView loadDefaultView(Integer userId, int page, int number) {
-        int safePage = Math.max(page, 1);
-        int safeNumber = Math.max(number, 1);
-        int offset = (safePage - 1) * safeNumber;
-
-        long total = logDocumentMapper.countVisibleByUserId(userId);
-        List<LogDocumentView> logDocuments = logDocumentMapper.findVisibleByUserId(userId, offset, safeNumber);
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(userId));
+        List<LogDocumentView> logDocuments = pageInfo.getList();
         for (LogDocumentView logDocument : logDocuments) {
             logDocument.setCreateTimeText(TimeUtils.formatUnix(logDocument.getCreateTime()));
         }
@@ -68,7 +70,7 @@ public class MainService {
         List<Contact> contacts = contactMapper.findAll();
         String panelTitle = configService.getValue("main_title", "");
         String panelDescription = configService.getValue("main_description", "");
-        Paginator paginator = Paginator.of(safePage, safeNumber, total, "/main/default");
+        Paginator paginator = Paginator.of(page, number, pageInfo.getTotal(), "/main/default");
 
         return new MainDefaultView(panelTitle, panelDescription, logDocuments, links, contacts, paginator);
     }
@@ -78,18 +80,5 @@ public class MainService {
         String cleanSearchType = "title";
         List<Document> documents = cleanKeyword.isEmpty() ? List.of() : documentMapper.findVisibleByNameLike(userId, cleanKeyword);
         return new SearchView(cleanSearchType, cleanKeyword, documents, documents.size());
-    }
-
-    public record MainDefaultView(
-        String panelTitle,
-        String panelDescription,
-        List<LogDocumentView> logDocuments,
-        List<Link> links,
-        List<Contact> contacts,
-        Paginator paginator
-    ) {
-    }
-
-    public record SearchView(String searchType, String keyword, List<Document> documents, int count) {
     }
 }

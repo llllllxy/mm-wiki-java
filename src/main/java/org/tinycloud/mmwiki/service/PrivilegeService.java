@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.vo.PrivilegeGroups;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -135,8 +137,5 @@ public class PrivilegeService {
             privilege.setTarget("");
         }
         return null;
-    }
-
-    public record PrivilegeGroups(List<Privilege> menus, List<Privilege> controllers) {
     }
 }

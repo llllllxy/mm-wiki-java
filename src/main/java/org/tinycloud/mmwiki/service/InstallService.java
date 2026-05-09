@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.vo.EnvView;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -361,6 +363,11 @@ public class InstallService {
                   configuration:
                     map-underscore-to-camel-case: true
                 
+                pagehelper:
+                  helper-dialect: mysql
+                  reasonable: false
+                  support-methods-arguments: false
+                
                 async:
                   executor:
                     thread:
@@ -469,9 +476,5 @@ public class InstallService {
             return safeValue;
         }
         return "\"" + safeValue.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
-    }
-
-    public record EnvView(Map<String, String> server, List<Map<String, Object>> envData,
-                          List<Map<String, Object>> dirData) {
     }
 }

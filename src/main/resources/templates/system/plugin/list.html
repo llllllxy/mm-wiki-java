@@ -22,7 +22,9 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form action="" method="get">
+                <form th:action="@{/system/plugin/list}" method="get">
+                    <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
                     <div class="col-md-offset-9 col-md-3">
                         <div class="input-group">
                             <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="插件名称">
@@ -59,12 +61,7 @@
                 </div>
             </div>
             <div th:if="${paginator != null and paginator.nums > 0}">
-                <ul class="pagination pagination-sm">
-                    <li><span>共 <span th:text="${paginator.nums}">0</span> 条数据</span></li>
-                    <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
-                        <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
-                    </li>
-                </ul>
+                <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
             </div>
         </div>
     </div>

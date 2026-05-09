@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.Access;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.file.Files;
@@ -49,21 +51,21 @@ public class AttachmentController extends ControllerSupport {
     @GetMapping("/attachment/page")
     public String page(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) {
         Document document = requireDocument(documentId);
-        AccessService.Access access = requireAccess(request, document);
+        Access access = requireAccess(request, document);
         model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_ATTACHMENT));
         model.addAttribute("document_id", documentId);
-        model.addAttribute("is_upload", access.editor());
-        model.addAttribute("is_delete", access.manager());
+        model.addAttribute("is_upload", access.isEditor());
+        model.addAttribute("is_delete", access.isManager());
         return "attachment/page";
     }
 
     @GetMapping("/attachment/image")
     public String image(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) {
         Document document = requireDocument(documentId);
-        AccessService.Access access = requireAccess(request, document);
+        Access access = requireAccess(request, document);
         model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_IMAGE));
         model.addAttribute("document_id", documentId);
-        model.addAttribute("is_delete", access.manager());
+        model.addAttribute("is_delete", access.isManager());
         return "attachment/image";
     }
 
@@ -75,8 +77,8 @@ public class AttachmentController extends ControllerSupport {
         HttpServletRequest request
     ) throws Exception {
         Document document = requireDocument(documentId);
-        AccessService.Access access = requireAccess(request, document);
-        if (!access.editor()) {
+        Access access = requireAccess(request, document);
+        if (!access.isEditor()) {
             return JsonResponse.error("您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {
@@ -111,8 +113,8 @@ public class AttachmentController extends ControllerSupport {
             return JsonResponse.error("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
-        AccessService.Access access = requireAccess(request, document);
-        if (!access.manager()) {
+        Access access = requireAccess(request, document);
+        if (!access.isManager()) {
             return JsonResponse.error("您没有权限删除该空间文档附件。");
         }
         attachmentService.deleteById(attachmentId);
@@ -129,8 +131,8 @@ public class AttachmentController extends ControllerSupport {
             throw new IllegalStateException("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
-        AccessService.Access access = requireAccess(request, document);
-        if (!access.visit()) {
+        Access access = requireAccess(request, document);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限下载该空间附件。");
         }
         Path path = documentFileService.resolveAttachmentPath(attachment.getPath());
@@ -150,10 +152,10 @@ public class AttachmentController extends ControllerSupport {
         return document;
     }
 
-    private AccessService.Access requireAccess(HttpServletRequest request, Document document) {
+    private Access requireAccess(HttpServletRequest request, Document document) {
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser(request), space);
-        if (!access.visit()) {
+        Access access = accessService.access(currentUser(request), space);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限访问该空间文档。");
         }
         return access;

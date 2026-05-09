@@ -1,7 +1,16 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.vo.DocumentEditData;
+import org.tinycloud.mmwiki.vo.DocumentViewData;
+import org.tinycloud.mmwiki.vo.ExportPayload;
+import org.tinycloud.mmwiki.vo.HistoryPage;
+import org.tinycloud.mmwiki.vo.SharedPageView;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,10 +38,8 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
 import org.tinycloud.mmwiki.domain.Document;
-import org.tinycloud.mmwiki.domain.DocumentEditData;
 import org.tinycloud.mmwiki.domain.DocumentHistoryView;
 import org.tinycloud.mmwiki.domain.DocumentTreeNode;
-import org.tinycloud.mmwiki.domain.DocumentViewData;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
@@ -112,8 +119,8 @@ public class DocumentService {
     public DocumentViewData loadDocumentView(String documentId, CurrentUser currentUser) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.visit()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限访问该空间文档。");
         }
 
@@ -136,8 +143,8 @@ public class DocumentService {
             users.get(document.getEditUserId()),
             pageContent,
             collection == null ? 0 : collection.getCollectionId(),
-            access.editor(),
-            access.manager()
+                access.isEditor(),
+                access.isManager()
         );
     }
 
@@ -169,8 +176,8 @@ public class DocumentService {
     public ExportPayload exportDocument(String documentId, CurrentUser currentUser) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.visit()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限导出该空间文档。");
         }
         if (!Objects.equals(space.getIsExport(), 1)) {
@@ -236,12 +243,12 @@ public class DocumentService {
      */
     public DocumentEditData loadEditData(String documentId, CurrentUser currentUser) throws IOException {
         DocumentViewData view = loadDocumentView(documentId, currentUser);
-        if (!view.editor()) {
+        if (!view.isEditor()) {
             throw new IllegalStateException("您没有权限修改该空间文档。");
         }
         return new DocumentEditData(
-            view.document(),
-            view.pageContent(),
+                view.getDocument(),
+                view.getPageContent(),
             configService.getValue("send_email_open", "0"),
             configService.getValue("auto_follow_doc_open", "0")
         );
@@ -264,8 +271,8 @@ public class DocumentService {
         }
 
         Space space = spaceService.requireSpace(spaceId);
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.editor()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isEditor()) {
             return JsonResponse.error("您没有权限在该空间创建文档。");
         }
 
@@ -318,8 +325,8 @@ public class DocumentService {
     ) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.editor()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isEditor()) {
             return JsonResponse.error("您没有权限修改该空间文档。");
         }
 
@@ -375,8 +382,8 @@ public class DocumentService {
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.editor()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isEditor()) {
             return JsonResponse.error("您没有权限移动该空间文档。");
         }
 
@@ -436,8 +443,8 @@ public class DocumentService {
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.manager()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isManager()) {
             return JsonResponse.error("您没有权限删除该空间文档。");
         }
 
@@ -460,33 +467,16 @@ public class DocumentService {
     public HistoryPage loadHistory(String documentId, CurrentUser currentUser, int page, int number) {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.visit()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限查看该空间修改历史。");
         }
 
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, number);
-        int offset = (safePage - 1) * safeNumber;
-        List<DocumentHistoryView> history = logDocumentMapper.findByDocumentId(documentId, offset, safeNumber);
+        PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
+        List<DocumentHistoryView> history = pageInfo.getList();
         history.forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
-        long count = logDocumentMapper.countByDocumentId(documentId);
-        return new HistoryPage(history, Paginator.of(safePage, safeNumber, count, "/document/history?document_id=" + documentId));
-    }
-
-    public record HistoryPage(List<DocumentHistoryView> items, Paginator paginator) {
-    }
-
-    public record SharedPageView(
-        Document document,
-        List<Document> parentDocuments,
-        String pageContent,
-        User createUser,
-        User editUser
-    ) {
-    }
-
-    public record ExportPayload(String fileName, ByteArrayResource resource) {
+        return new HistoryPage(history, Paginator.of(page, number, pageInfo.getTotal(), "/document/history?document_id=" + documentId));
     }
 
     private boolean isValidName(String name) {

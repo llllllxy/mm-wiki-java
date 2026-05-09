@@ -1,5 +1,10 @@
 package org.tinycloud.mmwiki.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.PrivilegeGroups;
+import org.tinycloud.mmwiki.vo.RolePage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import org.springframework.stereotype.Controller;
@@ -39,10 +44,10 @@ public class SystemRoleController extends ControllerSupport {
         @RequestParam(defaultValue = "") String keyword,
         Model model
     ) {
-        RoleService.RolePage view = roleService.list(keyword, page, number);
-        model.addAttribute("roles", view.roles());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("paginator", view.paginator());
+        RolePage view = roleService.list(keyword, page, number);
+        model.addAttribute("roles", view.getRoles());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/role/list";
     }
 
@@ -84,15 +89,13 @@ public class SystemRoleController extends ControllerSupport {
         if (role == null) {
             throw new IllegalStateException("角色不存在");
         }
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
-        long count = userService.countByFilters("", roleId);
-        var users = userService.findByFilters("", roleId, offset, safeNumber);
+        PageInfo<org.tinycloud.mmwiki.domain.User> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> userService.pageByFilters("", roleId));
+        var users = pageInfo.getList();
         model.addAttribute("users", users);
         model.addAttribute("role", role);
         model.addAttribute("roleId", roleId);
-        model.addAttribute("paginator", Paginator.of(safePage, safeNumber, count, "/system/role/user?role_id=" + roleId));
+        model.addAttribute("paginator", Paginator.of(page, number, pageInfo.getTotal(), "/system/role/user?role_id=" + roleId));
         return "system/role/user";
     }
 
@@ -102,19 +105,19 @@ public class SystemRoleController extends ControllerSupport {
         if (role == null) {
             throw new IllegalStateException("角色不存在");
         }
-        PrivilegeService.PrivilegeGroups groups = privilegeService.groups();
+        PrivilegeGroups groups = privilegeService.groups();
         List<Integer> granted = roleId == RoleService.ROOT_ROLE_ID
-            ? groups.menus().stream().map(item -> item.getPrivilegeId()).toList()
+                ? groups.getMenus().stream().map(item -> item.getPrivilegeId()).toList()
             : roleService.rolePrivilegeIds(roleId);
         if (roleId == RoleService.ROOT_ROLE_ID) {
             granted = java.util.stream.Stream
-                .concat(groups.menus().stream(), groups.controllers().stream())
+                    .concat(groups.getMenus().stream(), groups.getControllers().stream())
                 .map(item -> item.getPrivilegeId())
                 .toList();
         }
         model.addAttribute("role", role);
-        model.addAttribute("menus", groups.menus());
-        model.addAttribute("controllers", groups.controllers());
+        model.addAttribute("menus", groups.getMenus());
+        model.addAttribute("controllers", groups.getControllers());
         model.addAttribute("rolePrivileges", granted);
         model.addAttribute("disabledPrivilegeIds", RoleService.DEFAULT_PRIVILEGE_IDS);
         return "system/role/privilege";

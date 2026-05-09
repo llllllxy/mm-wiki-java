@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.Access;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -53,8 +55,8 @@ public class ImageController extends ControllerSupport {
             return EditorImageResponse.error("文档不存在。");
         }
         Space space = spaceService.requireSpace(document.getSpaceId());
-        AccessService.Access access = accessService.access(currentUser(request), space);
-        if (!access.editor()) {
+        Access access = accessService.access(currentUser(request), space);
+        if (!access.isEditor()) {
             return EditorImageResponse.error("您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {

@@ -1,5 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.LinkPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
@@ -22,15 +26,16 @@ public class LinkService {
     private LinkMapper linkMapper;
 
     public LinkPage list(String keyword, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = keyword == null ? "" : keyword.trim();
-        long count = search.isEmpty() ? linkMapper.countAll() : linkMapper.countByKeyword(search);
-        var links = search.isEmpty()
-            ? linkMapper.findPaged(offset, safeNumber)
-            : linkMapper.findByKeywordPaged(search, offset, safeNumber);
-        return new LinkPage(links, search, Paginator.of(safePage, safeNumber, count, "/system/link/list?keyword=" + search));
+        PageInfo<Link> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        linkMapper.pageAll();
+                    } else {
+                        linkMapper.pageByKeyword(search);
+                    }
+                });
+        return new LinkPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/link/list?keyword=" + search));
     }
 
     public Link findById(Integer linkId) {
@@ -96,8 +101,5 @@ public class LinkService {
         link.setUrl(link.getUrl().trim());
         link.setSequence(link.getSequence() == null ? 0 : link.getSequence());
         return null;
-    }
-
-    public record LinkPage(java.util.List<Link> links, String keyword, Paginator paginator) {
     }
 }

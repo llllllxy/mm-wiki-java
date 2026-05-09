@@ -1,5 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.AuthPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
 import java.time.Instant;
@@ -24,15 +28,16 @@ public class LoginAuthService {
     private LoginAuthMapper loginAuthMapper;
 
     public AuthPage list(String keyword, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = keyword == null ? "" : keyword.trim();
-        long count = search.isEmpty() ? loginAuthMapper.countAllActive() : loginAuthMapper.countByKeyword(search);
-        List<LoginAuth> auths = search.isEmpty()
-            ? loginAuthMapper.findAllActivePaged(offset, safeNumber)
-            : loginAuthMapper.findByKeywordPaged(search, offset, safeNumber);
-        return new AuthPage(auths, search, Paginator.of(safePage, safeNumber, count, "/system/auth/list?keyword=" + search));
+        PageInfo<LoginAuth> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        loginAuthMapper.pageAllActive();
+                    } else {
+                        loginAuthMapper.pageByKeyword(search);
+                    }
+                });
+        return new AuthPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/auth/list?keyword=" + search));
     }
 
     public LoginAuth findById(Integer loginAuthId) {
@@ -132,8 +137,5 @@ public class LoginAuthService {
         loginAuth.setUrl(loginAuth.getUrl().trim());
         loginAuth.setExtData(loginAuth.getExtData() == null ? "" : loginAuth.getExtData().trim());
         return null;
-    }
-
-    public record AuthPage(List<LoginAuth> auths, String keyword, Paginator paginator) {
     }
 }

@@ -1,5 +1,8 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.Dashboard;
+import org.tinycloud.mmwiki.vo.Monitor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,16 +28,16 @@ public class SystemStaticController extends ControllerSupport {
 
     @GetMapping("/system/static/default")
     public String defaultPage(Model model) {
-        StaticService.Dashboard view = staticService.dashboard();
-        model.addAttribute("normalUserCount", view.normalUserCount());
-        model.addAttribute("forbiddenUserCount", view.forbiddenUserCount());
-        model.addAttribute("spaceCount", view.spaceCount());
-        model.addAttribute("documentCount", view.documentCount());
-        model.addAttribute("todayLoginUserCount", view.todayLoginUserCount());
-        model.addAttribute("createMaxUser", view.createMaxUser());
-        model.addAttribute("editMaxUser", view.editMaxUser());
-        model.addAttribute("collectMaxUser", view.collectMaxUser());
-        model.addAttribute("fansMaxUser", view.fansMaxUser());
+        Dashboard view = staticService.dashboard();
+        model.addAttribute("normalUserCount", view.getNormalUserCount());
+        model.addAttribute("forbiddenUserCount", view.getForbiddenUserCount());
+        model.addAttribute("spaceCount", view.getSpaceCount());
+        model.addAttribute("documentCount", view.getDocumentCount());
+        model.addAttribute("todayLoginUserCount", view.getTodayLoginUserCount());
+        model.addAttribute("createMaxUser", view.getCreateMaxUser());
+        model.addAttribute("editMaxUser", view.getEditMaxUser());
+        model.addAttribute("collectMaxUser", view.getCollectMaxUser());
+        model.addAttribute("fansMaxUser", view.getFansMaxUser());
         return "system/static/default";
     }
 
@@ -58,10 +61,10 @@ public class SystemStaticController extends ControllerSupport {
 
     @GetMapping("/system/static/monitor")
     public String monitor(Model model) {
-        StaticService.Monitor view = staticService.monitor();
-        model.addAttribute("serverInfo", view.serverInfo());
-        model.addAttribute("errorLogCount", view.errorLogCount());
-        model.addAttribute("errLogs", view.errLogs());
+        Monitor view = staticService.monitor();
+        model.addAttribute("serverInfo", view.getServerInfo());
+        model.addAttribute("errorLogCount", view.getErrorLogCount());
+        model.addAttribute("errLogs", view.getErrLogs());
         return "system/static/monitor";
     }
 

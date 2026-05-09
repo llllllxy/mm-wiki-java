@@ -1,5 +1,14 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.vo.MemberPage;
+import org.tinycloud.mmwiki.vo.MemberView;
+import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
+import org.tinycloud.mmwiki.vo.SpaceDownload;
+import org.tinycloud.mmwiki.vo.SpacePage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -101,21 +110,23 @@ public class SpaceService {
      * 分页加载当前用户可访问的空间列表。
      */
     public SpacePage listSpaces(CurrentUser currentUser, String keyword, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
-        long count;
-        List<Space> spaces;
-        if (keyword != null && !keyword.isBlank()) {
-            count = spaceMapper.countByKeyword(keyword.trim());
-            spaces = spaceMapper.findByKeywordPaged(keyword.trim(), offset, safeNumber);
-        } else {
-            count = spaceMapper.countAll();
-            spaces = spaceMapper.findAllPaged(offset, safeNumber);
-        }
+        return listSpaces(currentUser, keyword, page, number, "/space/list");
+    }
+
+    public SpacePage listSpaces(CurrentUser currentUser, String keyword, int page, int number, String basePath) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<Space> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isBlank()) {
+                        spaceMapper.pageAll();
+                    } else {
+                        spaceMapper.pageByKeyword(search);
+                    }
+                });
+        List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
         decorate(spaces);
-        return new SpacePage(spaces, count, keyword == null ? "" : keyword, Paginator.of(safePage, safeNumber, count, "/space/list"));
+        return new SpacePage(spaces, pageInfo.getTotal(), search, Paginator.of(page, number, pageInfo.getTotal(), basePath));
     }
 
     /**
@@ -159,19 +170,21 @@ public class SpaceService {
      * 分页加载空间成员与可添加用户。
      */
     public MemberPage listMembers(CurrentUser currentUser, Integer spaceId, int page, int number) {
+        return listMembers(currentUser, spaceId, page, number, "/space/member?space_id=" + spaceId);
+    }
+
+    public MemberPage listMembers(CurrentUser currentUser, Integer spaceId, int page, int number, String basePath) {
         Space space = requireSpace(spaceId);
-        AccessService.Access access = currentUser == null ? new AccessService.Access(true, false, false) : null;
+        Access access = currentUser == null ? new Access(true, false, false) : null;
         if (currentUser != null) {
             access = accessService.access(currentUser, space);
-            if (!access.visit()) {
+            if (!access.isVisit()) {
                 throw new IllegalStateException("您没有权限访问该空间成员列表。");
             }
         }
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
-        long count = spaceUserService.countBySpaceId(spaceId);
-        List<SpaceUser> members = spaceUserService.findBySpaceIdPaged(spaceId, offset, safeNumber);
+        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
+        List<SpaceUser> members = pageInfo.getList();
         List<Integer> userIds = members.stream().map(SpaceUser::getUserId).toList();
         Map<Integer, User> users = userIds.isEmpty() ? Map.of() : userService.findActiveByIds(userIds).stream()
             .collect(Collectors.toMap(User::getUserId, item -> item));
@@ -183,13 +196,13 @@ public class SpaceService {
             }
             views.add(new MemberView(user, member.getPrivilege(), member.getSpaceUserId()));
         }
-        boolean manager = access != null && access.manager();
+        boolean manager = access != null && access.isManager();
         List<User> otherUsers = Collections.emptyList();
         if (manager) {
             List<Integer> allMemberIds = spaceUserService.findBySpaceId(spaceId).stream().map(SpaceUser::getUserId).toList();
             otherUsers = allMemberIds.isEmpty() ? userService.findAllActive() : userService.findActiveExcludingIds(allMemberIds);
         }
-        return new MemberPage(views, Paginator.of(safePage, safeNumber, count, "/space/member?space_id=" + spaceId), manager, otherUsers);
+        return new MemberPage(views, Paginator.of(page, number, pageInfo.getTotal(), basePath), manager, otherUsers);
     }
 
     @Transactional
@@ -307,8 +320,8 @@ public class SpaceService {
      */
     public void addMember(CurrentUser currentUser, Integer spaceId, Integer userId, Integer privilege) {
         Space space = requireSpace(spaceId);
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.manager()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isManager()) {
             throw new IllegalStateException("您没有权限添加该空间成员。");
         }
         if (spaceUserService.findBySpaceIdAndUserId(spaceId, userId) != null) {
@@ -322,8 +335,8 @@ public class SpaceService {
      */
     public void removeMember(CurrentUser currentUser, Integer spaceId, Integer userId, Integer spaceUserId) {
         Space space = requireSpace(spaceId);
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.manager()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isManager()) {
             throw new IllegalStateException("您没有权限移除该空间成员。");
         }
         SpaceUser membership = spaceUserService.findBySpaceIdAndUserId(spaceId, userId);
@@ -338,8 +351,8 @@ public class SpaceService {
      */
     public void updateMemberPrivilege(CurrentUser currentUser, Integer spaceId, Integer spaceUserId, Integer privilege) {
         Space space = requireSpace(spaceId);
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.manager()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isManager()) {
             throw new IllegalStateException("您没有权限修改该空间成员。");
         }
         spaceUserService.updatePrivilege(spaceUserId, privilege);
@@ -437,20 +450,5 @@ public class SpaceService {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    public record SpacePage(List<Space> spaces, long count, String keyword, Paginator paginator) {
-    }
-
-    public record SpaceCollectionPage(List<Space> spaces, int count) {
-    }
-
-    public record MemberView(User user, Integer privilege, Integer spaceUserId) {
-    }
-
-    public record MemberPage(List<MemberView> users, Paginator paginator, boolean manager, List<User> otherUsers) {
-    }
-
-    public record SpaceDownload(String fileName, ByteArrayResource resource) {
     }
 }

@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.LinkPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,10 +33,10 @@ public class SystemLinkController extends ControllerSupport {
         @RequestParam(defaultValue = "") String keyword,
         Model model
     ) {
-        LinkService.LinkPage view = linkService.list(keyword, page, number);
-        model.addAttribute("links", view.links());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("paginator", view.paginator());
+        LinkPage view = linkService.list(keyword, page, number);
+        model.addAttribute("links", view.getLinks());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/link/list";
     }
 

@@ -1,5 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.RolePage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -70,16 +74,18 @@ public class RoleService {
     }
 
     public RolePage list(String keyword, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = keyword == null ? "" : keyword.trim();
-        long count = search.isEmpty() ? roleMapper.countAll() : roleMapper.countByKeyword(search);
-        List<Role> roles = search.isEmpty()
-            ? roleMapper.findPaged(offset, safeNumber)
-            : roleMapper.findByKeywordPaged(search, offset, safeNumber);
+        PageInfo<Role> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        roleMapper.pageAll();
+                    } else {
+                        roleMapper.pageByKeyword(search);
+                    }
+                });
+        List<Role> roles = pageInfo.getList();
         roles.forEach(role -> role.setUpdateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(role.getUpdateTime())));
-        return new RolePage(roles, search, Paginator.of(safePage, safeNumber, count, "/system/role/list?keyword=" + search));
+        return new RolePage(roles, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/role/list?keyword=" + search));
     }
 
     @Transactional
@@ -192,8 +198,5 @@ public class RoleService {
         }
         role.setName(name);
         return null;
-    }
-
-    public record RolePage(List<Role> roles, String keyword, Paginator paginator) {
     }
 }

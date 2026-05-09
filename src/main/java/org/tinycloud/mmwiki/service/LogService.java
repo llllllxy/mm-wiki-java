@@ -1,7 +1,17 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.DocumentLogPage;
+import org.tinycloud.mmwiki.vo.SystemLogPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.domain.LogEntry;
@@ -30,18 +40,14 @@ public class LogService {
     private UserMapper userMapper;
 
     public SystemLogPage systemLogs(Integer level, String message, String username, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String searchMessage = message == null ? "" : message.trim();
         String searchUsername = username == null ? "" : username.trim();
-        long count = logMapper.countByFilters(level, searchMessage, searchUsername);
-        List<LogEntry> logs = logMapper.findByFilters(level, searchMessage, searchUsername, offset, safeNumber);
+        PageInfo<LogEntry> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> logMapper.pageByFilters(level, searchMessage, searchUsername));
+        List<LogEntry> logs = pageInfo.getList();
         logs.forEach(log -> log.setCreateTimeText(TimeUtils.formatUnix(log.getCreateTime())));
-        String basePath = "/system/log/system?level=" + (level == null ? "" : level)
-            + "&message=" + searchMessage
-            + "&username=" + searchUsername;
-        return new SystemLogPage(logs, level, searchMessage, searchUsername, Paginator.of(safePage, safeNumber, count, basePath));
+        String basePath = buildSystemLogBasePath(level, searchMessage, searchUsername);
+        return new SystemLogPage(logs, level, searchMessage, searchUsername, Paginator.of(page, number, pageInfo.getTotal(), basePath));
     }
 
     public LogEntry findLog(Long logId) {
@@ -53,26 +59,41 @@ public class LogService {
     }
 
     public DocumentLogPage documentLogs(Integer userId, String keyword, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = keyword == null ? "" : keyword.trim();
-        long count = logDocumentMapper.countForSystem(userId, search);
-        List<LogDocumentView> logs = logDocumentMapper.findForSystem(userId, search, offset, safeNumber);
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> logDocumentMapper.pageForSystem(userId, search));
+        List<LogDocumentView> logs = pageInfo.getList();
         logs.forEach(log -> log.setCreateTimeText(TimeUtils.formatUnix(log.getCreateTime())));
-        String basePath = "/system/log/document?keyword=" + search + (userId == null ? "" : "&user_id=" + userId);
-        return new DocumentLogPage(logs, userMapper.findAllActive(), userId, search, Paginator.of(safePage, safeNumber, count, basePath));
+        String basePath = buildDocumentLogBasePath(userId, search);
+        return new DocumentLogPage(logs, userMapper.findAllActive(), userId, search, Paginator.of(page, number, pageInfo.getTotal(), basePath));
     }
 
-    public record SystemLogPage(List<LogEntry> logs, Integer level, String message, String username, Paginator paginator) {
+    private String buildSystemLogBasePath(Integer level, String message, String username) {
+        List<String> params = new ArrayList<>();
+        if (level != null) {
+            params.add("level=" + level);
+        }
+        addQueryParam(params, "message", message);
+        addQueryParam(params, "username", username);
+        return buildBasePath("/system/log/system", params);
     }
 
-    public record DocumentLogPage(
-        List<LogDocumentView> logDocuments,
-        java.util.List<org.tinycloud.mmwiki.domain.User> users,
-        Integer userId,
-        String keyword,
-        Paginator paginator
-    ) {
+    private String buildDocumentLogBasePath(Integer userId, String keyword) {
+        List<String> params = new ArrayList<>();
+        if (userId != null) {
+            params.add("user_id=" + userId);
+        }
+        addQueryParam(params, "keyword", keyword);
+        return buildBasePath("/system/log/document", params);
+    }
+
+    private void addQueryParam(List<String> params, String name, String value) {
+        if (value != null && !value.isBlank()) {
+            params.add(name + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8));
+        }
+    }
+
+    private String buildBasePath(String path, List<String> params) {
+        return params.isEmpty() ? path : path + "?" + String.join("&", params);
     }
 }

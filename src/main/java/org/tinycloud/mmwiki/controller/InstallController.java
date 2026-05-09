@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.EnvView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedHashMap;
@@ -74,10 +76,10 @@ public class InstallController {
         if (installed(model)) {
             return "install/error";
         }
-        InstallService.EnvView view = installService.envView();
-        model.addAttribute("server", view.server());
-        model.addAttribute("envData", view.envData());
-        model.addAttribute("dirData", view.dirData());
+        EnvView view = installService.envView();
+        model.addAttribute("server", view.getServer());
+        model.addAttribute("envData", view.getEnvData());
+        model.addAttribute("dirData", view.getDirData());
         return "install/env";
     }
 

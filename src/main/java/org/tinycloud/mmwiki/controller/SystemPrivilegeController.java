@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.PrivilegeGroups;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,16 +28,16 @@ public class SystemPrivilegeController extends ControllerSupport {
 
     @GetMapping("/system/privilege/list")
     public String list(Model model) {
-        PrivilegeService.PrivilegeGroups groups = privilegeService.groups();
-        model.addAttribute("menus", groups.menus());
-        model.addAttribute("controllers", groups.controllers());
+        PrivilegeGroups groups = privilegeService.groups();
+        model.addAttribute("menus", groups.getMenus());
+        model.addAttribute("controllers", groups.getControllers());
         model.addAttribute("mode", privilegeService.mode());
         return "system/privilege/list";
     }
 
     @GetMapping("/system/privilege/add")
     public String add(Model model) {
-        model.addAttribute("menus", privilegeService.groups().menus());
+        model.addAttribute("menus", privilegeService.groups().getMenus());
         model.addAttribute("mode", privilegeService.mode());
         return "system/privilege/form";
     }
@@ -47,7 +49,7 @@ public class SystemPrivilegeController extends ControllerSupport {
             throw new IllegalStateException("权限不存在");
         }
         model.addAttribute("privilege", privilege);
-        model.addAttribute("menus", privilegeService.groups().menus());
+        model.addAttribute("menus", privilegeService.groups().getMenus());
         model.addAttribute("mode", privilegeService.mode());
         return "system/privilege/form";
     }

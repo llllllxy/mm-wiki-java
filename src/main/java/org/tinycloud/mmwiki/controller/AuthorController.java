@@ -39,25 +39,36 @@ public class AuthorController extends ControllerSupport {
         return "author/index";
     }
 
+    /**
+     * 普通登录
+     */
     @PostMapping("/login")
     @ResponseBody
-    public JsonResponse<Void> login(
-        @RequestParam String username,
-        @RequestParam String password,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
+    public JsonResponse<Void> login(@RequestParam String username,
+                                    @RequestParam String password,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
         return authService.login(username, password, request, response);
     }
 
+    /**
+     * 统一登录
+     */
     @PostMapping("/authLogin")
     @ResponseBody
-    public JsonResponse<Void> authLogin() {
-        return authService.authLoginStub();
+    public JsonResponse<Void> authLogin(@RequestParam String username,
+                                        @RequestParam String password,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response) {
+        return authService.authLogin(username, password, request, response);
     }
 
+    /**
+     * 退出登录
+     */
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
+    public String logout(HttpServletRequest request,
+                         HttpServletResponse response) {
         authService.logout(request, response);
         return "redirect:/author/index";
     }

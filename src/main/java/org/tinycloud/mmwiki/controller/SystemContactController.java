@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.ImportPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,10 +72,10 @@ public class SystemContactController extends ControllerSupport {
         @RequestParam(defaultValue = "") String username,
         Model model
     ) {
-        ContactService.ImportPage view = contactService.importCandidates(username, page, number);
-        model.addAttribute("users", view.users());
-        model.addAttribute("username", view.username());
-        model.addAttribute("paginator", view.paginator());
+        ImportPage view = contactService.importCandidates(username, page, number);
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("username", view.getUsername());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/contact/import";
     }
 }

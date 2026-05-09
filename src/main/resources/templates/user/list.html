@@ -23,6 +23,8 @@
             </div>
             <div class="row">
                 <form th:action="@{/user/list}" method="get">
+                    <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
                     <div class="col-md-9">
                         <div class="input-group"></div>
                     </div>
@@ -77,12 +79,7 @@
             </table>
         </div>
         <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <ul class="pagination pagination-sm">
-                <li><span>共<span th:text="${paginator.nums}">0</span> 条数据</span></li>
-                <li th:each="pageItem : ${paginator.pages}" th:classappend="${pageItem.active} ? 'active'">
-                    <a th:href="${pageItem.url}" th:text="${pageItem.page}">1</a>
-                </li>
-            </ul>
+            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
         </div>
     </div>
 </div>

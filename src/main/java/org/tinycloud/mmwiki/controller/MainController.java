@@ -1,5 +1,8 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.MainDefaultView;
+import org.tinycloud.mmwiki.vo.SearchView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -43,13 +46,13 @@ public class MainController extends ControllerSupport {
     ) {
         nav(model, "main");
         CurrentUser currentUser = currentUser(request);
-        MainService.MainDefaultView view = mainService.loadDefaultView(currentUser.getUserId(), page, number);
-        model.addAttribute("panel_title", view.panelTitle());
-        model.addAttribute("panel_description", view.panelDescription());
-        model.addAttribute("logDocuments", view.logDocuments());
-        model.addAttribute("links", view.links());
-        model.addAttribute("contacts", view.contacts());
-        model.addAttribute("paginator", view.paginator());
+        MainDefaultView view = mainService.loadDefaultView(currentUser.getUserId(), page, number);
+        model.addAttribute("panel_title", view.getPanelTitle());
+        model.addAttribute("panel_description", view.getPanelDescription());
+        model.addAttribute("logDocuments", view.getLogDocuments());
+        model.addAttribute("links", view.getLinks());
+        model.addAttribute("contacts", view.getContacts());
+        model.addAttribute("paginator", view.getPaginator());
         return "main/default";
     }
 
@@ -67,11 +70,11 @@ public class MainController extends ControllerSupport {
         Model model
     ) {
         CurrentUser currentUser = currentUser(request);
-        MainService.SearchView view = mainService.searchDocuments(currentUser.getUserId(), keyword, searchType);
-        model.addAttribute("search_type", view.searchType());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("documents", view.documents());
-        model.addAttribute("count", view.count());
+        SearchView view = mainService.searchDocuments(currentUser.getUserId(), keyword, searchType);
+        model.addAttribute("search_type", view.getSearchType());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("documents", view.getDocuments());
+        model.addAttribute("count", view.getCount());
         return "main/search";
     }
 }

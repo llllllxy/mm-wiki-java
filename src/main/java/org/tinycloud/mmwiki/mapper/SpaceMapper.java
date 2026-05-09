@@ -39,17 +39,8 @@ public interface SpaceMapper {
         from mw_space
         where is_delete = 0
         order by space_id desc
-        limit #{offset}, #{size}
         """)
-    List<Space> findAllPaged(@Param("offset") int offset, @Param("size") int size);
-
-    @Select("""
-        select count(*)
-        from mw_space
-        where is_delete = 0
-          and (name like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%'))
-        """)
-    long countByKeyword(@Param("keyword") String keyword);
+    List<Space> pageAll();
 
     @Select("""
         select *
@@ -57,9 +48,8 @@ public interface SpaceMapper {
         where is_delete = 0
           and (name like concat('%', #{keyword}, '%') or description like concat('%', #{keyword}, '%'))
         order by space_id desc
-        limit #{offset}, #{size}
         """)
-    List<Space> findByKeywordPaged(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    List<Space> pageByKeyword(@Param("keyword") String keyword);
 
     @Select("""
         select *

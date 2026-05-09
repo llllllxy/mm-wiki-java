@@ -27,12 +27,8 @@ public class SpaceUserService {
         return spaceUserMapper.findBySpaceIdAndUserId(spaceId, userId);
     }
 
-    public long countBySpaceId(Integer spaceId) {
-        return spaceUserMapper.countBySpaceId(spaceId);
-    }
-
-    public List<SpaceUser> findBySpaceIdPaged(Integer spaceId, int offset, int size) {
-        return spaceUserMapper.findBySpaceIdPaged(spaceId, offset, size);
+    public List<SpaceUser> pageBySpaceId(Integer spaceId) {
+        return spaceUserMapper.pageBySpaceId(spaceId);
     }
 
     public List<SpaceUser> findBySpaceId(Integer spaceId) {

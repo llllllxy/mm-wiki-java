@@ -36,28 +36,12 @@ public interface RoleMapper {
     Role findActiveById(@Param("roleId") Integer roleId);
 
     @Select("""
-        select count(*)
-        from mw_role
-        where is_delete = 0
-        """)
-    long countAll();
-
-    @Select("""
-        select count(*)
-        from mw_role
-        where is_delete = 0
-          and name like concat('%', #{keyword}, '%')
-        """)
-    long countByKeyword(@Param("keyword") String keyword);
-
-    @Select("""
         select role_id, name, type, is_delete, create_time, update_time
         from mw_role
         where is_delete = 0
         order by role_id desc
-        limit #{offset}, #{size}
         """)
-    List<Role> findPaged(@Param("offset") int offset, @Param("size") int size);
+    List<Role> pageAll();
 
     @Select("""
         select role_id, name, type, is_delete, create_time, update_time
@@ -65,9 +49,8 @@ public interface RoleMapper {
         where is_delete = 0
           and name like concat('%', #{keyword}, '%')
         order by role_id desc
-        limit #{offset}, #{size}
         """)
-    List<Role> findByKeywordPaged(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    List<Role> pageByKeyword(@Param("keyword") String keyword);
 
     @Select("""
         select count(*)

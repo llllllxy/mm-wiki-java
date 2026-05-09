@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -40,13 +42,11 @@ public class SystemUserController extends ControllerSupport {
         @RequestParam(value = "role_id", required = false) Integer roleId,
         Model model
     ) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String keyword = username == null ? "" : username.trim();
 
-        long count = userService.countByFilters(keyword, roleId);
-        List<User> users = userService.findByFilters(keyword, roleId, offset, safeNumber);
+        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> userService.pageByFilters(keyword, roleId));
+        List<User> users = pageInfo.getList();
         Map<Integer, String> roleNameIndex = roleService.roleNameIndex();
 
         model.addAttribute("users", users);
@@ -54,7 +54,7 @@ public class SystemUserController extends ControllerSupport {
         model.addAttribute("roleId", roleId);
         model.addAttribute("roles", roleService.findAllActive());
         model.addAttribute("roleNameIndex", roleNameIndex);
-        model.addAttribute("paginator", Paginator.of(safePage, safeNumber, count, "/system/user/list?username=" + keyword + rolePart(roleId)));
+        model.addAttribute("paginator", Paginator.of(page, number, pageInfo.getTotal(), "/system/user/list?username=" + keyword + rolePart(roleId)));
         return "system/user/list";
     }
 

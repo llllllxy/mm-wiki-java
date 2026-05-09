@@ -76,43 +76,12 @@ public interface UserMapper {
     List<User> findAllActive();
 
     @Select("""
-            select count(*)
-            from mw_user
-            where is_delete = 0
-            """)
-    long countAllActive();
-
-    @Select("""
-            select count(*)
-            from mw_user
-            where is_delete = 0
-              and username like concat('%', #{username}, '%')
-            """)
-    long countByUsernameLike(@Param("username") String username);
-
-    @Select({
-            "<script>",
-            "select count(*)",
-            "from mw_user",
-            "where is_delete = 0",
-            "<if test='username != null and username != \"\"'>",
-            "and username like concat('%', #{username}, '%')",
-            "</if>",
-            "<if test='roleId != null'>",
-            "and role_id = #{roleId}",
-            "</if>",
-            "</script>"
-    })
-    long countByFilters(@Param("username") String username, @Param("roleId") Integer roleId);
-
-    @Select("""
             select *
             from mw_user
             where is_delete = 0
             order by user_id desc
-            limit #{offset}, #{size}
             """)
-    List<User> findAllActivePaged(@Param("offset") int offset, @Param("size") int size);
+    List<User> pageAllActive();
 
     @Select("""
             select *
@@ -120,9 +89,8 @@ public interface UserMapper {
             where is_delete = 0
               and username like concat('%', #{username}, '%')
             order by user_id desc
-            limit #{offset}, #{size}
             """)
-    List<User> findByUsernameLikePaged(@Param("username") String username, @Param("offset") int offset, @Param("size") int size);
+    List<User> pageByUsernameLike(@Param("username") String username);
 
     @Select({
             "<script>",
@@ -136,15 +104,9 @@ public interface UserMapper {
             "and role_id = #{roleId}",
             "</if>",
             "order by user_id desc",
-            "limit #{offset}, #{size}",
             "</script>"
     })
-    List<User> findByFiltersPaged(
-            @Param("username") String username,
-            @Param("roleId") Integer roleId,
-            @Param("offset") int offset,
-            @Param("size") int size
-    );
+    List<User> pageByFilters(@Param("username") String username, @Param("roleId") Integer roleId);
 
     @Select({
             "<script>",
@@ -178,6 +140,34 @@ public interface UserMapper {
             """)
     @Options(useGeneratedKeys = true, keyProperty = "userId")
     int insert(User user);
+
+    @Insert("""
+            insert into mw_user(username, password, given_name, mobile, phone, email, department, position, location, im,
+                                last_ip, last_time, role_id, is_forbidden, is_delete, create_time, update_time)
+            values(#{username}, #{password}, #{givenName}, #{mobile}, #{phone}, #{email}, #{department}, #{position}, #{location}, #{im},
+                   #{lastIp}, #{lastTime}, #{roleId}, 0, 0, #{createTime}, #{updateTime})
+            """)
+    @Options(useGeneratedKeys = true, keyProperty = "userId")
+    int insertAuthUser(User user);
+
+    @Update("""
+            update mw_user
+            set given_name = #{givenName},
+                password = #{password},
+                email = #{email},
+                mobile = #{mobile},
+                phone = #{phone},
+                department = #{department},
+                position = #{position},
+                location = #{location},
+                im = #{im},
+                last_time = #{lastTime},
+                last_ip = #{lastIp},
+                update_time = #{updateTime}
+            where username = #{username}
+              and is_delete = 0
+            """)
+    int updateAuthUserByUsername(User user);
 
     @Update("""
             update mw_user

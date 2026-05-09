@@ -1,5 +1,8 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.DocumentLogPage;
+import org.tinycloud.mmwiki.vo.SystemLogPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,19 +26,18 @@ public class SystemLogController extends ControllerSupport {
 
     @GetMapping("/system/log/system")
     public String system(
-        @RequestParam(value = "level", required = false) Integer level,
-        @RequestParam(defaultValue = "") String message,
-        @RequestParam(defaultValue = "") String username,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        Model model
-    ) {
-        LogService.SystemLogPage view = logService.systemLogs(level, message, username, page, number);
-        model.addAttribute("logs", view.logs());
-        model.addAttribute("level", view.level());
-        model.addAttribute("message", view.message());
-        model.addAttribute("username", view.username());
-        model.addAttribute("paginator", view.paginator());
+            @RequestParam(value = "level", required = false) Integer level,
+            @RequestParam(defaultValue = "") String message,
+            @RequestParam(defaultValue = "") String username,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int number,
+            Model model) {
+        SystemLogPage view = logService.systemLogs(level, message, username, page, number);
+        model.addAttribute("logs", view.getLogs());
+        model.addAttribute("level", view.getLevel());
+        model.addAttribute("message", view.getMessage());
+        model.addAttribute("username", view.getUsername());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/log/system";
     }
 
@@ -51,18 +53,18 @@ public class SystemLogController extends ControllerSupport {
 
     @GetMapping("/system/log/document")
     public String document(
-        @RequestParam(value = "user_id", required = false) Integer userId,
-        @RequestParam(defaultValue = "") String keyword,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        Model model
+            @RequestParam(value = "user_id", required = false) Integer userId,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int number,
+            Model model
     ) {
-        LogService.DocumentLogPage view = logService.documentLogs(userId, keyword, page, number);
-        model.addAttribute("logDocuments", view.logDocuments());
-        model.addAttribute("users", view.users());
-        model.addAttribute("userId", view.userId());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("paginator", view.paginator());
+        DocumentLogPage view = logService.documentLogs(userId, keyword, page, number);
+        model.addAttribute("logDocuments", view.getLogDocuments());
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("userId", view.getUserId());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/log/document";
     }
 }

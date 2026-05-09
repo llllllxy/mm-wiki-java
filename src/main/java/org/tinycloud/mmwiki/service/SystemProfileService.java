@@ -1,5 +1,13 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.ActivityPage;
+import org.tinycloud.mmwiki.vo.FollowDocPage;
+import org.tinycloud.mmwiki.vo.FollowUserView;
+import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
+import org.tinycloud.mmwiki.vo.ProfileInfoView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -46,7 +54,10 @@ public class SystemProfileService {
      */
     public ProfileInfoView loadInfo(Integer userId) {
         User user = requireUser(userId);
-        List<LogDocumentView> logs = decorateLogs(logDocumentMapper.findByUserId(userId, 0, 10));
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
+                .doSelectPageInfo(() -> logDocumentMapper.pageByUserId(userId));
+        List<LogDocumentView> logs = pageInfo.getList();
+        logs = decorateLogs(logs);
         return new ProfileInfoView(user, logs, logs.size());
     }
 
@@ -132,33 +143,30 @@ public class SystemProfileService {
      */
     public FollowDocPage loadFollowDocs(Integer userId, int page, int number) {
         User user = requireUser(userId);
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         Map<String, Document> docs = documentMapper.findActiveByIds(docIds).stream()
             .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
 
-        List<FollowedDocument> items = new ArrayList<>();
+        List<ProfileFollowedDocument> items = new ArrayList<>();
         for (Follow follow : follows) {
             Document document = docs.get(follow.getObjectId());
             if (document != null) {
-                items.add(new FollowedDocument(document, follow.getFollowId(), TimeUtils.formatUnix(document.getUpdateTime())));
+                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.formatUnix(document.getUpdateTime())));
             }
         }
 
-        int offset = (safePage - 1) * safeNumber;
-        List<FollowedDocument> pageItems = offset >= items.size()
+        int offset = (page - 1) * number;
+        List<ProfileFollowedDocument> pageItems = offset >= items.size()
             ? List.of()
-            : items.subList(offset, Math.min(items.size(), offset + safeNumber));
+                : items.subList(offset, Math.min(items.size(), offset + number));
 
         return new FollowDocPage(
             user,
             pageItems,
             items.size(),
             configService.getValue("auto_follow_doc_open", "0"),
-            Paginator.of(safePage, safeNumber, items.size(), "/system/profile/followDoc")
+                Paginator.of(page, number, items.size(), "/system/profile/followDoc")
         );
     }
 
@@ -167,22 +175,19 @@ public class SystemProfileService {
      */
     public ActivityPage loadActivity(Integer userId, String keyword, int page, int number) {
         requireUser(userId);
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = trim(keyword);
 
-        List<LogDocumentView> logs;
-        long count;
-        if (search.isBlank()) {
-            logs = logDocumentMapper.findByUserId(userId, offset, safeNumber);
-            count = logDocumentMapper.countByUserId(userId);
-        } else {
-            logs = logDocumentMapper.findByUserIdAndKeyword(userId, search, offset, safeNumber);
-            count = logDocumentMapper.countByUserIdAndKeyword(userId, search);
-        }
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isBlank()) {
+                        logDocumentMapper.pageByUserId(userId);
+                    } else {
+                        logDocumentMapper.pageByUserIdAndKeyword(userId, search);
+                    }
+                });
+        List<LogDocumentView> logs = pageInfo.getList();
         logs = decorateLogs(logs);
-        return new ActivityPage(logs, search, Paginator.of(safePage, safeNumber, count, "/system/profile/activity?keyword=" + search));
+        return new ActivityPage(logs, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/profile/activity?keyword=" + search));
     }
 
     /**
@@ -221,20 +226,5 @@ public class SystemProfileService {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    public record ProfileInfoView(User user, List<LogDocumentView> logDocuments, int count) {
-    }
-
-    public record FollowUserView(User user, List<User> users, List<User> fansUsers, int followCount, int fansCount) {
-    }
-
-    public record FollowedDocument(Document document, Integer followId, String updateTimeText) {
-    }
-
-    public record FollowDocPage(User user, List<FollowedDocument> followDocuments, int count, String autoFollowDoc, Paginator paginator) {
-    }
-
-    public record ActivityPage(List<LogDocumentView> logDocuments, String keyword, Paginator paginator) {
     }
 }

@@ -35,19 +35,11 @@ public interface SpaceUserMapper {
     SpaceUser findBySpaceIdAndUserId(@Param("spaceId") Integer spaceId, @Param("userId") Integer userId);
 
     @Select("""
-        select count(*)
-        from mw_space_user
-        where space_id = #{spaceId}
-        """)
-    long countBySpaceId(@Param("spaceId") Integer spaceId);
-
-    @Select("""
         select *
         from mw_space_user
         where space_id = #{spaceId}
-        limit #{offset}, #{size}
         """)
-    List<SpaceUser> findBySpaceIdPaged(@Param("spaceId") Integer spaceId, @Param("offset") int offset, @Param("size") int size);
+    List<SpaceUser> pageBySpaceId(@Param("spaceId") Integer spaceId);
 
     @Select("""
         select *

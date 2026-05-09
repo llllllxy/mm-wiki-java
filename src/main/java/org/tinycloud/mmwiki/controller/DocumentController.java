@@ -1,5 +1,8 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.DocumentViewData;
+import org.tinycloud.mmwiki.vo.HistoryPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -8,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.tinycloud.mmwiki.domain.DocumentViewData;
 import org.tinycloud.mmwiki.service.DocumentService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
@@ -28,13 +30,13 @@ public class DocumentController extends ControllerSupport {
     @GetMapping("/document/index")
     public String index(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
         DocumentViewData view = documentService.loadDocumentView(documentId, currentUser(request));
-        model.addAttribute("documents", view.documents());
-        model.addAttribute("documentsJson", documentService.toTreeJson(view.documents()));
-        model.addAttribute("default_document_id", view.document().getDocumentId());
-        model.addAttribute("space", view.space());
-        model.addAttribute("space_document", view.spaceDocument());
-        model.addAttribute("is_editor", view.editor());
-        model.addAttribute("is_delete", view.manager());
+        model.addAttribute("documents", view.getDocuments());
+        model.addAttribute("documentsJson", documentService.toTreeJson(view.getDocuments()));
+        model.addAttribute("default_document_id", view.getDocument().getDocumentId());
+        model.addAttribute("space", view.getSpace());
+        model.addAttribute("space_document", view.getSpaceDocument());
+        model.addAttribute("is_editor", view.isEditor());
+        model.addAttribute("is_delete", view.isManager());
         return "document/index";
     }
 
@@ -46,7 +48,7 @@ public class DocumentController extends ControllerSupport {
         Model model
     ) throws Exception {
         DocumentViewData parentView = documentService.loadDocumentView(parentId, currentUser(request));
-        model.addAttribute("parent_documents", documentService.getParentDocuments(parentView.document()));
+        model.addAttribute("parent_documents", documentService.getParentDocuments(parentView.getDocument()));
         model.addAttribute("parent_id", parentId);
         model.addAttribute("space_id", spaceId);
         return "document/form";
@@ -72,9 +74,9 @@ public class DocumentController extends ControllerSupport {
         HttpServletRequest request,
         Model model
     ) {
-        DocumentService.HistoryPage history = documentService.loadHistory(documentId, currentUser(request), page, number);
-        model.addAttribute("logDocuments", history.items());
-        model.addAttribute("paginator", history.paginator());
+        HistoryPage history = documentService.loadHistory(documentId, currentUser(request), page, number);
+        model.addAttribute("logDocuments", history.getItems());
+        model.addAttribute("paginator", history.getPaginator());
         return "document/history";
     }
 

@@ -1,5 +1,10 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.DocumentEditData;
+import org.tinycloud.mmwiki.vo.DocumentViewData;
+import org.tinycloud.mmwiki.vo.ExportPayload;
+import org.tinycloud.mmwiki.vo.SharedPageView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
@@ -12,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.tinycloud.mmwiki.domain.DocumentEditData;
-import org.tinycloud.mmwiki.domain.DocumentViewData;
 import org.tinycloud.mmwiki.service.DocumentService;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
@@ -34,26 +37,26 @@ public class PageController extends ControllerSupport {
     @GetMapping("/page/view")
     public String view(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
         DocumentViewData view = documentService.loadDocumentView(documentId, currentUser(request));
-        model.addAttribute("space", view.space());
-        model.addAttribute("document", view.document());
-        model.addAttribute("collection_id", view.collectionId());
-        model.addAttribute("create_user", view.createUser());
-        model.addAttribute("edit_user", view.editUser());
-        model.addAttribute("page_content", view.pageContent());
-        model.addAttribute("parent_documents", view.parentDocuments());
-        model.addAttribute("is_editor", view.editor());
-        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.document().getCreateTime()));
-        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.document().getUpdateTime()));
+        model.addAttribute("space", view.getSpace());
+        model.addAttribute("document", view.getDocument());
+        model.addAttribute("collection_id", view.getCollectionId());
+        model.addAttribute("create_user", view.getCreateUser());
+        model.addAttribute("edit_user", view.getEditUser());
+        model.addAttribute("page_content", view.getPageContent());
+        model.addAttribute("parent_documents", view.getParentDocuments());
+        model.addAttribute("is_editor", view.isEditor());
+        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.getDocument().getCreateTime()));
+        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.getDocument().getUpdateTime()));
         return "page/view";
     }
 
     @GetMapping("/page/edit")
     public String edit(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
         DocumentEditData editData = documentService.loadEditData(documentId, currentUser(request));
-        model.addAttribute("document", editData.document());
-        model.addAttribute("page_content", editData.pageContent());
-        model.addAttribute("sendEmail", editData.sendEmail());
-        model.addAttribute("autoFollowDoc", editData.autoFollowDoc());
+        model.addAttribute("document", editData.getDocument());
+        model.addAttribute("page_content", editData.getPageContent());
+        model.addAttribute("sendEmail", editData.getSendEmail());
+        model.addAttribute("autoFollowDoc", editData.getAutoFollowDoc());
         return "page/edit";
     }
 
@@ -82,25 +85,25 @@ public class PageController extends ControllerSupport {
 
     @GetMapping("/page/display")
     public String display(@RequestParam("document_id") String documentId, Model model) throws Exception {
-        DocumentService.SharedPageView view = documentService.loadSharedView(documentId);
-        model.addAttribute("document", view.document());
-        model.addAttribute("parent_documents", view.parentDocuments());
-        model.addAttribute("page_content", view.pageContent());
-        model.addAttribute("create_user", view.createUser());
-        model.addAttribute("edit_user", view.editUser());
-        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.document().getCreateTime()));
-        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.document().getUpdateTime()));
+        SharedPageView view = documentService.loadSharedView(documentId);
+        model.addAttribute("document", view.getDocument());
+        model.addAttribute("parent_documents", view.getParentDocuments());
+        model.addAttribute("page_content", view.getPageContent());
+        model.addAttribute("create_user", view.getCreateUser());
+        model.addAttribute("edit_user", view.getEditUser());
+        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.getDocument().getCreateTime()));
+        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.getDocument().getUpdateTime()));
         return "page/display";
     }
 
     @GetMapping("/page/export")
     public ResponseEntity<ByteArrayResource> export(@RequestParam("document_id") String documentId, HttpServletRequest request) throws Exception {
-        DocumentService.ExportPayload payload = documentService.exportDocument(documentId, currentUser(request));
+        ExportPayload payload = documentService.exportDocument(documentId, currentUser(request));
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + payload.fileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + payload.getFileName() + "\"")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .contentLength(payload.resource().contentLength())
-            .body(payload.resource());
+                .contentLength(payload.getResource().contentLength())
+                .body(payload.getResource());
     }
 
     private String documentUrl(HttpServletRequest request, String documentId) {

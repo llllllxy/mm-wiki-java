@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.vo.Access;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.Space;
@@ -45,8 +47,5 @@ public class AccessService {
             return new Access(true, true, false);
         }
         return new Access(true, false, false);
-    }
-
-    public record Access(boolean visit, boolean editor, boolean manager) {
     }
 }

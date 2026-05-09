@@ -34,34 +34,19 @@ public interface LinkMapper {
     Link findById(@Param("linkId") Integer linkId);
 
     @Select("""
-        select count(*)
-        from mw_link
-        """)
-    long countAll();
-
-    @Select("""
-        select count(*)
-        from mw_link
-        where name like concat('%', #{keyword}, '%')
-        """)
-    long countByKeyword(@Param("keyword") String keyword);
-
-    @Select("""
         select *
         from mw_link
         order by sequence asc, link_id desc
-        limit #{offset}, #{size}
         """)
-    List<Link> findPaged(@Param("offset") int offset, @Param("size") int size);
+    List<Link> pageAll();
 
     @Select("""
         select *
         from mw_link
         where name like concat('%', #{keyword}, '%')
         order by sequence asc, link_id desc
-        limit #{offset}, #{size}
         """)
-    List<Link> findByKeywordPaged(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    List<Link> pageByKeyword(@Param("keyword") String keyword);
 
     @Select("""
         select count(*)

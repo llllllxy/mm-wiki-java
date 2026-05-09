@@ -18,24 +18,6 @@ import org.tinycloud.mmwiki.domain.LogDocumentView;
 public interface LogDocumentMapper {
 
     @Select("""
-        select count(*)
-        from mw_log_document ld
-        where exists (
-            select 1
-            from mw_space s
-            where s.space_id = ld.space_id
-              and s.visit_level = 'public'
-        )
-        or exists (
-            select 1
-            from mw_space_user su
-            where su.space_id = ld.space_id
-              and su.user_id = #{userId}
-        )
-        """)
-    long countVisibleByUserId(@Param("userId") Integer userId);
-
-    @Select("""
         select ld.log_document_id,
                ld.document_id,
                ld.space_id,
@@ -63,9 +45,8 @@ public interface LogDocumentMapper {
               and su.user_id = #{userId}
         )
         order by ld.log_document_id desc
-        limit #{offset}, #{size}
         """)
-    List<LogDocumentView> findVisibleByUserId(@Param("userId") Integer userId, @Param("offset") int offset, @Param("size") int size);
+    List<LogDocumentView> pageVisibleByUserId(@Param("userId") Integer userId);
 
     @Select("""
         select ld.log_document_id,
@@ -81,16 +62,8 @@ public interface LogDocumentMapper {
         left join mw_document d on d.document_id = ld.document_id
         where ld.user_id = #{userId}
         order by ld.log_document_id desc
-        limit #{offset}, #{size}
         """)
-    List<LogDocumentView> findByUserId(@Param("userId") Integer userId, @Param("offset") int offset, @Param("size") int size);
-
-    @Select("""
-        select count(*)
-        from mw_log_document
-        where user_id = #{userId}
-        """)
-    long countByUserId(@Param("userId") Integer userId);
+    List<LogDocumentView> pageByUserId(@Param("userId") Integer userId);
 
     @Select("""
         select ld.log_document_id,
@@ -110,26 +83,8 @@ public interface LogDocumentMapper {
             or d.name like concat('%', #{keyword}, '%')
           )
         order by ld.log_document_id desc
-        limit #{offset}, #{size}
         """)
-    List<LogDocumentView> findByUserIdAndKeyword(
-        @Param("userId") Integer userId,
-        @Param("keyword") String keyword,
-        @Param("offset") int offset,
-        @Param("size") int size
-    );
-
-    @Select("""
-        select count(*)
-        from mw_log_document ld
-        left join mw_document d on d.document_id = ld.document_id
-        where ld.user_id = #{userId}
-          and (
-            ld.comment like concat('%', #{keyword}, '%')
-            or d.name like concat('%', #{keyword}, '%')
-          )
-        """)
-    long countByUserIdAndKeyword(@Param("userId") Integer userId, @Param("keyword") String keyword);
+    List<LogDocumentView> pageByUserIdAndKeyword(@Param("userId") Integer userId, @Param("keyword") String keyword);
 
     @Select("""
         select ld.log_document_id,
@@ -143,30 +98,8 @@ public interface LogDocumentMapper {
         left join mw_user u on u.user_id = ld.user_id
         where ld.document_id = #{documentId}
         order by ld.log_document_id desc
-        limit #{offset}, #{size}
         """)
-    List<DocumentHistoryView> findByDocumentId(@Param("documentId") String documentId, @Param("offset") int offset, @Param("size") int size);
-
-    @Select("""
-        select count(*)
-        from mw_log_document
-        where document_id = #{documentId}
-        """)
-    long countByDocumentId(@Param("documentId") String documentId);
-
-    @Select({
-        "<script>",
-        "select count(*)",
-        "from mw_log_document ld",
-        "left join mw_document d on d.document_id = ld.document_id",
-        "where 1 = 1",
-        "<if test='userId != null'>and ld.user_id = #{userId}</if>",
-        "<if test='keyword != null and keyword != \"\"'>",
-        "and (ld.comment like concat('%', #{keyword}, '%') or d.name like concat('%', #{keyword}, '%'))",
-        "</if>",
-        "</script>"
-    })
-    long countForSystem(@Param("userId") Integer userId, @Param("keyword") String keyword);
+    List<DocumentHistoryView> pageByDocumentId(@Param("documentId") String documentId);
 
     @Select({
         "<script>",
@@ -190,15 +123,9 @@ public interface LogDocumentMapper {
         "and (ld.comment like concat('%', #{keyword}, '%') or d.name like concat('%', #{keyword}, '%'))",
         "</if>",
         "order by ld.log_document_id desc",
-        "limit #{offset}, #{size}",
         "</script>"
     })
-    List<LogDocumentView> findForSystem(
-        @Param("userId") Integer userId,
-        @Param("keyword") String keyword,
-        @Param("offset") int offset,
-        @Param("size") int size
-    );
+    List<LogDocumentView> pageForSystem(@Param("userId") Integer userId, @Param("keyword") String keyword);
 
     @Insert("""
         insert into mw_log_document(document_id, space_id, user_id, action, comment, create_time)

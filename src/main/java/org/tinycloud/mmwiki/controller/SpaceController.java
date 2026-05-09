@@ -1,5 +1,10 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.vo.MemberPage;
+import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
+import org.tinycloud.mmwiki.vo.SpacePage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -49,30 +54,30 @@ public class SpaceController extends ControllerSupport {
         Model model
     ) {
         nav(model, "space");
-        SpaceService.SpacePage view = spaceService.listSpaces(currentUser(request), keyword, page, number);
-        model.addAttribute("spaces", view.spaces());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("count", view.count());
-        model.addAttribute("paginator", view.paginator());
+        SpacePage view = spaceService.listSpaces(currentUser(request), keyword, page, number);
+        model.addAttribute("spaces", view.getSpaces());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("count", view.getCount());
+        model.addAttribute("paginator", view.getPaginator());
         return "space/list";
     }
 
     @GetMapping("/space/collection")
     public String collection(HttpServletRequest request, Model model) {
         nav(model, "space");
-        SpaceService.SpaceCollectionPage view = spaceService.listCollectedSpaces(currentUser(request));
-        model.addAttribute("spaces", view.spaces());
-        model.addAttribute("count", view.count());
+        SpaceCollectionPage view = spaceService.listCollectedSpaces(currentUser(request));
+        model.addAttribute("spaces", view.getSpaces());
+        model.addAttribute("count", view.getCount());
         return "space/collection";
     }
 
     @GetMapping("/space/search")
     public String search(@RequestParam("tag") String tag, HttpServletRequest request, Model model) {
         nav(model, "space");
-        SpaceService.SpaceCollectionPage view = spaceService.searchByTag(currentUser(request), tag);
+        SpaceCollectionPage view = spaceService.searchByTag(currentUser(request), tag);
         model.addAttribute("tag", tag);
-        model.addAttribute("spaces", view.spaces());
-        model.addAttribute("count", view.count());
+        model.addAttribute("spaces", view.getSpaces());
+        model.addAttribute("count", view.getCount());
         return "space/search";
     }
 
@@ -80,8 +85,8 @@ public class SpaceController extends ControllerSupport {
     public String document(@RequestParam("space_id") Integer spaceId, HttpServletRequest request) {
         CurrentUser currentUser = currentUser(request);
         Space space = spaceService.requireSpace(spaceId);
-        AccessService.Access access = accessService.access(currentUser, space);
-        if (!access.visit()) {
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限访问该空间。");
         }
         Document spaceDefault = documentService.findSpaceDefaultDocument(spaceId);
@@ -96,12 +101,12 @@ public class SpaceController extends ControllerSupport {
         HttpServletRequest request,
         Model model
     ) {
-        SpaceService.MemberPage view = spaceService.listMembers(currentUser(request), spaceId, page, number);
-        model.addAttribute("users", view.users());
+        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, page, number);
+        model.addAttribute("users", view.getUsers());
         model.addAttribute("space_id", spaceId);
-        model.addAttribute("paginator", view.paginator());
-        model.addAttribute("otherUsers", view.otherUsers());
-        return view.manager() ? "space/manager_member" : "space/member";
+        model.addAttribute("paginator", view.getPaginator());
+        model.addAttribute("otherUsers", view.getOtherUsers());
+        return view.isManager() ? "space/manager_member" : "space/member";
     }
 
     @PostMapping("/space/addMember")

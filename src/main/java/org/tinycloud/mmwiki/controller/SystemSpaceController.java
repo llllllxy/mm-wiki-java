@@ -1,5 +1,9 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.MemberPage;
+import org.tinycloud.mmwiki.vo.SpaceDownload;
+import org.tinycloud.mmwiki.vo.SpacePage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -19,7 +23,6 @@ import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.service.SpaceService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -41,12 +44,10 @@ public class SystemSpaceController extends ControllerSupport {
         HttpServletRequest request,
         Model model
     ) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        SpaceService.SpacePage view = spaceService.listSpaces(currentUser(request), keyword, safePage, safeNumber);
-        model.addAttribute("spaces", view.spaces());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("paginator", Paginator.of(safePage, safeNumber, view.count(), "/system/space/list?keyword=" + view.keyword()));
+        SpacePage view = spaceService.listSpaces(currentUser(request), keyword, page, number, "/system/space/list?keyword=" + (keyword == null ? "" : keyword.trim()));
+        model.addAttribute("spaces", view.getSpaces());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/space/list";
     }
 
@@ -58,11 +59,11 @@ public class SystemSpaceController extends ControllerSupport {
         HttpServletRequest request,
         Model model
     ) {
-        SpaceService.MemberPage view = spaceService.listMembers(currentUser(request), spaceId, page, number);
-        model.addAttribute("users", view.users());
+        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, page, number, "/system/space/member?space_id=" + spaceId);
+        model.addAttribute("users", view.getUsers());
         model.addAttribute("space_id", spaceId);
-        model.addAttribute("otherUsers", view.otherUsers());
-        model.addAttribute("paginator", Paginator.of(page, number, view.paginator().getNums(), "/system/space/member?space_id=" + spaceId));
+        model.addAttribute("otherUsers", view.getOtherUsers());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/space/member";
     }
 
@@ -97,12 +98,12 @@ public class SystemSpaceController extends ControllerSupport {
 
     @GetMapping("/system/space/download")
     public ResponseEntity<ByteArrayResource> download(@RequestParam("space_id") Integer spaceId) throws IOException {
-        SpaceService.SpaceDownload payload = spaceService.downloadSpace(spaceId);
-        String encoded = URLEncoder.encode(payload.fileName(), StandardCharsets.UTF_8).replace("+", "%20");
+        SpaceDownload payload = spaceService.downloadSpace(spaceId);
+        String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .contentLength(payload.resource().contentLength())
-            .body(payload.resource());
+                .contentLength(payload.getResource().contentLength())
+                .body(payload.getResource());
     }
 }

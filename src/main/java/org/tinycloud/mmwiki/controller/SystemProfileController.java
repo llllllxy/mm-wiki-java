@@ -1,5 +1,10 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.vo.ActivityPage;
+import org.tinycloud.mmwiki.vo.FollowDocPage;
+import org.tinycloud.mmwiki.vo.FollowUserView;
+import org.tinycloud.mmwiki.vo.ProfileInfoView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -28,10 +33,10 @@ public class SystemProfileController extends ControllerSupport {
     @GetMapping("/system/profile/info")
     public String info(HttpServletRequest request, Model model) {
         CurrentUser currentUser = currentUser(request);
-        SystemProfileService.ProfileInfoView view = systemProfileService.loadInfo(currentUser.getUserId());
-        model.addAttribute("user", view.user());
-        model.addAttribute("logDocuments", view.logDocuments());
-        model.addAttribute("count", view.count());
+        ProfileInfoView view = systemProfileService.loadInfo(currentUser.getUserId());
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("logDocuments", view.getLogDocuments());
+        model.addAttribute("count", view.getCount());
         return "system/profile/info";
     }
 
@@ -69,12 +74,12 @@ public class SystemProfileController extends ControllerSupport {
 
     @GetMapping("/system/profile/followUser")
     public String followUser(HttpServletRequest request, Model model) {
-        SystemProfileService.FollowUserView view = systemProfileService.loadFollowUsers(currentUser(request).getUserId());
-        model.addAttribute("user", view.user());
-        model.addAttribute("users", view.users());
-        model.addAttribute("fansUsers", view.fansUsers());
-        model.addAttribute("followCount", view.followCount());
-        model.addAttribute("fansCount", view.fansCount());
+        FollowUserView view = systemProfileService.loadFollowUsers(currentUser(request).getUserId());
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("users", view.getUsers());
+        model.addAttribute("fansUsers", view.getFansUsers());
+        model.addAttribute("followCount", view.getFollowCount());
+        model.addAttribute("fansCount", view.getFansCount());
         return "system/profile/follow_user";
     }
 
@@ -85,13 +90,13 @@ public class SystemProfileController extends ControllerSupport {
         @RequestParam(defaultValue = "10") int number,
         Model model
     ) {
-        SystemProfileService.FollowDocPage view =
+        FollowDocPage view =
             systemProfileService.loadFollowDocs(currentUser(request).getUserId(), page, number);
-        model.addAttribute("user", view.user());
-        model.addAttribute("followDocuments", view.followDocuments());
-        model.addAttribute("count", view.count());
-        model.addAttribute("autoFollowDoc", view.autoFollowDoc());
-        model.addAttribute("paginator", view.paginator());
+        model.addAttribute("user", view.getUser());
+        model.addAttribute("followDocuments", view.getFollowDocuments());
+        model.addAttribute("count", view.getCount());
+        model.addAttribute("autoFollowDoc", view.getAutoFollowDoc());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/profile/follow_doc";
     }
 
@@ -103,11 +108,11 @@ public class SystemProfileController extends ControllerSupport {
         @RequestParam(defaultValue = "") String keyword,
         Model model
     ) {
-        SystemProfileService.ActivityPage view =
+        ActivityPage view =
             systemProfileService.loadActivity(currentUser(request).getUserId(), keyword, page, number);
-        model.addAttribute("logDocuments", view.logDocuments());
-        model.addAttribute("keyword", view.keyword());
-        model.addAttribute("paginator", view.paginator());
+        model.addAttribute("logDocuments", view.getLogDocuments());
+        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("paginator", view.getPaginator());
         return "system/profile/activity";
     }
 

@@ -32,18 +32,6 @@ public interface LogMapper {
 
     @Select({
         "<script>",
-        "select count(*)",
-        "from mw_log",
-        "where 1 = 1",
-        "<if test='level != null'>and level = #{level}</if>",
-        "<if test='message != null and message != \"\"'>and message like concat('%', #{message}, '%')</if>",
-        "<if test='username != null and username != \"\"'>and username like concat('%', #{username}, '%')</if>",
-        "</script>"
-    })
-    long countByFilters(@Param("level") Integer level, @Param("message") String message, @Param("username") String username);
-
-    @Select({
-        "<script>",
         "select log_id, level, path, `get`, post, message, ip, user_agent, referer, user_id, username, create_time",
         "from mw_log",
         "where 1 = 1",
@@ -51,30 +39,15 @@ public interface LogMapper {
         "<if test='message != null and message != \"\"'>and message like concat('%', #{message}, '%')</if>",
         "<if test='username != null and username != \"\"'>and username like concat('%', #{username}, '%')</if>",
         "order by log_id desc",
-        "limit #{offset}, #{size}",
         "</script>"
     })
-    List<LogEntry> findByFilters(
-        @Param("level") Integer level,
-        @Param("message") String message,
-        @Param("username") String username,
-        @Param("offset") int offset,
-        @Param("size") int size
-    );
-
-    @Select("""
-        select count(*)
-        from mw_log
-        where level = #{level}
-        """)
-    long countByLevel(@Param("level") Integer level);
+    List<LogEntry> pageByFilters(@Param("level") Integer level, @Param("message") String message, @Param("username") String username);
 
     @Select("""
         select log_id, level, path, `get`, post, message, ip, user_agent, referer, user_id, username, create_time
         from mw_log
         where level = #{level}
         order by log_id desc
-        limit #{offset}, #{size}
         """)
-    List<LogEntry> findByLevel(@Param("level") Integer level, @Param("offset") int offset, @Param("size") int size);
+    List<LogEntry> pageByLevel(@Param("level") Integer level);
 }

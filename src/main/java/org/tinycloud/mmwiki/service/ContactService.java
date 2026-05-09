@@ -1,5 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.ImportPage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Instant;
 import java.util.List;
@@ -67,15 +71,16 @@ public class ContactService {
     }
 
     public ImportPage importCandidates(String username, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String search = username == null ? "" : username.trim();
-        long count = search.isEmpty() ? userService.countAllActive() : userService.countByUsernameLike(search);
-        List<User> users = search.isEmpty()
-            ? userService.findAllActivePaged(offset, safeNumber)
-            : userService.findByUsernameLikePaged(search, offset, safeNumber);
-        return new ImportPage(users, search, Paginator.of(safePage, safeNumber, count, "/system/contact/import?username=" + search));
+        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        userService.pageAllActive();
+                    } else {
+                        userService.pageByUsernameLike(search);
+                    }
+                });
+        return new ImportPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/contact/import?username=" + search));
     }
 
     private JsonResponse<Void> validate(Contact contact) {
@@ -99,8 +104,5 @@ public class ContactService {
         contact.setMobile(contact.getMobile().trim());
         contact.setEmail(contact.getEmail().trim());
         return null;
-    }
-
-    public record ImportPage(List<User> users, String username, Paginator paginator) {
     }
 }

@@ -27,38 +27,21 @@ public interface LoginAuthMapper {
     List<LoginAuth> findAllActive();
 
     @Select("""
-        select count(*)
-        from mw_login_auth
-        where is_delete = 0
-          and name like concat('%', #{keyword}, '%')
-        """)
-    long countByKeyword(@Param("keyword") String keyword);
-
-    @Select("""
-        select count(*)
-        from mw_login_auth
-        where is_delete = 0
-        """)
-    long countAllActive();
-
-    @Select("""
         select login_auth_id, name, username_prefix, url, ext_data, is_used, is_delete, create_time, update_time
         from mw_login_auth
         where is_delete = 0
           and name like concat('%', #{keyword}, '%')
         order by login_auth_id desc
-        limit #{offset}, #{size}
         """)
-    List<LoginAuth> findByKeywordPaged(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    List<LoginAuth> pageByKeyword(@Param("keyword") String keyword);
 
     @Select("""
         select login_auth_id, name, username_prefix, url, ext_data, is_used, is_delete, create_time, update_time
         from mw_login_auth
         where is_delete = 0
         order by login_auth_id desc
-        limit #{offset}, #{size}
         """)
-    List<LoginAuth> findAllActivePaged(@Param("offset") int offset, @Param("size") int size);
+    List<LoginAuth> pageAllActive();
 
     @Select("""
         select login_auth_id, name, username_prefix, url, ext_data, is_used, is_delete, create_time, update_time

@@ -1,5 +1,14 @@
 package org.tinycloud.mmwiki.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.vo.FollowDocView;
+import org.tinycloud.mmwiki.vo.FollowUserListPage;
+import org.tinycloud.mmwiki.vo.UserFollowView;
+import org.tinycloud.mmwiki.vo.UserFollowedDocument;
+import org.tinycloud.mmwiki.vo.UserListPage;
+import org.tinycloud.mmwiki.vo.UserProfileView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
@@ -32,23 +41,20 @@ public class UserDirectoryService {
     private DocumentMapper documentMapper;
 
     public UserListPage listUsers(CurrentUser currentUser, String username, int page, int number) {
-        int safePage = Math.max(1, page);
-        int safeNumber = Math.max(10, Math.min(number, 100));
-        int offset = (safePage - 1) * safeNumber;
         String keyword = username == null ? "" : username.trim();
 
-        long count;
-        List<User> users;
-        if (keyword.isBlank()) {
-            count = userService.countAllActive();
-            users = userService.findAllActivePaged(offset, safeNumber);
-        } else {
-            count = userService.countByUsernameLike(keyword);
-            users = userService.findByUsernameLikePaged(keyword, offset, safeNumber);
-        }
+        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
+                .doSelectPageInfo(() -> {
+                    if (keyword.isBlank()) {
+                        userService.pageAllActive();
+                    } else {
+                        userService.pageByUsernameLike(keyword);
+                    }
+                });
+        List<User> users = pageInfo.getList();
 
         markFollows(currentUser.getUserId(), users);
-        return new UserListPage(users, keyword, count, Paginator.of(safePage, safeNumber, count, "/user/list"));
+        return new UserListPage(users, keyword, pageInfo.getTotal(), Paginator.of(page, number, pageInfo.getTotal(), "/user/list"));
     }
 
     public FollowUserListPage listFollowedUsers(Integer userId) {
@@ -71,7 +77,9 @@ public class UserDirectoryService {
         if (user == null) {
             throw new IllegalStateException("用户不存在。");
         }
-        List<LogDocumentView> activities = logDocumentMapper.findByUserId(userId, 0, 10);
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
+                .doSelectPageInfo(() -> logDocumentMapper.pageByUserId(userId));
+        List<LogDocumentView> activities = pageInfo.getList();
         return new UserProfileView(user, activities, activities.size());
     }
 
@@ -109,8 +117,8 @@ public class UserDirectoryService {
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         List<Document> documents = docIds.isEmpty() ? List.of() : documentMapper.findActiveByIds(docIds);
         Map<String, Follow> followIndex = follows.stream().collect(java.util.stream.Collectors.toMap(Follow::getObjectId, follow -> follow, (left, right) -> left));
-        List<FollowedDocument> items = documents.stream()
-            .map(document -> new FollowedDocument(document, followIndex.get(document.getDocumentId()).getFollowId()))
+        List<UserFollowedDocument> items = documents.stream()
+                .map(document -> new UserFollowedDocument(document, followIndex.get(document.getDocumentId()).getFollowId()))
             .toList();
         return new FollowDocView(user, items, items.size());
     }
@@ -124,23 +132,5 @@ public class UserDirectoryService {
                 user.setFollowId(follow.getFollowId());
             }
         }
-    }
-
-    public record UserListPage(List<User> users, String username, long count, Paginator paginator) {
-    }
-
-    public record FollowUserListPage(List<User> users, int count) {
-    }
-
-    public record UserProfileView(User user, List<LogDocumentView> logDocuments, int count) {
-    }
-
-    public record UserFollowView(User user, List<User> users, List<User> fansUsers, int followCount, int fansCount, Integer loginUserId) {
-    }
-
-    public record FollowedDocument(Document document, Integer followId) {
-    }
-
-    public record FollowDocView(User user, List<FollowedDocument> pages, int count) {
     }
 }
