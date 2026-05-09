@@ -7,24 +7,24 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>MM-Wiki - Login</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link href="/static/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/animate.css" rel="stylesheet" />
-    <link href="/static/css/login.css" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/static/css/animate.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/login.css}" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
 
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/plugins/jquery/jquery.form.js"></script>
-    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script src="/static/js/modules/login.js"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/modules/login.js}"></script>
 </head>
 <body>
 <div class="login_box">
     <div class="login_l_img animated bounceInLeft">
         <span>快速构建团队协作与知识分享平台</span>
-        <img src="/static/images/logo_new.png" />
+        <img th:src="@{/static/images/logo_new.png}"/>
     </div>
     <div class="login">
         <div class="tabs">
@@ -41,7 +41,7 @@
             <div class="slider"><div class="indicator"></div></div>
             <div class="content">
                 <section>
-                    <form role="form" action="/author/login" method="post" onsubmit="return false">
+                    <form role="form" th:action="@{/author/login}" method="post" onsubmit="return false">
                         <fieldset>
                             <div class="form-group">
                                 <div class="input-group">
@@ -60,7 +60,7 @@
                     </form>
                 </section>
                 <section>
-                    <form role="form" action="/author/authLogin" method="post" onsubmit="return false">
+                    <form role="form" th:action="@{/author/authLogin}" method="post" onsubmit="return false">
                         <fieldset>
                             <div class="form-group">
                                 <div class="input-group">

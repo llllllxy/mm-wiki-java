@@ -5,17 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-switch/css/bootstrap-switch.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/form.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-switch/css/bootstrap-switch.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/form.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -23,7 +23,7 @@
     <div class="panel panel-default">
         <br>
         <div class="panel-body">
-            <form class="form-horizontal" method="post" action="/system/config/modify">
+            <form class="form-horizontal" method="post" th:action="@{/system/config/modify}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span>系统版本号</label>
                     <div class="col-sm-4">

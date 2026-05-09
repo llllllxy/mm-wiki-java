@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -21,7 +21,7 @@
             <div class="row">
                 <form action="" method="get">
                     <div class="col-md-2">
-                        <button type="button" name="add" data-link="/system/email/add" class="btn btn-primary">
+                        <button type="button" name="add" th:data-link="@{/system/email/add}" class="btn btn-primary">
                             <i class="glyphicon glyphicon-plus"></i> 添加邮件服务器
                         </button>
                     </div>
@@ -62,15 +62,16 @@
                         <span class="label label-danger" th:if="${email.isUsed != 1}">否</span>
                     </td>
                     <td class="center">
-                        <a name="edit" th:attr="data-link=@{/system/email/edit(email_id=${email.emailId})}"><i class="glyphicon glyphicon-edit"></i>修改</a>
+                        <a name="edit" th:data-link="@{/system/email/edit(email_id=${email.emailId})}"><i
+                                class="glyphicon glyphicon-edit"></i>修改</a>
                         <a th:if="${email.isUsed != 1}"
                            data-message="确定要启用该邮件服务器吗？"
-                           th:data-url="|/system/email/used?email_id=${email.emailId}|"
+                           th:data-url="@{/system/email/used(email_id=${email.emailId})}"
                            onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
                             <i class="glyphicon glyphicon-ok-circle"></i>启用
                         </a>
                         <a data-message="确定删除吗？"
-                           th:data-url="|/system/email/delete?email_id=${email.emailId}|"
+                           th:data-url="@{/system/email/delete(email_id=${email.emailId})}"
                            onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
                             <i class="glyphicon glyphicon-trash"></i>删除
                         </a>

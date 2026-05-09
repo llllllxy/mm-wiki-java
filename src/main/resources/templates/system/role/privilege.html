@@ -5,22 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/form.js"></script>
-    <script type="text/javascript" src="/static/js/modules/system/role.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/modules/system/role.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div id="failedBox" class="hide"></div>
     <div class="panel panel-default">
         <div class="panel-body">
-            <form class="form-horizontal" method="post" action="/system/role/grantPrivilege">
+            <form class="form-horizontal" method="post" th:action="@{/system/role/grantPrivilege}">
                 <input type="hidden" name="role_id" th:value="${role.roleId}" />
                 <h4><span class="label label-default" th:text="${role.name + '权限'}">角色权限</span></h4>
                 <hr>

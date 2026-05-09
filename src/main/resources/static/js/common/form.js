@@ -22,33 +22,18 @@ var Form = {
      * @returns {boolean}
      */
     ajaxSubmit: function (element, inPopup) {
-
         if (inPopup) {
             Form.inPopup = true;
         }
 
-        /**
-         * 成功信息条
-         * @param message
-         * @param data
-         */
         function successBox(message, data) {
             Common.successBox(Form.failedBox, message)
         }
 
-        /**
-         * 失败信息条
-         * @param message
-         * @param data
-         */
         function failed(message, data) {
             Common.errorBox(Form.failedBox, message)
         }
 
-        /**
-         * request success
-         * @param result
-         */
         function response(result) {
             if (result.code == 0) {
                 failed(result.message, result.data);
@@ -70,14 +55,13 @@ var Form = {
         }
 
         function beforeSubmit(formData, jqForm, options) {
-            // 对要提交的数据进行修改
+            // 只加密显式标记的密码字段，避免通用表单误伤邮箱、LDAP、安装配置等明文密钥。
             for (var i = 0; i < formData.length; i++) {
-                if (formData[i].name == 'pwd'
-                    || formData[i].name == 'pwd_new'
-                    || formData[i].name == 'pwd_confirm'
-                    || formData[i].name == 'password') {
-                    var value = formData[i].value;
-                    formData[i].value = hex_sha256(value);
+                var field = jqForm.find(":input").filter(function () {
+                    return this.name == formData[i].name && $(this).attr("data-sha256") == "true";
+                });
+                if (field.length > 0 && formData[i].value) {
+                    formData[i].value = hex_sha256(formData[i].value);
                 }
             }
             return true;  // 返回true表示继续提交表单，返回false表示取消提交

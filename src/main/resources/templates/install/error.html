@@ -12,13 +12,12 @@
 </div>
 <div th:replace="~{install/layout :: footer}"></div>
 <script th:inline="javascript">
+    var redirect = /*[[${redirect != null ? redirect : '/author/index'}]]*/ "/author/index";
+    var sleep = /*[[${sleep != null ? sleep : 3000}]]*/ 3000;
+
     setTimeout(function () {
-        window.location.href = [[${redirect != null ? redirect : '/author/index'
-    }]]
-        ;
-    }, [[${sleep != null ? sleep : 3000
-    }]])
-    ;
+        window.location.href = redirect;
+    }, sleep);
 </script>
 </body>
 </html>

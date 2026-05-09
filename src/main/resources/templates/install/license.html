@@ -20,7 +20,7 @@
                             <label>本软件遵循 MIT 开源协议</label>
                             <pre th:text="${license}">MIT License</pre>
                         </div>
-                        <form class="form-inline" action="/install/license" method="post">
+                        <form class="form-inline" th:action="@{/install/license}" method="post">
                             <div class="col-md-offset-8 pull-right">
                                 <label><input type="checkbox" name="license_agree" value="1"
                                               th:checked="${license_agree == 1}"> <strong class="text-danger">我已阅读并同意使用该协议</strong></label>

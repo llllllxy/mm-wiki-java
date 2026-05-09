@@ -5,23 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-select/css/bootstrap-select.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/jquery/jquery.form.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/bootstrap-select.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js"></script>
-    <script src="/static/js/common/common.js"></script>
-    <script src="/static/js/common/date.js"></script>
-    <script src="/static/js/common/form.js"></script>
-    <script src="/static/js/common/layers.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-select/css/bootstrap-select.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js}"></script>
+    <script th:src="@{/static/js/common/common.js}"></script>
+    <script th:src="@{/static/js/common/date.js}"></script>
+    <script th:src="@{/static/js/common/form.js}"></script>
+    <script th:src="@{/static/js/common/layers.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -29,7 +30,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" action="/document/save" onsubmit="return false">
+            <form class="form-horizontal" method="post" th:action="@{/document/save}" onsubmit="return false">
                 <input type="hidden" name="parent_id" th:value="${parent_id}">
                 <input type="hidden" name="space_id" th:value="${space_id}">
                 <div class="form-group">

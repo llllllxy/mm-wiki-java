@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -72,11 +72,12 @@
                         <span class="label label-danger" th:if="${space.isExport != 1}">否</span>
                     </td>
                     <td class="center">
-                        <a name="user" th:attr="data-link=@{/system/space/member(space_id=${space.spaceId})}"><i class="fa fa-group"></i> 成员</a>
+                        <a name="user" th:data-link="@{/system/space/member(space_id=${space.spaceId})}"><i
+                                class="fa fa-group"></i> 成员</a>
                         <a th:href="@{/system/space/edit(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-edit"></i> 编辑</a>
                         <a th:href="@{/system/space/download(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-download-alt"></i> 下载</a>
                         <a data-message="确定删除该空间吗？删除前请确认已经备份。"
-                           th:data-url="|/system/space/delete?space_id=${space.spaceId}|"
+                           th:data-url="@{/system/space/delete(space_id=${space.spaceId})}"
                            onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
                                 class="glyphicon glyphicon-remove"></i> 删除</a>
                     </td>

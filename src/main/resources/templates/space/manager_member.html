@@ -5,17 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1 , user-scalable=no">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-select/css/bootstrap-select.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap-select/js/bootstrap-select.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/layers.js"></script>
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-select/css/bootstrap-select.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -23,7 +23,7 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form action="/space/addMember" method="post">
+                <form th:action="@{/space/addMember}" method="post">
                     <div class="col-md-3">
                         <div class="input-group">
                             <span class="input-group-addon">空间权限</span>
@@ -67,7 +67,7 @@
                     <td th:text="${member.user.mobile}">mobile</td>
                     <td class="center" style="padding: 4px 6px">
                         <select name="edit_privilege" class="form-control input-xs"
-                                th:attr="data-link=@{/space/modifyMember(space_id=${space_id},space_user_id=${member.spaceUserId})}">
+                                th:data-link="@{/space/modifyMember(space_id=${space_id},space_user_id=${member.spaceUserId})}">
                             <option value="0" th:selected="${member.privilege == 0}">浏览者</option>
                             <option value="1" th:selected="${member.privilege == 1}">编辑者</option>
                             <option value="2" th:selected="${member.privilege == 2}">管理员</option>

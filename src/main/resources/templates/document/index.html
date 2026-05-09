@@ -7,27 +7,27 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>MM-Wiki</title>
-    <link type="favicon" rel="shortcut icon" href="/static/images/favicon.ico" />
-    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/popover/css/jquery.webui-popover.min.css">
-    <link type="text/css" rel="stylesheet" href="/static/plugins/zTreev3/css/metroStyle/metroStyle.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/dashboard.css">
-    <link type="text/css" rel="stylesheet" href="/static/css/common.css">
+    <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/popover/css/jquery.webui-popover.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/zTreev3/css/metroStyle/metroStyle.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/dashboard.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
 
-    <script type="text/javascript" src="/static/plugins/jquery/jquery1.11.js"></script>
-    <script type="text/javascript" src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/popover/js/jquery.webui-popover.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/layui/layer/layer.js"></script>
-    <script type="text/javascript" src="/static/plugins/cipher/sha256.js"></script>
-    <script type="text/javascript" src="/static/plugins/layout/jquery-ui-1.11.0.js"></script>
-    <script type="text/javascript" src="/static/plugins/layout/jquery.layout.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/zTreev3/js/jquery.ztree.all.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/zTreev3/js/jquery.ztree.exhide.min.js"></script>
-    <script type="text/javascript" src="/static/plugins/zTreev3/js/fuzzysearch.min.js"></script>
-    <script type="text/javascript" src="/static/js/common/common.js"></script>
-    <script type="text/javascript" src="/static/js/common/layers.js"></script>
-    <script type="text/javascript" src="/static/js/modules/common.js"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/popover/js/jquery.webui-popover.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layout/jquery-ui-1.11.0.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/layout/jquery.layout.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/zTreev3/js/jquery.ztree.all.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/zTreev3/js/jquery.ztree.exhide.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/zTreev3/js/fuzzysearch.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/modules/common.js}"></script>
 </head>
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
@@ -44,7 +44,8 @@
         <div class="page-tree">
             <h4 class="text-center">
                 <a th:href="@{/document/index(document_id=${space_document.documentId})}" th:text="${space_document.name}">空间首页</a>
-                <a name="create_document" th:attr="data-link=@{/document/add(space_id=${space_document.spaceId},parent_id=${space_document.documentId})}">
+                <a name="create_document"
+                   th:data-link="@{/document/add(space_id=${space_document.spaceId},parent_id=${space_document.documentId})}">
                     <span class="fa fa-plus-square-o"></span>
                 </a>
             </h4>
@@ -53,7 +54,7 @@
         </div>
     </div>
 </div>
-<script type="text/javascript" src="/static/js/modules/document.js"></script>
+<script type="text/javascript" th:src="@{/static/js/modules/document.js}"></script>
 <script th:inline="javascript">
     var documentsData = JSON.parse(/*[[${documentsJson}]]*/ "[]");
     var defaultDocumentId = /*[[${default_document_id}]]*/ "";

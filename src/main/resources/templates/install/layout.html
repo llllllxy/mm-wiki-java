@@ -5,19 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title}">MM-Wiki 安装向导</title>
-    <link rel="stylesheet" type="text/css" href="/static/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/plugins/bootstrap/css/bootstrap.min.css">
-    <link rel="icon" href="/static/images/favicon.ico">
-    <script src="/static/plugins/jquery/jquery.min.js"></script>
-    <script src="/static/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/plugins/layui/layer/layer.js"></script>
-    <script src="/static/plugins/jquery/jquery.form.js"></script>
-    <script src="/static/plugins/cipher/sha256.js"></script>
-    <script src="/static/js/common/layers.js"></script>
-    <script src="/static/js/common/form.js"></script>
-    <script src="/static/js/common/common.js"></script>
-    <script src="/static/js/modules/install.js"></script>
-    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/static/css/common.css}">
+    <link rel="icon" th:href="@{/static/images/favicon.ico}">
+    <script th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/static/plugins/layui/layer/layer.js}"></script>
+    <script th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
+    <script th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script th:src="@{/static/js/common/layers.js}"></script>
+    <script th:src="@{/static/js/common/form.js}"></script>
+    <script th:src="@{/static/js/common/common.js}"></script>
+    <script th:src="@{/static/js/modules/install.js}"></script>
 </head>
 <body>
 <div th:fragment="nav" class="navbar navbar-inverse navbar-fixed-top">
@@ -70,7 +70,7 @@
 </div>
 <footer th:fragment="footer" class="container">
     <hr>
-    <p>&copy; <span th:text="${copyright}">2018 phachon</span></p>
+    <p>&copy; <span th:text="${copyright}">2026 tinycloud</span></p>
 </footer>
 </body>
 </html>
