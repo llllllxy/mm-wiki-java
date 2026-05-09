@@ -309,6 +309,10 @@ public class InstallService {
                   port: %s
                   address: %s
                   servlet:
+                    session:
+                      cookie:
+                        http-only: true
+                        secure: true
                     encoding:
                       charset: UTF-8
                       force: true
@@ -356,6 +360,15 @@ public class InstallService {
                   type-aliases-package: org.tinycloud.mmwiki.domain
                   configuration:
                     map-underscore-to-camel-case: true
+                
+                async:
+                  executor:
+                    thread:
+                      core-pool-size: 2
+                      max-pool-size: 8
+                      keep-alive-seconds: 60
+                      queue-capacity: 100
+                      name-prefix: mmwiki-async-
                 
                 mmwiki:
                   version: %s
