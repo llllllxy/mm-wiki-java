@@ -25,8 +25,9 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${email != null} ? '/system/email/modify' : '/system/email/save'">
-                <input type="hidden" name="email_id" th:value="${email != null ? email.emailId : ''}">
+            <form class="form-horizontal" method="post"
+                  th:action="${email != null} ? @{/system/email/modify} : @{/system/email/save}">
+                <input type="hidden" name="emailId" th:value="${email != null ? email.emailId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 服务名称</label>
                     <div class="col-sm-4">
@@ -53,7 +54,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 发件人邮箱</label>
                     <div class="col-sm-4">
-                        <input type="text" name="sender_address" class="form-control" placeholder="请输入发件人邮箱"
+                        <input type="text" name="senderAddress" class="form-control" placeholder="请输入发件人邮箱"
                                th:value="${email != null ? email.senderAddress : ''}">
                     </div>
                     <div class="col-sm-4 form-comment">
@@ -84,14 +85,14 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 是否使用 SSL</label>
                     <div class="col-sm-1">
-                        <input type="checkbox" name="is_ssl" value="1"
+                        <input type="checkbox" name="isSsl" value="1"
                                th:checked="${email != null and email.isSsl == 1}">
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-2 control-label"> 发件人显示名</label>
                     <div class="col-sm-4">
-                        <input type="text" name="sender_name" class="form-control" placeholder="请输入发件人显示名"
+                        <input type="text" name="senderName" class="form-control" placeholder="请输入发件人显示名"
                                th:value="${email != null and !#strings.isEmpty(email.senderName) ? email.senderName : 'MM-Wiki'}">
                     </div>
                     <div class="col-sm-4 form-comment">
@@ -101,7 +102,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label"> 邮件标题前缀</label>
                     <div class="col-sm-4">
-                        <input type="text" name="sender_title_prefix" class="form-control"
+                        <input type="text" name="senderTitlePrefix" class="form-control"
                                placeholder="请输入邮件标题前缀"
                                th:value="${email != null and !#strings.isEmpty(email.senderTitlePrefix) ? email.senderTitlePrefix : '[MM-Wiki]'}">
                     </div>
@@ -109,7 +110,10 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="button" onclick="Email.testSend(this.form, '/system/email/test');" class="btn btn-success">测试</button>
+                        <button type="button" th:data-url="@{/system/email/test}"
+                                onclick="Email.testSend(this.form, this.getAttribute('data-url'));"
+                                class="btn btn-success">测试
+                        </button>
                         <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
                     </div>
                 </div>

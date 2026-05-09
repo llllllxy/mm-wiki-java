@@ -1,7 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +46,7 @@ public class SystemEmailController extends ControllerSupport {
      * 修改邮件服务器表单页。
      */
     @GetMapping("/system/email/edit")
-    public String edit(@RequestParam("email_id") Integer emailId, Model model) {
+    public String edit(@RequestParam("emailId") Integer emailId, Model model) {
         EmailServer email = emailService.findById(emailId);
         if (email == null) {
             throw new IllegalStateException("邮件服务器不存在。");
@@ -61,8 +60,8 @@ public class SystemEmailController extends ControllerSupport {
      */
     @PostMapping("/system/email/save")
     @ResponseBody
-    public JsonResponse<Void> save(HttpServletRequest request) {
-        return emailService.save(buildEmailServer(null, request));
+    public JsonResponse<Void> save(EmailServer emailServer) {
+        return emailService.save(emailServer);
     }
 
     /**
@@ -70,8 +69,8 @@ public class SystemEmailController extends ControllerSupport {
      */
     @PostMapping("/system/email/modify")
     @ResponseBody
-    public JsonResponse<Void> modify(HttpServletRequest request) {
-        return emailService.update(buildEmailServer(integerParam(request, "email_id", "emailId"), request));
+    public JsonResponse<Void> modify(EmailServer emailServer) {
+        return emailService.update(emailServer);
     }
 
     /**
@@ -79,7 +78,7 @@ public class SystemEmailController extends ControllerSupport {
      */
     @PostMapping("/system/email/used")
     @ResponseBody
-    public JsonResponse<Void> used(@RequestParam("email_id") Integer emailId) {
+    public JsonResponse<Void> used(@RequestParam("emailId") Integer emailId) {
         return emailService.markUsed(emailId);
     }
 
@@ -88,7 +87,7 @@ public class SystemEmailController extends ControllerSupport {
      */
     @PostMapping("/system/email/delete")
     @ResponseBody
-    public JsonResponse<Void> delete(@RequestParam("email_id") Integer emailId) {
+    public JsonResponse<Void> delete(@RequestParam("emailId") Integer emailId) {
         return emailService.delete(emailId);
     }
 
@@ -97,44 +96,7 @@ public class SystemEmailController extends ControllerSupport {
      */
     @PostMapping("/system/email/test")
     @ResponseBody
-    public JsonResponse<Void> test(HttpServletRequest request) {
-        return emailService.testSend(buildEmailServer(integerParam(request, "email_id", "emailId"), request), param(request, "emails"));
-    }
-
-    private EmailServer buildEmailServer(Integer emailId, HttpServletRequest request) {
-        EmailServer emailServer = new EmailServer();
-        emailServer.setEmailId(emailId);
-        emailServer.setName(param(request, "name"));
-        emailServer.setSenderAddress(param(request, "sender_address", "senderAddress"));
-        emailServer.setSenderName(param(request, "sender_name", "senderName"));
-        emailServer.setSenderTitlePrefix(param(request, "sender_title_prefix", "senderTitlePrefix"));
-        emailServer.setHost(param(request, "host"));
-        emailServer.setPort(integerParam(request, "port"));
-        emailServer.setUsername(param(request, "username"));
-        emailServer.setPassword(param(request, "password", "mailPassword"));
-        emailServer.setIsSsl(integerParam(request, "is_ssl", "isSsl"));
-        return emailServer;
-    }
-
-    private String param(HttpServletRequest request, String... names) {
-        for (String name : names) {
-            String value = request.getParameter(name);
-            if (value != null) {
-                return value;
-            }
-        }
-        return "";
-    }
-
-    private Integer integerParam(HttpServletRequest request, String... names) {
-        String value = param(request, names);
-        if (value == null || value.isBlank()) {
-            return 0;
-        }
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException ex) {
-            return 0;
-        }
+    public JsonResponse<Void> test(EmailServer emailServer, @RequestParam(defaultValue = "") String emails) {
+        return emailService.testSend(emailServer, emails);
     }
 }
