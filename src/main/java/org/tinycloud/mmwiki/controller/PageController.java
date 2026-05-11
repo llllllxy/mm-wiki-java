@@ -66,13 +66,13 @@ public class PageController extends ControllerSupport {
     @PostMapping("/page/modify")
     @ResponseBody
     public JsonResponse<Void> modify(
-        @RequestParam("document_id") String documentId,
-        @RequestParam("name") String name,
-        @RequestParam(name = "document_page_editor-markdown-doc", required = false, defaultValue = "") String content,
-        @RequestParam(name = "comment", required = false, defaultValue = "") String comment,
-        @RequestParam(name = "is_notice_user", required = false, defaultValue = "0") String isNoticeUser,
-        @RequestParam(name = "is_follow_doc", required = false, defaultValue = "0") String isFollowDoc,
-        HttpServletRequest request
+            @RequestParam("document_id") String documentId,
+            @RequestParam("name") String name,
+            @RequestParam(name = "document_page_editor-markdown-doc", required = false, defaultValue = "") String content,
+            @RequestParam(name = "comment", required = false, defaultValue = "") String comment,
+            @RequestParam(name = "is_notice_user", required = false, defaultValue = "0") String isNoticeUser,
+            @RequestParam(name = "is_follow_doc", required = false, defaultValue = "0") String isFollowDoc,
+            HttpServletRequest request
     ) throws Exception {
         return documentService.modifyPage(
                 currentUser(request),
@@ -100,12 +100,14 @@ public class PageController extends ControllerSupport {
     }
 
     @GetMapping("/page/export")
-    public ResponseEntity<ByteArrayResource> export(@RequestParam("document_id") String documentId, HttpServletRequest request) throws Exception {
-        ExportPayload payload = documentService.exportDocument(documentId, currentUser(request));
+    public ResponseEntity<ByteArrayResource> export(@RequestParam("document_id") String documentId,
+                                                    @RequestParam(name = "output", required = false, defaultValue = "markdown") String output,
+                                                    HttpServletRequest request) throws Exception {
+        ExportPayload payload = documentService.exportDocument(documentId, currentUser(request), output);
         String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(payload.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM : payload.getContentType())
                 .contentLength(payload.getResource().contentLength())
                 .body(payload.getResource());
     }

@@ -80,6 +80,11 @@ mmwiki:
   copyright: 2026 TinyCloud
   system-name-fallback: Markdown Mini Wiki
   document-root-dir: ./data
+  pdf:
+    # 可选：PDF 导出中文字体路径。支持文件路径或 classpath:/fonts/pdf/xxx.ttf。
+    # 当前仅使用 ttf 格式，避免部分 otf/ttc 字体在 PDFBox 下解析异常。
+    # 为空时使用内置字体目录 fonts/pdf 下的 ttf 字体，不自动探测操作系统字体。
+    font-path:
   search:
     interval-time: 30
     batch-update-doc-num: 100

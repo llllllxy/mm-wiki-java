@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.vo;
 
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 
 /**
  * ExportPayload view object.
@@ -20,6 +21,11 @@ public class ExportPayload {
      */
     private ByteArrayResource resource;
 
+    /**
+     * contentType.
+     */
+    private MediaType contentType;
+
     public ExportPayload() {
     }
 
@@ -27,8 +33,17 @@ public class ExportPayload {
             String fileName,
             ByteArrayResource resource
     ) {
+        this(fileName, resource, MediaType.APPLICATION_OCTET_STREAM);
+    }
+
+    public ExportPayload(
+            String fileName,
+            ByteArrayResource resource,
+            MediaType contentType
+    ) {
         this.fileName = fileName;
         this.resource = resource;
+        this.contentType = contentType;
     }
 
     public String getFileName() {
@@ -45,6 +60,14 @@ public class ExportPayload {
 
     public void setResource(ByteArrayResource resource) {
         this.resource = resource;
+    }
+
+    public MediaType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(MediaType contentType) {
+        this.contentType = contentType;
     }
 
 }

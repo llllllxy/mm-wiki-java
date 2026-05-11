@@ -31,6 +31,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,6 +94,9 @@ public class DocumentService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PdfExportService pdfExportService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -172,9 +176,9 @@ public class DocumentService {
     }
 
     /**
-     * 导出 Markdown 文档内容。
+     * 按指定格式导出文档内容。
      */
-    public ExportPayload exportDocument(String documentId, CurrentUser currentUser) throws IOException {
+    public ExportPayload exportDocument(String documentId, CurrentUser currentUser, String output) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
@@ -185,8 +189,17 @@ public class DocumentService {
             throw new IllegalStateException("该文档不允许导出。");
         }
 
+        String exportType = StringUtils.hasText(output) ? output.trim().toLowerCase() : "markdown";
+        if (!"markdown".equals(exportType) && !"pdf".equals(exportType)) {
+            throw new IllegalStateException("不支持的导出类型。");
+        }
+
         List<Document> parentDocuments = getParentDocuments(document);
         String pageFile = documentFileService.resolvePageFile(document, parentDocuments);
+        if ("pdf".equals(exportType)) {
+            String pageContent = documentFileService.readPage(pageFile);
+            return new ExportPayload(document.getName() + ".pdf", new ByteArrayResource(pdfExportService.export(document, pageContent)), MediaType.APPLICATION_PDF);
+        }
         List<Attachment> attachments = attachmentService.findByDocumentId(documentId);
         return new ExportPayload(document.getName() + ".zip", new ByteArrayResource(zipDocument(document, pageFile, attachments)));
     }

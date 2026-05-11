@@ -17,6 +17,7 @@ public class MmwikiProperties {
     private String systemNameFallback = "Markdown Mini Wiki";
     private String documentRootDir = "./data";
     private Search search = new Search();
+    private Pdf pdf = new Pdf();
 
     public String getVersion() {
         return version;
@@ -58,6 +59,14 @@ public class MmwikiProperties {
         this.search = search;
     }
 
+    public Pdf getPdf() {
+        return pdf;
+    }
+
+    public void setPdf(Pdf pdf) {
+        this.pdf = pdf;
+    }
+
     public static class Search {
         private int intervalTime = 30;
         private int batchUpdateDocNum = 100;
@@ -76,6 +85,18 @@ public class MmwikiProperties {
 
         public void setBatchUpdateDocNum(int batchUpdateDocNum) {
             this.batchUpdateDocNum = batchUpdateDocNum;
+        }
+    }
+
+    public static class Pdf {
+        private String fontPath = "";
+
+        public String getFontPath() {
+            return fontPath;
+        }
+
+        public void setFontPath(String fontPath) {
+            this.fontPath = fontPath;
         }
     }
 }
