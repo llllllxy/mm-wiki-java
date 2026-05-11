@@ -60,6 +60,9 @@
                             最后更新于 <span th:text="${document_update_time}">2026/05/06 10:00:00</span>
                             <a name="history" th:data-link="@{/document/history(document_id=${document.documentId})}">&nbsp;<i
                                     class="fa fa-history item">查看修改历史</i></a>
+                            <a th:data-document-id="${document.documentId}"
+                               onclick="Page.attachment(this.getAttribute('data-document-id'))">&nbsp;<i
+                                    class="fa fa-paperclip item"></i> 查看附件</a>
                         </p>
                     </div>
                     <div class="col-md-4 text-right">
@@ -73,6 +76,23 @@
                                th:data-url="@{/collection/cancel(collection_id=${collection_id})}"
                                onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
                                     class="glyphicon glyphicon-star"></i>&nbsp;取消</a>
+                            <a th:if="${space != null and space.isShare == 1}" type="button" class="btn btn-default"
+                               name="share" th:href="@{/page/display(document_id=${document.documentId})}"
+                               target="_blank"><i class="glyphicon glyphicon-share-alt"></i>&nbsp;分享</a>
+                            <button th:if="${space != null and space.isExport == 1}" type="button"
+                                    class="btn btn-default"
+                                    data-toggle="web-popover" data-placement="bottom">
+                                <i class="glyphicon glyphicon-export"></i>&nbsp;导出
+                            </button>
+                            <div th:if="${space != null and space.isExport == 1}" class="webui-popover-content">
+                                <ul class="dropdown-menu webui-popover-menu">
+                                    <li>
+                                        <a th:href="@{/page/export(document_id=${document.documentId},output='markdown')}">
+                                            <span class="fa fa-file-text"></span> Markdown
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
