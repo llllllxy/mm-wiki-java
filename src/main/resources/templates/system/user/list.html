@@ -65,6 +65,7 @@
 <script type="text/javascript" th:inline="javascript">
     AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var roleNameIndex = /*[[${roleNameIndex}]]*/ {};
+    var loginRoleId = Number(/*[[${login_role_id}]]*/ 0);
 
     function userInfoLink(row, text) {
         return '<a name="info" data-link="' + AjaxUtil.ctx + 'system/user/info?user_id=' + row.userId + '">' + tableHtml(text) + '</a>';
@@ -80,7 +81,10 @@
 
     function actionFormatter(value, row) {
         var html = '<a name="info" data-link="' + AjaxUtil.ctx + 'system/user/info?user_id=' + row.userId + '"><i class="glyphicon glyphicon-eye-open"></i> 详情</a> ';
-        html += '<a href="' + AjaxUtil.ctx + 'system/user/edit?user_id=' + row.userId + '"><i class="glyphicon glyphicon-edit"></i> 编辑</a> ';
+        if (row.roleId === 1 && loginRoleId !== 1) {
+            return html + '<label class="text text-danger">暂无权限</label>';
+        }
+        html += '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/user/edit?user_id=' + row.userId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ';
         if (row.isForbidden === 1) {
             html += '<a data-message="确定恢复该用户吗？" data-url="' + AjaxUtil.ctx + 'system/user/recover?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok"></i> 恢复</a>';
         } else if (row.roleId !== 1) {
@@ -123,6 +127,7 @@
             ],
             onLoadSuccess: function () {
                 Layers.bindIframe("[name='info']", "用户详情", "500px", "1000px");
+                Layers.bindIframe("[name='edit']", "修改用户信息", "450px", "1000px");
             }
         });
     });

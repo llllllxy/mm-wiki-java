@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author liuxingyu01
  * @since 2026-05-06
  */
-public class EmailUtils {
+public final class EmailUtils {
 
     private static final Logger log = LoggerFactory.getLogger(EmailUtils.class);
 

@@ -17,7 +17,7 @@ import java.util.Enumeration;
  * @author liuxingyu01
  * @since 2023-04-06 15:11:53
  */
-public class LocalHostUtils {
+public final class LocalHostUtils {
     private static final Logger log = LoggerFactory.getLogger(LocalHostUtils.class);
 
     /**

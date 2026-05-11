@@ -27,8 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -48,14 +47,7 @@ import java.util.regex.Pattern;
  */
 @Service
 public class PdfExportService {
-
     private static final Logger log = LoggerFactory.getLogger(PdfExportService.class);
-
-    /**
-     * PDF 页面中展示的导出时间格式。
-     */
-    private static final DateTimeFormatter EXPORT_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.systemDefault());
 
     /**
      * 匹配 Markdown 转成 HTML 后的 img 标签 src 属性，用于把本地图片内嵌到 PDF。
@@ -170,7 +162,7 @@ public class PdfExportService {
      */
     private String buildHtml(Document document, String bodyHtml) {
         String title = HtmlUtils.htmlEscape(document.getName(), StandardCharsets.UTF_8.name());
-        String exportTime = EXPORT_TIME_FORMATTER.format(Instant.now());
+        String exportTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
         return """
                 <!DOCTYPE html>
                 <html>

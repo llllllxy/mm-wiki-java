@@ -54,9 +54,19 @@
                         <p class="view-page-time">
                             <i class="fa fa-calendar fa-fw"></i>
                             由
-                            <a class="text text-info" th:href="@{/user/info(user_id=${create_user.userId})}" th:text="${create_user.username + '（' + create_user.givenName + '）'}">创建者</a>
+                            <a th:if="${create_user.userId == login_user_id}" class="text text-info"
+                               th:href="@{/system/main/index}" target="_parent"
+                               th:text="${create_user.username + '（' + create_user.givenName + '）'}">创建者</a>
+                            <a th:unless="${create_user.userId == login_user_id}" class="text text-info"
+                               th:href="@{/user/info(user_id=${create_user.userId})}"
+                               th:text="${create_user.username + '（' + create_user.givenName + '）'}">创建者</a>
                             创建于 <span th:text="${document_create_time}">2026/05/06 10:00:00</span>，由
-                            <a class="text text-info" th:href="@{/user/info(user_id=${edit_user.userId})}" th:text="${edit_user.username + '（' + edit_user.givenName + '）'}">修改者</a>
+                            <a th:if="${edit_user.userId == login_user_id}" class="text text-info"
+                               th:href="@{/system/main/index}" target="_parent"
+                               th:text="${edit_user.username + '（' + edit_user.givenName + '）'}">修改者</a>
+                            <a th:unless="${edit_user.userId == login_user_id}" class="text text-info"
+                               th:href="@{/user/info(user_id=${edit_user.userId})}"
+                               th:text="${edit_user.username + '（' + edit_user.givenName + '）'}">修改者</a>
                             最后更新于 <span th:text="${document_update_time}">2026/05/06 10:00:00</span>
                             <a name="history" th:data-link="@{/document/history(document_id=${document.documentId})}">&nbsp;<i
                                     class="fa fa-history item">查看修改历史</i></a>

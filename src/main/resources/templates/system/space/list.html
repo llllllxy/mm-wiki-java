@@ -62,7 +62,13 @@
     }
 
     function visitFormatter(value) {
-        return value === "private" ? tableText("Private", "text text-danger") : tableText("Public", "text text-primary");
+        if (value === "private") {
+            return tableText("Private", "text text-danger");
+        }
+        if (value === "internal") {
+            return tableText("Internal", "text text-warning");
+        }
+        return tableText("Public", "text text-primary");
     }
 
     function boolFormatter(value) {
@@ -71,7 +77,7 @@
 
     function actionFormatter(value, row) {
         return '<a name="user" data-link="' + AjaxUtil.ctx + 'system/space/member?space_id=' + row.spaceId + '"><i class="fa fa-group"></i> 成员</a> ' +
-            '<a href="' + AjaxUtil.ctx + 'system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 编辑</a> ' +
+            '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ' +
             '<a href="' + AjaxUtil.ctx + 'system/space/download?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-download-alt"></i> 下载</a> ' +
             '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="' + AjaxUtil.ctx + 'system/space/delete?space_id=' + row.spaceId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
     }
@@ -99,6 +105,7 @@
             ],
             onLoadSuccess: function () {
                 Layers.bindIframe("[name='user']", "空间成员列表", "500px", "1000px");
+                Layers.bindIframe("[name='edit']", "修改空间信息", "450px", "950px");
             }
         });
     });
