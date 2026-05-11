@@ -20,6 +20,7 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LinkMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -73,6 +74,15 @@ public class MainService {
         Paginator paginator = Paginator.of(page, number, pageInfo.getTotal(), "/main/default");
 
         return new MainDefaultView(panelTitle, panelDescription, logDocuments, links, contacts, paginator);
+    }
+
+    public PageModel<LogDocumentView> recentDocumentPage(Integer userId, int pageNum, int pageSize) {
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(userId));
+        for (LogDocumentView logDocument : pageInfo.getList()) {
+            logDocument.setCreateTimeText(TimeUtils.formatUnix(logDocument.getCreateTime()));
+        }
+        return PageModel.from(pageInfo);
     }
 
     public SearchView searchDocuments(Integer userId, String keyword, String searchType) {

@@ -7,12 +7,21 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -22,9 +31,9 @@
                 <h3><i class="fa fa-address-card-o"></i> <span th:text="${user.username + '（' + user.givenName + '）'}">用户</span></h3>
             </div>
             <ul class="nav nav-tabs">
-                <li><a href="/system/profile/info">用户信息</a></li>
-                <li><a href="/system/profile/followUser">关注用户</a></li>
-                <li class="active"><a href="/system/profile/followDoc">关注文档</a></li>
+                <li><a th:href="@{/system/profile/info}">用户信息</a></li>
+                <li><a th:href="@{/system/profile/followUser}">关注用户</a></li>
+                <li class="active"><a th:href="@{/system/profile/followDoc}">关注文档</a></li>
             </ul>
             <br>
             <div class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 10px">
@@ -33,34 +42,43 @@
                     当关注文档更新时会发送邮件通知，点击 <i class="glyphicon glyphicon-remove-circle"></i> 可移除。
                 </p>
             </div>
-            <div th:if="${count == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+            <div id="emptyFollowDocAlert" class="alert alert-info alert-dismissible fade in hide" role="alert"
+                 style="margin-bottom: 10px">
                 <p><i class="glyphicon glyphicon-volume-up"></i> 还没有关注任何文档。</p>
             </div>
-            <table th:if="${count > 0}" class="table">
-                <tbody>
-                <tr th:each="item : ${followDocuments}">
-                    <td>
-                        <strong>
-                            <a th:href="@{/document/index(document_id=${item.document.documentId})}" target="_parent">
-                                <i class="fa fa-file-o"></i>
-                                <span th:text="${item.document.name}">文档</span>
-                            </a>
-                        </strong>
-                        <span class="text-font-10" style="color: #8e8e8e;">（最后更新于 <span th:text="${item.updateTimeText}">2026-01-01 00:00:00</span>）</span>
-                    </td>
-                    <td class="w5p center">
-                        <a th:data-url="@{/follow/cancel(follow_id=${item.followId},redirect='/system/profile/followDoc')}"
-                           onclick="Common.ajaxSubmit(this.getAttribute('data-url'))" title="移除关注"><i
-                                class="glyphicon glyphicon-remove-circle"></i></a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="center" style="margin-top: 5px" th:if="${paginator != null and paginator.nums > 0}">
-                <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
-            </div>
+            <table id="followDocTable"></table>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function documentFormatter(value, row) {
+        return '<strong><a href="' + AjaxUtil.ctx + 'document/index?document_id=' + row.document.documentId + '" target="_parent"><i class="fa fa-file-o"></i> ' + tableHtml(row.document.name) + '</a></strong> ' +
+            '<span class="text-font-10" style="color: #8e8e8e;">（最后更新于 ' + tableHtml(row.updateTimeText) + '）</span>';
+    }
+
+    function actionFormatter(value, row) {
+        return '<a data-url="' + AjaxUtil.ctx + 'follow/cancel?follow_id=' + row.followId + '&redirect=/system/profile/followDoc" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))" title="移除关注"><i class="glyphicon glyphicon-remove-circle"></i></a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "followDocTable",
+            url: AjaxUtil.ctx + "system/profile/followDoc",
+            uniqueId: "followId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            columns: [
+                {field: "document.name", title: "文档", formatter: documentFormatter},
+                {field: "operate", title: "操作", width: "5%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function (data) {
+                $("#emptyFollowDocAlert").toggleClass("hide", (data.total || 0) > 0);
+            }
+        });
+    });
+</script>
 </body>
 </html>

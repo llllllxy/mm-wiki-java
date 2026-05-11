@@ -9,11 +9,16 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.tinycloud.mmwiki.domain.Document;
+import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.service.MainService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.CurrentUser;
+import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -38,22 +43,23 @@ public class MainController extends ControllerSupport {
     }
 
     @GetMapping("/main/default")
-    public String defaultPage(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int number,
-        HttpServletRequest request,
-        Model model
-    ) {
+    public String defaultPage(HttpServletRequest request, Model model) {
         nav(model, "main");
         CurrentUser currentUser = currentUser(request);
-        MainDefaultView view = mainService.loadDefaultView(currentUser.getUserId(), page, number);
+        MainDefaultView view = mainService.loadDefaultView(currentUser.getUserId(), 1, 10);
         model.addAttribute("panel_title", view.getPanelTitle());
         model.addAttribute("panel_description", view.getPanelDescription());
-        model.addAttribute("logDocuments", view.getLogDocuments());
         model.addAttribute("links", view.getLinks());
         model.addAttribute("contacts", view.getContacts());
-        model.addAttribute("paginator", view.getPaginator());
         return "main/default";
+    }
+
+    @PostMapping("/main/default")
+    @ResponseBody
+    public JsonResponse<PageModel<LogDocumentView>> defaultData(@RequestParam(defaultValue = "1") int pageNum,
+                                                                @RequestParam(defaultValue = "10") int pageSize,
+                                                                HttpServletRequest request) {
+        return JsonResponse.success("查询成功", mainService.recentDocumentPage(currentUser(request).getUserId(), pageNum, pageSize));
     }
 
     @GetMapping("/main/about")

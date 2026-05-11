@@ -6,6 +6,7 @@ import org.tinycloud.mmwiki.vo.PluginPage;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -20,6 +21,10 @@ public class PluginService {
     public PluginPage list(String keyword, int page, int number) {
         String search = keyword == null ? "" : keyword.trim();
         return new PluginPage(List.of(), search, Paginator.of(page, number, 0, "/system/plugin/list?keyword=" + search));
+    }
+
+    public PageModel<PluginEntry> pageModel(String keyword, int pageNum, int pageSize) {
+        return PageModel.build((long) pageNum, (long) pageSize, List.of(), 0L, 0L);
     }
 
     public PluginEntry findById(Integer pluginId) {

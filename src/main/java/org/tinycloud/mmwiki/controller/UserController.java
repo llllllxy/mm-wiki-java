@@ -11,10 +11,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.service.UserDirectoryService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.CurrentUser;
+import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -35,21 +40,22 @@ public class UserController extends ControllerSupport {
     }
 
     @GetMapping("/user/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String username,
-        HttpServletRequest request,
-        Model model
-    ) {
+    public String list(@RequestParam(defaultValue = "") String username,
+                       HttpServletRequest request,
+                       Model model) {
         CurrentUser currentUser = currentUser(request);
-        UserListPage view = userDirectoryService.listUsers(currentUser, username, page, number);
-        model.addAttribute("users", view.getUsers());
-        model.addAttribute("count", view.getCount());
-        model.addAttribute("username", view.getUsername());
-        model.addAttribute("paginator", view.getPaginator());
+        model.addAttribute("username", username == null ? "" : username.trim());
         model.addAttribute("login_user_id", currentUser.getUserId());
         return "user/list";
+    }
+
+    @PostMapping("/user/list")
+    @ResponseBody
+    public JsonResponse<PageModel<User>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "") String username,
+                                                  HttpServletRequest request) {
+        return JsonResponse.success("查询成功", userDirectoryService.userPage(currentUser(request), username, pageNum, pageSize));
     }
 
     @GetMapping("/user/follow")

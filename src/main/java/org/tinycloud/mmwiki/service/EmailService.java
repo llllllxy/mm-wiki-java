@@ -10,6 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -24,6 +25,9 @@ import org.tinycloud.mmwiki.mapper.FollowMapper;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 /**
  * 邮件服务器配置、测试发信与文档更新通知服务。
@@ -57,6 +61,22 @@ public class EmailService {
     public List<EmailServer> list(String keyword) {
         String search = keyword == null ? "" : keyword.trim();
         return search.isEmpty() ? emailMapper.findAll() : emailMapper.findByNameLike(search);
+    }
+
+    /**
+     * 分页查询邮件服务器配置。
+     */
+    public PageModel<EmailServer> pageModel(String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<EmailServer> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        emailMapper.findAll();
+                    } else {
+                        emailMapper.findByNameLike(search);
+                    }
+                });
+        return PageModel.from(pageInfo);
     }
 
     /**
@@ -108,6 +128,7 @@ public class EmailService {
     /**
      * 将指定邮件服务器设置为启用状态。
      */
+    @Transactional
     public JsonResponse<Void> markUsed(Integer emailId) {
         EmailServer email = findById(emailId);
         if (email == null) {

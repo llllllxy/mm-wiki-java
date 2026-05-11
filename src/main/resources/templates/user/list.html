@@ -7,81 +7,108 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="page-header">
-                <h2>全部用户 <small><span class="badge" th:text="${count}">0</span></small></h2>
+                <h2>全部用户 <small><span id="userCount" class="badge">0</span></small></h2>
             </div>
             <div class="row">
-                <form th:action="@{/user/list}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="userSearchForm" role="form">
                     <div class="col-md-9">
                         <div class="input-group"></div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="username" type="text" th:value="${username}" placeholder="用户名">
+                            <input id="username" class="form-control" name="username" type="text" th:value="${username}"
+                                   placeholder="用户名">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
             <br>
-            <table class="table">
-                <thead>
-                <tr>
-                    <td class="w15p text-left"><strong>用户名</strong></td>
-                    <td class="text-left"><strong>姓名</strong></td>
-                    <td class="text-left"><strong>职位</strong></td>
-                    <td class="w17p text-left"><strong>邮箱</strong></td>
-                    <td class="w11p text-left"><strong>座机</strong></td>
-                    <td class="w11p text-left"><strong>手机</strong></td>
-                    <td class="w11p text-left"><strong>IM</strong></td>
-                    <td class="w8p center"><strong>操作</strong></td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr class="space-list" th:each="user : ${users}">
-                    <td>
-                        <strong th:if="${user.userId == login_user_id}"><a href="/system/main/index" target="_parent" th:text="${user.username}">user</a></strong>
-                        <strong th:if="${user.userId != login_user_id}"><a th:href="@{/user/info(user_id=${user.userId})}" th:text="${user.username}">user</a></strong>
-                    </td>
-                    <td th:text="${user.givenName}">name</td>
-                    <td th:text="${user.position}">position</td>
-                    <td th:text="${user.email}">email</td>
-                    <td th:text="${user.phone}">phone</td>
-                    <td th:text="${user.mobile}">mobile</td>
-                    <td th:text="${user.im}">im</td>
-                    <td class="center">
-                        <th:block th:if="${user.userId != login_user_id}">
-                            <a th:if="${user.follow}" th:data-url="@{/follow/cancel(follow_id=${user.followId})}"
-                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
-                                    class="glyphicon glyphicon-heart"></i></a>
-                            <a th:if="${!user.follow}" th:data-url="@{/follow/add(type=2,object_id=${user.userId})}"
-                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
-                                    class="glyphicon glyphicon-heart-empty"></i></a>
-                        </th:block>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+            <table id="userTable"></table>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+    var loginUserId = /*[[${login_user_id}]]*/ 0;
+
+    function usernameFormatter(value, row) {
+        if (row.userId === loginUserId) {
+            return '<strong><a href="' + AjaxUtil.ctx + 'system/main/index" target="_parent">' + tableHtml(value) + '</a></strong>';
+        }
+        return '<strong>' + tableLink(AjaxUtil.ctx + "user/info?user_id=" + row.userId, value, null) + '</strong>';
+    }
+
+    function actionFormatter(value, row) {
+        if (row.userId === loginUserId) {
+            return "";
+        }
+        if (row.follow) {
+            return '<a data-url="' + AjaxUtil.ctx + 'follow/cancel?follow_id=' + row.followId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart"></i></a>';
+        }
+        return '<a data-url="' + AjaxUtil.ctx + 'follow/add?type=2&object_id=' + row.userId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart-empty"></i></a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "userTable",
+            url: AjaxUtil.ctx + "user/list",
+            uniqueId: "userId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {username: $("#username").val()};
+            },
+            columns: [
+                {field: "username", title: "用户名", width: "15%", formatter: usernameFormatter},
+                {field: "givenName", title: "姓名"},
+                {field: "position", title: "职位"},
+                {field: "email", title: "邮箱", width: "17%"},
+                {field: "phone", title: "座机", width: "11%"},
+                {field: "mobile", title: "手机", width: "11%"},
+                {field: "im", title: "IM", width: "11%"},
+                {field: "operate", title: "操作", width: "8%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function (data) {
+                $("#userCount").text(data.total || 0);
+            }
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("userTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("userSearchForm", "userTable");
+    }
+</script>
 </body>
 </html>

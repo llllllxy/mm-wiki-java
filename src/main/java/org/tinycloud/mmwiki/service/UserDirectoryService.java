@@ -20,6 +20,7 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -55,6 +56,20 @@ public class UserDirectoryService {
 
         markFollows(currentUser.getUserId(), users);
         return new UserListPage(users, keyword, pageInfo.getTotal(), Paginator.of(page, number, pageInfo.getTotal(), "/user/list"));
+    }
+
+    public PageModel<User> userPage(CurrentUser currentUser, String username, int pageNum, int pageSize) {
+        String keyword = username == null ? "" : username.trim();
+        PageInfo<User> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (keyword.isBlank()) {
+                        userService.pageAllActive();
+                    } else {
+                        userService.pageByUsernameLike(keyword);
+                    }
+                });
+        markFollows(currentUser.getUserId(), pageInfo.getList());
+        return PageModel.from(pageInfo);
     }
 
     public FollowUserListPage listFollowedUsers(Integer userId) {

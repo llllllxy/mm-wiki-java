@@ -7,8 +7,19 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -16,33 +27,33 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <table class="table">
-                <thead>
-                <tr>
-                    <td class="w10p text-left"><strong>用户</strong></td>
-                    <td class="w10p text-left"><strong>操作</strong></td>
-                    <td class=""><strong>备注</strong></td>
-                    <td class="w20p center"><strong>时间</strong></td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="logDocument : ${logDocuments}">
-                    <td th:text="${logDocument.username}">user</td>
-                    <td>
-                        <label class="text text-info" th:if="${logDocument.action == 1}">创建</label>
-                        <label class="text text-primary" th:if="${logDocument.action == 2}">修改</label>
-                        <label class="text text-danger" th:if="${logDocument.action == 3}">删除</label>
-                    </td>
-                    <td th:text="${logDocument.comment}">备注</td>
-                    <td class="center" th:text="${logDocument.createTimeText}">2026-05-06 10:00:00</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+            <table id="documentHistoryTable"></table>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+    var documentId = /*[[${documentId}]]*/ "";
+
+    $(function () {
+        initTable({
+            domId: "documentHistoryTable",
+            url: AjaxUtil.ctx + "document/history",
+            uniqueId: "logDocumentId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {document_id: documentId};
+            },
+            columns: [
+                {field: "username", title: "用户", width: "10%"},
+                {field: "action", title: "操作", width: "10%", formatter: tableDocumentAction},
+                {field: "comment", title: "备注"},
+                {field: "createTimeText", title: "时间", width: "20%", align: "center"}
+            ]
+        });
+    });
+</script>
 </body>
 </html>

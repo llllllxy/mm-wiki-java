@@ -22,6 +22,9 @@ import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 /**
  * MM-Wiki 页面与接口控制器。
  *
@@ -99,8 +102,9 @@ public class PageController extends ControllerSupport {
     @GetMapping("/page/export")
     public ResponseEntity<ByteArrayResource> export(@RequestParam("document_id") String documentId, HttpServletRequest request) throws Exception {
         ExportPayload payload = documentService.exportDocument(documentId, currentUser(request));
+        String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + payload.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .contentLength(payload.getResource().contentLength())
                 .body(payload.getResource());

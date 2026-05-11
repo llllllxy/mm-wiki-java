@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.service.PluginService;
+import org.tinycloud.mmwiki.vo.PluginEntry;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -26,17 +28,19 @@ public class SystemPluginController extends ControllerSupport {
     private PluginService pluginService;
 
     @GetMapping("/system/plugin/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        Model model
-    ) {
-        PluginPage view = pluginService.list(keyword, page, number);
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        PluginPage view = pluginService.list(keyword, 1, 20);
         model.addAttribute("plugins", view.getPlugins());
         model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
         return "system/plugin/list";
+    }
+
+    @PostMapping("/system/plugin/list")
+    @ResponseBody
+    public JsonResponse<PageModel<PluginEntry>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                         @RequestParam(defaultValue = "20") int pageSize,
+                                                         @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", pluginService.pageModel(keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/plugin/config")

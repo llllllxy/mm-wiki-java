@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.DocumentHistoryView;
 import org.tinycloud.mmwiki.service.DocumentService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -69,15 +71,19 @@ public class DocumentController extends ControllerSupport {
     @GetMapping("/document/history")
     public String history(
         @RequestParam("document_id") String documentId,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int number,
-        HttpServletRequest request,
         Model model
     ) {
-        HistoryPage history = documentService.loadHistory(documentId, currentUser(request), page, number);
-        model.addAttribute("logDocuments", history.getItems());
-        model.addAttribute("paginator", history.getPaginator());
+        model.addAttribute("documentId", documentId);
         return "document/history";
+    }
+
+    @PostMapping("/document/history")
+    @ResponseBody
+    public JsonResponse<PageModel<DocumentHistoryView>> historyData(@RequestParam("document_id") String documentId,
+                                                                    @RequestParam(defaultValue = "1") int pageNum,
+                                                                    @RequestParam(defaultValue = "10") int pageSize,
+                                                                    HttpServletRequest request) {
+        return JsonResponse.success("查询成功", documentService.historyPage(documentId, currentUser(request), pageNum, pageSize));
     }
 
     @PostMapping("/document/move")

@@ -18,6 +18,7 @@ import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -35,27 +36,26 @@ public class SystemUserController extends ControllerSupport {
     private RoleService roleService;
 
     @GetMapping("/system/user/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String username,
-        @RequestParam(value = "role_id", required = false) Integer roleId,
-        Model model
-    ) {
-        String keyword = username == null ? "" : username.trim();
-
-        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> userService.pageByFilters(keyword, roleId));
-        List<User> users = pageInfo.getList();
-        Map<Integer, String> roleNameIndex = roleService.roleNameIndex();
-
-        model.addAttribute("users", users);
-        model.addAttribute("username", keyword);
+    public String list(@RequestParam(defaultValue = "") String username,
+                       @RequestParam(value = "role_id", required = false) Integer roleId,
+                       Model model) {
+        model.addAttribute("username", username == null ? "" : username.trim());
         model.addAttribute("roleId", roleId);
         model.addAttribute("roles", roleService.findAllActive());
-        model.addAttribute("roleNameIndex", roleNameIndex);
-        model.addAttribute("paginator", Paginator.of(page, number, pageInfo.getTotal(), "/system/user/list?username=" + keyword + rolePart(roleId)));
+        model.addAttribute("roleNameIndex", roleService.roleNameIndex());
         return "system/user/list";
+    }
+
+    @PostMapping("/system/user/list")
+    @ResponseBody
+    public JsonResponse<PageModel<User>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "") String username,
+                                                  @RequestParam(value = "role_id", required = false) Integer roleId) {
+        String keyword = username == null ? "" : username.trim();
+        PageInfo<User> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> userService.pageByFilters(keyword, roleId));
+        return JsonResponse.success("查询成功", PageModel.from(pageInfo));
     }
 
     @GetMapping("/system/user/info")

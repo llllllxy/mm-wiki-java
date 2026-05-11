@@ -7,108 +7,109 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/space/list}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="systemSpaceSearchForm" role="form">
                     <div class="col-md-3">
-                        <a class="btn btn-success" href="/system/space/add"><i class="glyphicon glyphicon-plus"></i> 添加空间</a>
+                        <a class="btn btn-success" th:href="@{/system/space/add}"><i
+                                class="glyphicon glyphicon-plus"></i> 添加空间</a>
                     </div>
                     <div class="col-md-3 col-md-offset-6">
                         <div class="input-group">
-                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="空间名称 / 描述">
+                            <input id="keyword" class="form-control" name="keyword" type="text" th:value="${keyword}"
+                                   placeholder="空间名称 / 描述">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th class="w15p">名称</th>
-                    <th>描述</th>
-                    <th class="w15p">标签</th>
-                    <th class="w8p">访问级别</th>
-                    <th class="w8p">分享</th>
-                    <th class="w8p">导出</th>
-                    <th class="w22p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="space : ${spaces}">
-                    <td class="center" th:text="${space.spaceId}">1</td>
-                    <td>
-                        <a th:href="@{/space/document(space_id=${space.spaceId})}" target="_parent" title="查看空间文档">
-                            <strong th:text="${space.name}">空间</strong>
-                            <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span>
-                        </a>
-                    </td>
-                    <td th:text="${space.description}">描述</td>
-                    <td class="tags-show center" th:text="${space.tags}">标签</td>
-                    <td class="center">
-                        <label class="text text-danger" th:if="${space.visitLevel == 'private'}">Private</label>
-                        <label class="text text-primary" th:if="${space.visitLevel != 'private'}">Public</label>
-                    </td>
-                    <td class="center">
-                        <span class="label label-success" th:if="${space.isShare == 1}">是</span>
-                        <span class="label label-danger" th:if="${space.isShare != 1}">否</span>
-                    </td>
-                    <td class="center">
-                        <span class="label label-success" th:if="${space.isExport == 1}">是</span>
-                        <span class="label label-danger" th:if="${space.isExport != 1}">否</span>
-                    </td>
-                    <td class="center">
-                        <a name="user" th:data-link="@{/system/space/member(space_id=${space.spaceId})}"><i
-                                class="fa fa-group"></i> 成员</a>
-                        <a th:href="@{/system/space/edit(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-edit"></i> 编辑</a>
-                        <a th:href="@{/system/space/download(space_id=${space.spaceId})}"><i class="glyphicon glyphicon-download-alt"></i> 下载</a>
-                        <a data-message="确定删除该空间吗？删除前请确认已经备份。"
-                           th:data-url="@{/system/space/delete(space_id=${space.spaceId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-remove"></i> 删除</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemSpaceTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function nameFormatter(value, row) {
+        return '<a href="' + AjaxUtil.ctx + 'space/document?space_id=' + row.spaceId + '" target="_parent" title="查看空间文档"><strong>' + tableHtml(value) + '</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a>';
+    }
+
+    function visitFormatter(value) {
+        return value === "private" ? tableText("Private", "text text-danger") : tableText("Public", "text text-primary");
+    }
+
+    function boolFormatter(value) {
+        return value === 1 ? tableLabel("是", "label-success") : tableLabel("否", "label-danger");
+    }
+
+    function actionFormatter(value, row) {
+        return '<a name="user" data-link="' + AjaxUtil.ctx + 'system/space/member?space_id=' + row.spaceId + '"><i class="fa fa-group"></i> 成员</a> ' +
+            '<a href="' + AjaxUtil.ctx + 'system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 编辑</a> ' +
+            '<a href="' + AjaxUtil.ctx + 'system/space/download?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-download-alt"></i> 下载</a> ' +
+            '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="' + AjaxUtil.ctx + 'system/space/delete?space_id=' + row.spaceId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
+    }
+
     $(function () {
-        $(".tags-show").each(function () {
-            var tags = $(this).text();
-            if (tags !== "") {
-                var html = "";
-                var tagList = tags.split(",");
-                for (var i = 0; i < tagList.length; i++) {
-                    if (tagList[i].trim() !== "") {
-                        html += "<span class='label label-default'>" + tagList[i].trim() + "</span> ";
-                    }
-                }
-                $(this).html(html);
+        initTable({
+            domId: "systemSpaceTable",
+            url: AjaxUtil.ctx + "system/space/list",
+            uniqueId: "spaceId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {keyword: $("#keyword").val()};
+            },
+            columns: [
+                {field: "spaceId", title: "ID", width: "8%", align: "center"},
+                {field: "name", title: "名称", width: "15%", formatter: nameFormatter},
+                {field: "description", title: "描述"},
+                {field: "tags", title: "标签", width: "15%", align: "center", formatter: tableTags},
+                {field: "visitLevel", title: "访问级别", width: "8%", align: "center", formatter: visitFormatter},
+                {field: "isShare", title: "分享", width: "8%", align: "center", formatter: boolFormatter},
+                {field: "isExport", title: "导出", width: "8%", align: "center", formatter: boolFormatter},
+                {field: "operate", title: "操作", width: "22%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function () {
+                Layers.bindIframe("[name='user']", "空间成员列表", "500px", "1000px");
             }
         });
     });
-    Layers.bindIframe("[name='user']", "空间成员列表", "500px", "1000px");
+
+    function reloadTable() {
+        reloadTableFirstPage("systemSpaceTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("systemSpaceSearchForm", "systemSpaceTable");
+    }
 </script>
 </body>
 </html>

@@ -7,62 +7,86 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
+    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/profile/activity}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="profileActivitySearchForm" role="form">
                     <div class="col-md-9">
                         <div class="input-group"></div>
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="备注 / 文档名称">
+                            <input id="keyword" class="form-control" name="keyword" type="text" th:value="${keyword}"
+                                   placeholder="备注 / 文档名称">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">动作</th>
-                    <th>文档</th>
-                    <th class="w35p">备注</th>
-                    <th class="w15p">时间</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="logDocument : ${logDocuments}">
-                    <td class="center">
-                        <label class="text text-info" th:if="${logDocument.action == 1}">创建</label>
-                        <label class="text text-primary" th:if="${logDocument.action == 2}">修改</label>
-                        <label class="text text-danger" th:if="${logDocument.action == 3}">删除</label>
-                    </td>
-                    <td>
-                        <span th:if="${logDocument.action == 3}" th:text="${logDocument.documentName}">文档</span>
-                        <a th:unless="${logDocument.action == 3}" th:href="@{/document/index(document_id=${logDocument.documentId})}" target="_parent" th:text="${logDocument.documentName}">文档</a>
-                    </td>
-                    <td th:text="${logDocument.comment}">备注</td>
-                    <td class="center" th:text="${logDocument.createTimeText}">2026-01-01 00:00:00</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="profileActivityTable"></table>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function documentFormatter(value, row) {
+        if (row.action === 3) {
+            return tableHtml(value);
+        }
+        return tableLink(AjaxUtil.ctx + "document/index?document_id=" + row.documentId, value, "_parent");
+    }
+
+    $(function () {
+        initTable({
+            domId: "profileActivityTable",
+            url: AjaxUtil.ctx + "system/profile/activity",
+            uniqueId: "logDocumentId",
+            sortable: false,
+            pageSize: 15,
+            pageList: [10, 15, 20, 50],
+            queryParams: function () {
+                return {keyword: $("#keyword").val()};
+            },
+            columns: [
+                {field: "action", title: "动作", width: "8%", align: "center", formatter: tableDocumentAction},
+                {field: "documentName", title: "文档", formatter: documentFormatter},
+                {field: "comment", title: "备注", width: "35%"},
+                {field: "createTimeText", title: "时间", width: "15%", align: "center"}
+            ]
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("profileActivityTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("profileActivitySearchForm", "profileActivityTable");
+    }
+</script>
 </body>
 </html>

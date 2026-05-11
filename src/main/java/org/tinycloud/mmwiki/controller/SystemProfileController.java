@@ -3,6 +3,7 @@ package org.tinycloud.mmwiki.controller;
 import org.tinycloud.mmwiki.vo.ActivityPage;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
+import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
 import org.tinycloud.mmwiki.vo.ProfileInfoView;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.service.SystemProfileService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -84,36 +87,36 @@ public class SystemProfileController extends ControllerSupport {
     }
 
     @GetMapping("/system/profile/followDoc")
-    public String followDoc(
-        HttpServletRequest request,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int number,
-        Model model
-    ) {
+    public String followDoc(HttpServletRequest request, Model model) {
         FollowDocPage view =
-            systemProfileService.loadFollowDocs(currentUser(request).getUserId(), page, number);
+                systemProfileService.loadFollowDocs(currentUser(request).getUserId(), 1, 10);
         model.addAttribute("user", view.getUser());
-        model.addAttribute("followDocuments", view.getFollowDocuments());
         model.addAttribute("count", view.getCount());
         model.addAttribute("autoFollowDoc", view.getAutoFollowDoc());
-        model.addAttribute("paginator", view.getPaginator());
         return "system/profile/follow_doc";
     }
 
+    @PostMapping("/system/profile/followDoc")
+    @ResponseBody
+    public JsonResponse<PageModel<ProfileFollowedDocument>> followDocData(HttpServletRequest request,
+                                                                          @RequestParam(defaultValue = "1") int pageNum,
+                                                                          @RequestParam(defaultValue = "10") int pageSize) {
+        return JsonResponse.success("查询成功", systemProfileService.loadFollowDocPage(currentUser(request).getUserId(), pageNum, pageSize));
+    }
+
     @GetMapping("/system/profile/activity")
-    public String activity(
-        HttpServletRequest request,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "15") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        Model model
-    ) {
-        ActivityPage view =
-            systemProfileService.loadActivity(currentUser(request).getUserId(), keyword, page, number);
-        model.addAttribute("logDocuments", view.getLogDocuments());
-        model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
+    public String activity(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/profile/activity";
+    }
+
+    @PostMapping("/system/profile/activity")
+    @ResponseBody
+    public JsonResponse<PageModel<LogDocumentView>> activityData(HttpServletRequest request,
+                                                                 @RequestParam(defaultValue = "1") int pageNum,
+                                                                 @RequestParam(defaultValue = "15") int pageSize,
+                                                                 @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", systemProfileService.loadActivityPage(currentUser(request).getUserId(), keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/profile/password")

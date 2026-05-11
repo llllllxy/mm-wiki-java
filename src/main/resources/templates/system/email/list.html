@@ -7,19 +7,28 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form action="" method="get">
+                <form id="systemEmailSearchForm" role="form">
                     <div class="col-md-2">
                         <button type="button" name="add" th:data-link="@{/system/email/add}" class="btn btn-primary">
                             <i class="glyphicon glyphicon-plus"></i> 添加邮件服务器
@@ -28,64 +37,74 @@
                     <div class="col-md-7"></div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="服务器名称">
+                            <input id="keyword" class="form-control" name="keyword" type="text" th:value="${keyword}"
+                                   placeholder="服务器名称">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w5p">ID</th>
-                    <th>名称</th>
-                    <th class="w18p">SMTP 服务器主机</th>
-                    <th class="w18p">发件人邮箱</th>
-                    <th class="w18p">用户名</th>
-                    <th class="w8p">是否启用</th>
-                    <th class="w13p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="email : ${emails}">
-                    <td class="center" th:text="${email.emailId}">1</td>
-                    <td th:text="${email.name}">name</td>
-                    <td th:text="${email.host}">host</td>
-                    <td th:text="${email.senderAddress}">sender</td>
-                    <td th:text="${email.username}">username</td>
-                    <td class="center">
-                        <span class="label label-success" th:if="${email.isUsed == 1}">是</span>
-                        <span class="label label-danger" th:if="${email.isUsed != 1}">否</span>
-                    </td>
-                    <td class="center">
-                        <a name="edit" th:data-link="@{/system/email/edit(emailId=${email.emailId})}"><i
-                                class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:if="${email.isUsed != 1}"
-                           data-message="确定要启用该邮件服务器吗？"
-                           th:data-url="@{/system/email/used(emailId=${email.emailId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
-                            <i class="glyphicon glyphicon-ok-circle"></i>启用
-                        </a>
-                        <a data-message="确定删除吗？"
-                           th:data-url="@{/system/email/delete(emailId=${email.emailId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
-                            <i class="glyphicon glyphicon-trash"></i>删除
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemEmailTable"></table>
         </div>
-        <div class="panel-footer"></div>
     </div>
 </div>
-<script type="text/javascript">
-    Layers.bindIframe("button[name='add']", "添加邮件服务器", "560px", "970px");
-    Layers.bindIframe("[name='edit']", "修改邮件服务器", "560px", "970px");
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function usedFormatter(value) {
+        return value === 1 ? tableLabel("是", "label-success") : tableLabel("否", "label-danger");
+    }
+
+    function actionFormatter(value, row) {
+        var html = '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/email/edit?emailId=' + row.emailId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
+        if (row.isUsed !== 1) {
+            html += '<a data-message="确定要启用该邮件服务器吗？" data-url="' + AjaxUtil.ctx + 'system/email/used?emailId=' + row.emailId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok-circle"></i>启用</a> ';
+        }
+        html += '<a data-message="确定删除吗？" data-url="' + AjaxUtil.ctx + 'system/email/delete?emailId=' + row.emailId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+        return html;
+    }
+
+    $(function () {
+        initTable({
+            domId: "systemEmailTable",
+            url: AjaxUtil.ctx + "system/email/list",
+            uniqueId: "emailId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {keyword: $("#keyword").val()};
+            },
+            columns: [
+                {field: "emailId", title: "ID", width: "5%", align: "center"},
+                {field: "name", title: "名称"},
+                {field: "host", title: "SMTP 服务器主机", width: "18%"},
+                {field: "senderAddress", title: "发件人邮箱", width: "18%"},
+                {field: "username", title: "用户名", width: "18%"},
+                {field: "isUsed", title: "是否启用", width: "8%", align: "center", formatter: usedFormatter},
+                {field: "operate", title: "操作", width: "13%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function () {
+                Layers.bindIframe("button[name='add']", "添加邮件服务器", "560px", "970px");
+                Layers.bindIframe("[name='edit']", "修改邮件服务器", "560px", "970px");
+            }
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("systemEmailTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("systemEmailSearchForm", "systemEmailTable");
+    }
 </script>
 </body>
 </html>

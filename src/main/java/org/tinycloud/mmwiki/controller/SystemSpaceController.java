@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
 import org.tinycloud.mmwiki.vo.MemberPage;
+import org.tinycloud.mmwiki.vo.MemberView;
 import org.tinycloud.mmwiki.vo.SpaceDownload;
 import org.tinycloud.mmwiki.vo.SpacePage;
 
@@ -23,6 +24,7 @@ import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.service.SpaceService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -37,34 +39,37 @@ public class SystemSpaceController extends ControllerSupport {
     private SpaceService spaceService;
 
     @GetMapping("/system/space/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        HttpServletRequest request,
-        Model model
-    ) {
-        SpacePage view = spaceService.listSpaces(currentUser(request), keyword, page, number, "/system/space/list?keyword=" + (keyword == null ? "" : keyword.trim()));
-        model.addAttribute("spaces", view.getSpaces());
-        model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/space/list";
     }
 
+    @PostMapping("/system/space/list")
+    @ResponseBody
+    public JsonResponse<PageModel<Space>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                   @RequestParam(defaultValue = "20") int pageSize,
+                                                   @RequestParam(defaultValue = "") String keyword,
+                                                   HttpServletRequest request) {
+        return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(request), keyword, pageNum, pageSize));
+    }
+
     @GetMapping("/system/space/member")
-    public String member(
-        @RequestParam("space_id") Integer spaceId,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "15") int number,
-        HttpServletRequest request,
-        Model model
-    ) {
-        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, page, number, "/system/space/member?space_id=" + spaceId);
-        model.addAttribute("users", view.getUsers());
+    public String member(@RequestParam("space_id") Integer spaceId,
+                         HttpServletRequest request,
+                         Model model) {
+        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, 1, 15, "/system/space/member?space_id=" + spaceId);
         model.addAttribute("space_id", spaceId);
         model.addAttribute("otherUsers", view.getOtherUsers());
-        model.addAttribute("paginator", view.getPaginator());
         return "system/space/member";
+    }
+
+    @PostMapping("/system/space/member")
+    @ResponseBody
+    public JsonResponse<PageModel<MemberView>> memberData(@RequestParam("space_id") Integer spaceId,
+                                                          @RequestParam(defaultValue = "1") int pageNum,
+                                                          @RequestParam(defaultValue = "15") int pageSize,
+                                                          HttpServletRequest request) {
+        return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(request), spaceId, pageNum, pageSize));
     }
 
     @GetMapping("/system/space/add")

@@ -7,17 +7,26 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-select/css/bootstrap-select.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/bootstrap-select.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/i18n/defaults-zh_CN.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/form.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -50,56 +59,62 @@
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th class="w15p">用户名</th>
-                    <th>姓名</th>
-                    <th class="w20p">邮箱</th>
-                    <th class="w15p">空间权限</th>
-                    <th class="w13p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="member : ${users}">
-                    <td class="center" th:text="${member.user.userId}">1</td>
-                    <td th:text="${member.user.username}">user</td>
-                    <td th:text="${member.user.givenName}">name</td>
-                    <td th:text="${member.user.email}">email</td>
-                    <td class="center" style="padding: 4px 6px">
-                        <select name="edit_privilege" class="form-control input-xs"
-                                th:data-link="@{/system/space_user/modify(space_id=${space_id},space_user_id=${member.spaceUserId})}">
-                            <option value="0" th:selected="${member.privilege == 0}">浏览者</option>
-                            <option value="1" th:selected="${member.privilege == 1}">编辑者</option>
-                            <option value="2" th:selected="${member.privilege == 2}">管理员</option>
-                        </select>
-                    </td>
-                    <td class="center">
-                        <a data-message="确定要移除该成员吗？"
-                           th:data-url="@{/system/space_user/remove(space_user_id=${member.spaceUserId},space_id=${space_id},user_id=${member.user.userId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">
-                            <i class="glyphicon glyphicon-remove-circle"></i>移除
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemSpaceMemberTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+    var spaceId = /*[[${space_id}]]*/ 0;
+
+    function privilegeSelectFormatter(value, row) {
+        var url = AjaxUtil.ctx + "system/space_user/modify?space_id=" + spaceId + "&space_user_id=" + row.spaceUserId;
+        var html = '<select name="edit_privilege" class="form-control input-xs" data-link="' + url + '">';
+        html += '<option value="0"' + (row.privilege === 0 ? " selected" : "") + '>浏览者</option>';
+        html += '<option value="1"' + (row.privilege === 1 ? " selected" : "") + '>编辑者</option>';
+        html += '<option value="2"' + (row.privilege === 2 ? " selected" : "") + '>管理员</option>';
+        html += '</select>';
+        return html;
+    }
+
+    function actionFormatter(value, row) {
+        return '<a data-message="确定要移除该成员吗？" data-url="' + AjaxUtil.ctx + 'system/space_user/remove?space_user_id=' + row.spaceUserId + '&space_id=' + spaceId + '&user_id=' + row.user.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
+    }
+
+    function bindPrivilegeChange() {
+        $("select[name='edit_privilege']").off("change").on("change", function () {
+            Common.ajaxSubmit($(this).attr("data-link"), "privilege=" + this.value);
+        });
+    }
+
     $(function () {
-        $("select[name='edit_privilege']").each(function () {
-            $(this).bind('change', function () {
-                var url = $(this).attr("data-link");
-                var privilege = this.value;
-                Common.ajaxSubmit(url + "&privilege=" + privilege);
-            });
+        $(".selectpicker").selectpicker();
+        initTable({
+            domId: "systemSpaceMemberTable",
+            url: AjaxUtil.ctx + "system/space/member",
+            uniqueId: "spaceUserId",
+            sortable: false,
+            pageSize: 15,
+            pageList: [10, 15, 20, 50],
+            queryParams: function () {
+                return {space_id: spaceId};
+            },
+            columns: [
+                {field: "user.userId", title: "ID", width: "8%", align: "center"},
+                {field: "user.username", title: "用户名", width: "15%"},
+                {field: "user.givenName", title: "姓名"},
+                {field: "user.email", title: "邮箱", width: "20%"},
+                {
+                    field: "privilege",
+                    title: "空间权限",
+                    width: "15%",
+                    align: "center",
+                    formatter: privilegeSelectFormatter
+                },
+                {field: "operate", title: "操作", width: "13%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: bindPrivilegeChange
         });
     });
 </script>

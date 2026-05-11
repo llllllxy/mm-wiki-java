@@ -11,6 +11,7 @@ import org.tinycloud.mmwiki.domain.EmailServer;
 import org.tinycloud.mmwiki.service.EmailService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * 系统邮件服务器配置控制器。
@@ -29,9 +30,19 @@ public class SystemEmailController extends ControllerSupport {
      */
     @GetMapping("/system/email/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
-        model.addAttribute("emails", emailService.list(keyword));
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/email/list";
+    }
+
+    /**
+     * 邮件服务器列表数据。
+     */
+    @PostMapping("/system/email/list")
+    @ResponseBody
+    public JsonResponse<PageModel<EmailServer>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                         @RequestParam(defaultValue = "20") int pageSize,
+                                                         @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", emailService.pageModel(keyword, pageNum, pageSize));
     }
 
     /**

@@ -24,6 +24,7 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -170,6 +171,28 @@ public class SystemProfileService {
         );
     }
 
+    public PageModel<ProfileFollowedDocument> loadFollowDocPage(Integer userId, int pageNum, int pageSize) {
+        User user = requireUser(userId);
+        List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowService.TYPE_DOC);
+        List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
+        Map<String, Document> docs = documentMapper.findActiveByIds(docIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
+
+        List<ProfileFollowedDocument> items = new ArrayList<>();
+        for (Follow follow : follows) {
+            Document document = docs.get(follow.getObjectId());
+            if (document != null) {
+                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.formatUnix(document.getUpdateTime())));
+            }
+        }
+
+        int offset = Math.max(0, (pageNum - 1) * pageSize);
+        List<ProfileFollowedDocument> pageItems = offset >= items.size()
+                ? List.of()
+                : items.subList(offset, Math.min(items.size(), offset + pageSize));
+        return PageModel.build((long) pageNum, (long) pageSize, pageItems, (long) items.size());
+    }
+
     /**
      * 分页加载当前用户的文档操作动态。
      */
@@ -188,6 +211,21 @@ public class SystemProfileService {
         List<LogDocumentView> logs = pageInfo.getList();
         logs = decorateLogs(logs);
         return new ActivityPage(logs, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/profile/activity?keyword=" + search));
+    }
+
+    public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
+        requireUser(userId);
+        String search = trim(keyword);
+        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isBlank()) {
+                        logDocumentMapper.pageByUserId(userId);
+                    } else {
+                        logDocumentMapper.pageByUserIdAndKeyword(userId, search);
+                    }
+                });
+        decorateLogs(pageInfo.getList());
+        return PageModel.from(pageInfo);
     }
 
     /**

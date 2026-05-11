@@ -7,15 +7,21 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet"
           th:href="@{/static/plugins/bootstrap-checkbox/awesome-bootstrap-checkbox.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-select/css/bootstrap-select.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
-
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap-select/js/bootstrap-select.min.js}"></script>
@@ -24,6 +30,8 @@
     <script th:src="@{/static/js/common/date.js}"></script>
     <script th:src="@{/static/js/common/form.js}"></script>
     <script th:src="@{/static/js/common/layers.js}"></script>
+    <script th:src="@{/static/js/common/ajax.js}"></script>
+    <script th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -39,42 +47,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading"><strong><i class="fa fa-file-word-o"></i> 最近更新文档</strong></div>
                 <div class="panel-body" style="min-height: 550px">
-                    <div class="document-update">
-                        <ul>
-                            <th:block th:each="logDocument : ${logDocuments}">
-                                <li>
-                                    <div th:if="${logDocument.action == 3}">
-                                        <i class="fa fa-file-word-o" th:if="${logDocument.documentType == 1}"></i>
-                                        <i class="fa fa-folder-o" th:unless="${logDocument.documentType == 1}"></i>
-                                        <span th:text="${logDocument.documentName}">文档名</span>
-                                    </div>
-                                    <div th:unless="${logDocument.action == 3}">
-                                        <a th:href="@{/document/index(document_id=${logDocument.documentId})}" target="_parent" class="text text-info text-font-15">
-                                            <i class="fa fa-file-word-o" th:if="${logDocument.documentType == 1}"></i>
-                                            <i class="fa fa-folder-o" th:unless="${logDocument.documentType == 1}"></i>
-                                            <span th:text="${logDocument.documentName}">文档名</span>
-                                        </a>
-                                    </div>
-                                    <span class="text text-font-12 document-user-time">
-                                        <i class="fa fa-calendar"></i>
-                                        由
-                                        <a th:if="${logDocument.userId == login_user_id}" href="/system/main/index" target="_parent">
-                                            <span th:text="${logDocument.username}">admin</span>（<span th:text="${logDocument.givenName}">管理员</span>）
-                                        </a>
-                                        <a th:unless="${logDocument.userId == login_user_id}" th:href="@{/user/info(user_id=${logDocument.userId})}">
-                                            <span th:text="${logDocument.username}">admin</span>（<span th:text="${logDocument.givenName}">管理员</span>）
-                                        </a>
-                                        <span th:text="${logDocument.action == 1 ? '创建' : (logDocument.action == 2 ? '修改' : '删除')}">修改</span>
-                                        于 <span th:text="${logDocument.createTimeText}">2026-05-06 10:00:00</span>
-                                    </span>
-                                </li>
-                                <hr>
-                            </th:block>
-                        </ul>
-                    </div>
-                    <div class="center" th:if="${paginator.nums > 0}">
-                        <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
-                    </div>
+                    <table id="recentDocumentTable"></table>
                 </div>
             </div>
         </div>
@@ -106,5 +79,42 @@
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+    var loginUserId = /*[[${login_user_id}]]*/ 0;
+
+    function documentFormatter(value, row) {
+        var icon = row.documentType === 1 ? "fa-file-word-o" : "fa-folder-o";
+        if (row.action === 3) {
+            return '<i class="fa ' + icon + '"></i> ' + tableHtml(row.documentName);
+        }
+        return '<a href="' + AjaxUtil.ctx + 'document/index?document_id=' + row.documentId + '" target="_parent" class="text text-info text-font-15"><i class="fa ' + icon + '"></i> ' + tableHtml(row.documentName) + '</a>';
+    }
+
+    function userFormatter(value, row) {
+        var text = tableHtml(row.username) + "（" + tableHtml(row.givenName) + "）";
+        if (row.userId === loginUserId) {
+            return '<a href="' + AjaxUtil.ctx + 'system/main/index" target="_parent">' + text + '</a>';
+        }
+        return '<a href="' + AjaxUtil.ctx + 'user/info?user_id=' + row.userId + '">' + text + '</a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "recentDocumentTable",
+            url: AjaxUtil.ctx + "main/default",
+            uniqueId: "logDocumentId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            columns: [
+                {field: "documentName", title: "文档", formatter: documentFormatter},
+                {field: "username", title: "用户", width: "22%", formatter: userFormatter},
+                {field: "action", title: "动作", width: "10%", align: "center", formatter: tableDocumentAction},
+                {field: "createTimeText", title: "时间", width: "22%", align: "center"}
+            ]
+        });
+    });
+</script>
 </body>
 </html>

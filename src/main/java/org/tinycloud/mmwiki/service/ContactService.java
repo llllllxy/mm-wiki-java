@@ -13,6 +13,7 @@ import org.tinycloud.mmwiki.domain.Contact;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.ContactMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -81,6 +82,19 @@ public class ContactService {
                     }
                 });
         return new ImportPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/contact/import?username=" + search));
+    }
+
+    public PageModel<User> importCandidatePage(String username, int pageNum, int pageSize) {
+        String search = username == null ? "" : username.trim();
+        PageInfo<User> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        userService.pageAllActive();
+                    } else {
+                        userService.pageByUsernameLike(search);
+                    }
+                });
+        return PageModel.from(pageInfo);
     }
 
     private JsonResponse<Void> validate(Contact contact) {

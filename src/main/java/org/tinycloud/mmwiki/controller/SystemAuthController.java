@@ -13,6 +13,7 @@ import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.service.LoginAuthService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -27,17 +28,17 @@ public class SystemAuthController extends ControllerSupport {
     private LoginAuthService loginAuthService;
 
     @GetMapping("/system/auth/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        Model model
-    ) {
-        AuthPage view = loginAuthService.list(keyword, page, number);
-        model.addAttribute("auths", view.getAuths());
-        model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/auth/list";
+    }
+
+    @PostMapping("/system/auth/list")
+    @ResponseBody
+    public JsonResponse<PageModel<LoginAuth>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                       @RequestParam(defaultValue = "20") int pageSize,
+                                                       @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", loginAuthService.pageModel(keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/auth/add")

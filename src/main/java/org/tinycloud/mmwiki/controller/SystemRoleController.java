@@ -19,6 +19,7 @@ import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -38,17 +39,17 @@ public class SystemRoleController extends ControllerSupport {
     private UserService userService;
 
     @GetMapping("/system/role/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        Model model
-    ) {
-        RolePage view = roleService.list(keyword, page, number);
-        model.addAttribute("roles", view.getRoles());
-        model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/role/list";
+    }
+
+    @PostMapping("/system/role/list")
+    @ResponseBody
+    public JsonResponse<PageModel<Role>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", roleService.pageModel(keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/role/add")
@@ -79,24 +80,24 @@ public class SystemRoleController extends ControllerSupport {
     }
 
     @GetMapping("/system/role/user")
-    public String user(
-        @RequestParam("role_id") Integer roleId,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "15") int number,
-        Model model
-    ) {
+    public String user(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
             throw new IllegalStateException("角色不存在");
         }
-        PageInfo<org.tinycloud.mmwiki.domain.User> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> userService.pageByFilters("", roleId));
-        var users = pageInfo.getList();
-        model.addAttribute("users", users);
         model.addAttribute("role", role);
         model.addAttribute("roleId", roleId);
-        model.addAttribute("paginator", Paginator.of(page, number, pageInfo.getTotal(), "/system/role/user?role_id=" + roleId));
         return "system/role/user";
+    }
+
+    @PostMapping("/system/role/user")
+    @ResponseBody
+    public JsonResponse<PageModel<org.tinycloud.mmwiki.domain.User>> userData(@RequestParam("role_id") Integer roleId,
+                                                                              @RequestParam(defaultValue = "1") int pageNum,
+                                                                              @RequestParam(defaultValue = "15") int pageSize) {
+        PageInfo<org.tinycloud.mmwiki.domain.User> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> userService.pageByFilters("", roleId));
+        return JsonResponse.success("查询成功", PageModel.from(pageInfo));
     }
 
     @GetMapping("/system/role/privilege")

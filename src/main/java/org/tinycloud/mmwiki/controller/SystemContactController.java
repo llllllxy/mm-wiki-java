@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Contact;
+import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.service.ContactService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -66,16 +68,16 @@ public class SystemContactController extends ControllerSupport {
     }
 
     @GetMapping("/system/contact/import")
-    public String importPage(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String username,
-        Model model
-    ) {
-        ImportPage view = contactService.importCandidates(username, page, number);
-        model.addAttribute("users", view.getUsers());
-        model.addAttribute("username", view.getUsername());
-        model.addAttribute("paginator", view.getPaginator());
+    public String importPage(@RequestParam(defaultValue = "") String username, Model model) {
+        model.addAttribute("username", username == null ? "" : username.trim());
         return "system/contact/import";
+    }
+
+    @PostMapping("/system/contact/import")
+    @ResponseBody
+    public JsonResponse<PageModel<User>> importData(@RequestParam(defaultValue = "1") int pageNum,
+                                                    @RequestParam(defaultValue = "20") int pageSize,
+                                                    @RequestParam(defaultValue = "") String username) {
+        return JsonResponse.success("查询成功", contactService.importCandidatePage(username, pageNum, pageSize));
     }
 }

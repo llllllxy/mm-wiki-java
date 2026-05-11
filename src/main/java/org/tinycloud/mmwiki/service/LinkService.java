@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.Link;
 import org.tinycloud.mmwiki.mapper.LinkMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -36,6 +37,19 @@ public class LinkService {
                     }
                 });
         return new LinkPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/link/list?keyword=" + search));
+    }
+
+    public PageModel<Link> pageModel(String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<Link> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        linkMapper.pageAll();
+                    } else {
+                        linkMapper.pageByKeyword(search);
+                    }
+                });
+        return PageModel.from(pageInfo);
     }
 
     public Link findById(Integer linkId) {

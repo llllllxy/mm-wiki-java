@@ -43,6 +43,7 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -129,6 +130,22 @@ public class SpaceService {
         return new SpacePage(spaces, pageInfo.getTotal(), search, Paginator.of(page, number, pageInfo.getTotal(), basePath));
     }
 
+    public PageModel<Space> listSpacesPage(CurrentUser currentUser, String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isBlank()) {
+                        spaceMapper.pageAll();
+                    } else {
+                        spaceMapper.pageByKeyword(search);
+                    }
+                });
+        List<Space> spaces = pageInfo.getList();
+        markCollections(currentUser, spaces);
+        decorate(spaces);
+        return PageModel.from(pageInfo);
+    }
+
     /**
      * 加载当前用户收藏的空间列表。
      */
@@ -203,6 +220,13 @@ public class SpaceService {
             otherUsers = allMemberIds.isEmpty() ? userService.findAllActive() : userService.findActiveExcludingIds(allMemberIds);
         }
         return new MemberPage(views, Paginator.of(page, number, pageInfo.getTotal(), basePath), manager, otherUsers);
+    }
+
+    public PageModel<MemberView> listMembersPage(CurrentUser currentUser, Integer spaceId, int pageNum, int pageSize) {
+        MemberPage view = listMembers(currentUser, spaceId, pageNum, pageSize);
+        long total = view.getPaginator() == null ? view.getUsers().size() : view.getPaginator().getNums();
+        long totalPage = view.getPaginator() == null ? 0L : view.getPaginator().getTotalPages();
+        return PageModel.build((long) pageNum, (long) pageSize, view.getUsers(), total, totalPage);
     }
 
     @Transactional

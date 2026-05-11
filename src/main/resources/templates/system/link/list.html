@@ -7,72 +7,98 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/link/list}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="systemLinkSearchForm" role="form">
                     <div class="col-md-2">
-                        <button type="button" name="add" data-link="/system/link/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加链接</button>
+                        <button type="button" name="add" data-link="/system/link/add" class="btn btn-primary"><i
+                                class="glyphicon glyphicon-plus"></i>添加链接
+                        </button>
                     </div>
                     <div class="col-md-7"></div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="链接名称">
+                            <input id="keyword" class="form-control" name="keyword" type="text" th:value="${keyword}"
+                                   placeholder="链接名称">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th class="w25p">名称</th>
-                    <th>URL</th>
-                    <th class="w10p">排序号</th>
-                    <th class="w13p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="link : ${links}">
-                    <td class="center" th:text="${link.linkId}">1</td>
-                    <td th:text="${link.name}">name</td>
-                    <td><a th:href="${link.url}" target="_blank" th:text="${link.url}">url</a></td>
-                    <td class="center" th:text="${link.sequence}">0</td>
-                    <td class="center">
-                        <a name="edit" th:data-link="@{/system/link/edit(link_id=${link.linkId})}"><i
-                                class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a data-message="确定删除吗？" th:data-url="@{/system/link/delete(link_id=${link.linkId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-trash"></i>删除</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemLinkTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
-    Layers.bindIframe("button[name='add']", "添加链接", "340px", "900px");
-    Layers.bindIframe("[name='edit']", "修改链接", "340px", "900px");
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function urlFormatter(value) {
+        return tableLink(value, value, "_blank");
+    }
+
+    function actionFormatter(value, row) {
+        return '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/link/edit?link_id=' + row.linkId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ' +
+            '<a data-message="确定删除吗？" data-url="' + AjaxUtil.ctx + 'system/link/delete?link_id=' + row.linkId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "systemLinkTable",
+            url: AjaxUtil.ctx + "system/link/list",
+            uniqueId: "linkId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {keyword: $("#keyword").val()};
+            },
+            columns: [
+                {field: "linkId", title: "ID", width: "8%", align: "center"},
+                {field: "name", title: "名称", width: "25%"},
+                {field: "url", title: "URL", formatter: urlFormatter},
+                {field: "sequence", title: "排序号", width: "10%", align: "center"},
+                {field: "operate", title: "操作", width: "13%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function () {
+                Layers.bindIframe("button[name='add']", "添加链接", "340px", "900px");
+                Layers.bindIframe("[name='edit']", "修改链接", "340px", "900px");
+            }
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("systemLinkTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("systemLinkSearchForm", "systemLinkTable");
+    }
 </script>
 </body>
 </html>

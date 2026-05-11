@@ -46,6 +46,7 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -477,6 +478,19 @@ public class DocumentService {
         List<DocumentHistoryView> history = pageInfo.getList();
         history.forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
         return new HistoryPage(history, Paginator.of(page, number, pageInfo.getTotal(), "/document/history?document_id=" + documentId));
+    }
+
+    public PageModel<DocumentHistoryView> historyPage(String documentId, CurrentUser currentUser, int pageNum, int pageSize) {
+        Document document = requireDocument(documentId);
+        Space space = spaceService.requireSpace(document.getSpaceId());
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
+            throw new IllegalStateException("您没有权限查看该空间修改历史。");
+        }
+        PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
+        pageInfo.getList().forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
+        return PageModel.from(pageInfo);
     }
 
     private boolean isValidName(String name) {

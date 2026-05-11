@@ -13,6 +13,7 @@ import org.tinycloud.mmwiki.domain.Link;
 import org.tinycloud.mmwiki.service.LinkService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -27,17 +28,17 @@ public class SystemLinkController extends ControllerSupport {
     private LinkService linkService;
 
     @GetMapping("/system/link/list")
-    public String list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int number,
-        @RequestParam(defaultValue = "") String keyword,
-        Model model
-    ) {
-        LinkPage view = linkService.list(keyword, page, number);
-        model.addAttribute("links", view.getLinks());
-        model.addAttribute("keyword", view.getKeyword());
-        model.addAttribute("paginator", view.getPaginator());
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/link/list";
+    }
+
+    @PostMapping("/system/link/list")
+    @ResponseBody
+    public JsonResponse<PageModel<Link>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", linkService.pageModel(keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/link/add")

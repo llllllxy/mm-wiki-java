@@ -20,6 +20,7 @@ import org.tinycloud.mmwiki.mapper.RoleMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -86,6 +87,20 @@ public class RoleService {
         List<Role> roles = pageInfo.getList();
         roles.forEach(role -> role.setUpdateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(role.getUpdateTime())));
         return new RolePage(roles, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/role/list?keyword=" + search));
+    }
+
+    public PageModel<Role> pageModel(String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<Role> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        roleMapper.pageAll();
+                    } else {
+                        roleMapper.pageByKeyword(search);
+                    }
+                });
+        pageInfo.getList().forEach(role -> role.setUpdateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(role.getUpdateTime())));
+        return PageModel.from(pageInfo);
     }
 
     @Transactional

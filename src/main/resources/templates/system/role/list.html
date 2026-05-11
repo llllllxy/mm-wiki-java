@@ -7,84 +7,106 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/role/list}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="systemRoleSearchForm" role="form">
                     <div class="col-md-2">
                         <button type="button" name="add" data-link="/system/role/add" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> 添加角色</button>
                     </div>
                     <div class="col-md-7"></div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="keyword" type="text" th:value="${keyword}" placeholder="角色名称">
+                            <input id="keyword" class="form-control" name="keyword" type="text" th:value="${keyword}"
+                                   placeholder="角色名称">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th>名称</th>
-                    <th class="w8p">类型</th>
-                    <th class="w15p">修改时间</th>
-                    <th class="w20p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="role : ${roles}">
-                    <td class="center" th:text="${role.roleId}">1</td>
-                    <td th:text="${role.name}">角色</td>
-                    <td class="center">
-                        <span class="label label-danger" th:if="${role.type == 1}">系统</span>
-                        <span class="label label-success" th:if="${role.type != 1}">自定义</span>
-                    </td>
-                    <td class="center" th:text="${role.updateTimeText}">-</td>
-                    <td class="center">
-                        <a th:if="${role.roleId != 1}" name="edit"
-                           th:data-link="@{/system/role/edit(role_id=${role.roleId})}"><i
-                                class="glyphicon glyphicon-edit"></i>修改</a>
-                        <a th:if="${role.roleId != 1}" name="privilege"
-                           th:data-link="@{/system/role/privilege(role_id=${role.roleId})}"><i
-                                class="glyphicon glyphicon-lock"></i>权限</a>
-                        <a name="user" th:data-link="@{/system/role/user(role_id=${role.roleId})}"><i
-                                class="glyphicon glyphicon-user"></i>用户</a>
-                        <a th:if="${role.roleId != 1 and role.type == 0}" data-message="确定删除吗？"
-                           th:data-url="@{/system/role/delete(role_id=${role.roleId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="remove glyphicon glyphicon-trash"></i>删除</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemRoleTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
-    Layers.bindIframe("button[name='add']", "添加角色", "300px", "800px");
-    Layers.bindIframe("[name='edit']", "修改角色信息", "300px", "800px");
-    Layers.bindIframe("[name='privilege']", "角色授权", "500px", "1050px");
-    Layers.bindIframe("[name='user']", "角色用户", "500px", "1000px");
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function typeFormatter(value) {
+        return value === 1 ? tableLabel("系统", "label-danger") : tableLabel("自定义", "label-success");
+    }
+
+    function actionFormatter(value, row) {
+        var html = "";
+        if (row.roleId !== 1) {
+            html += '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/role/edit?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
+            html += '<a name="privilege" data-link="' + AjaxUtil.ctx + 'system/role/privilege?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-lock"></i>权限</a> ';
+        }
+        html += '<a name="user" data-link="' + AjaxUtil.ctx + 'system/role/user?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-user"></i>用户</a> ';
+        if (row.roleId !== 1 && row.type === 0) {
+            html += '<a data-message="确定删除吗？" data-url="' + AjaxUtil.ctx + 'system/role/delete?role_id=' + row.roleId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-trash"></i>删除</a>';
+        }
+        return html;
+    }
+
+    $(function () {
+        initTable({
+            domId: "systemRoleTable",
+            url: AjaxUtil.ctx + "system/role/list",
+            uniqueId: "roleId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {keyword: $("#keyword").val()};
+            },
+            columns: [
+                {field: "roleId", title: "ID", width: "8%", align: "center"},
+                {field: "name", title: "名称"},
+                {field: "type", title: "类型", width: "8%", align: "center", formatter: typeFormatter},
+                {field: "updateTimeText", title: "修改时间", width: "15%", align: "center"},
+                {field: "operate", title: "操作", width: "20%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function () {
+                Layers.bindIframe("button[name='add']", "添加角色", "300px", "800px");
+                Layers.bindIframe("[name='edit']", "修改角色信息", "300px", "800px");
+                Layers.bindIframe("[name='privilege']", "角色授权", "500px", "1050px");
+                Layers.bindIframe("[name='user']", "角色用户", "500px", "1000px");
+            }
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("systemRoleTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("systemRoleSearchForm", "systemRoleTable");
+    }
 </script>
 </body>
 </html>

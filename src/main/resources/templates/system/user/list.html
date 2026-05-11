@@ -7,28 +7,36 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/user/list}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="systemUserSearchForm" role="form">
                     <div class="col-md-3">
-                        <a class="btn btn-success" href="/system/user/add"><i class="glyphicon glyphicon-plus"></i> 添加用户</a>
+                        <a class="btn btn-success" th:href="@{/system/user/add}"><i
+                                class="glyphicon glyphicon-plus"></i> 添加用户</a>
                     </div>
                     <div class="col-md-3 col-md-offset-3">
                         <div class="input-group">
                             <span class="input-group-addon">角色</span>
-                            <select name="role_id" class="form-control">
+                            <select id="role_id" name="role_id" class="form-control">
                                 <option value="">全部</option>
                                 <option th:each="role : ${roles}" th:value="${role.roleId}" th:selected="${roleId != null and roleId == role.roleId}" th:text="${role.name}">角色</option>
                             </select>
@@ -36,67 +44,96 @@
                     </div>
                     <div class="col-md-3">
                         <div class="input-group">
-                            <input class="form-control" name="username" type="text" th:value="${username}" placeholder="用户名">
+                            <input id="username" class="form-control" name="username" type="text" th:value="${username}"
+                                   placeholder="用户名">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th class="w15p">用户名</th>
-                    <th>姓名</th>
-                    <th class="w15p">邮箱</th>
-                    <th class="w11p">手机号</th>
-                    <th class="w15p">角色</th>
-                    <th class="w8p">状态</th>
-                    <th class="w16p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="user : ${users}">
-                    <td class="center" th:text="${user.userId}">1</td>
-                    <td><a name="info" th:data-link="@{/system/user/info(user_id=${user.userId})}"
-                           th:text="${user.username}">user</a></td>
-                    <td><a name="info" th:data-link="@{/system/user/info(user_id=${user.userId})}"
-                           th:text="${user.givenName}">name</a></td>
-                    <td th:text="${user.email}">email</td>
-                    <td class="center" th:text="${user.mobile}">mobile</td>
-                    <td class="center"><label class="text-info" th:text="${roleNameIndex[user.roleId]}">角色</label></td>
-                    <td class="center">
-                        <span class="label label-danger" th:if="${user.isForbidden == 1}">屏蔽</span>
-                        <span class="label label-success" th:if="${user.isForbidden != 1}">正常</span>
-                    </td>
-                    <td class="center">
-                        <a name="info" th:data-link="@{/system/user/info(user_id=${user.userId})}"><i
-                                class="glyphicon glyphicon-eye-open"></i> 详情</a>
-                        <a th:href="@{/system/user/edit(user_id=${user.userId})}"><i class="glyphicon glyphicon-edit"></i> 编辑</a>
-                        <a th:if="${user.isForbidden == 1}" data-message="确定恢复该用户吗？"
-                           th:data-url="@{/system/user/recover(user_id=${user.userId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-ok"></i> 恢复</a>
-                        <a th:if="${user.isForbidden != 1 and user.roleId != 1}" data-message="确定屏蔽该用户吗？"
-                           th:data-url="@{/system/user/forbidden(user_id=${user.userId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-remove"></i> 屏蔽</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="systemUserTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
-    Layers.bindIframe("[name='info']", "用户详情", "500px", "1000px");
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+    var roleNameIndex = /*[[${roleNameIndex}]]*/ {};
+
+    function userInfoLink(row, text) {
+        return '<a name="info" data-link="' + AjaxUtil.ctx + 'system/user/info?user_id=' + row.userId + '">' + tableHtml(text) + '</a>';
+    }
+
+    function statusFormatter(value, row) {
+        return row.isForbidden === 1 ? tableLabel("屏蔽", "label-danger") : tableLabel("正常", "label-success");
+    }
+
+    function roleFormatter(value) {
+        return '<label class="text-info">' + tableHtml(roleNameIndex[value] || "") + '</label>';
+    }
+
+    function actionFormatter(value, row) {
+        var html = '<a name="info" data-link="' + AjaxUtil.ctx + 'system/user/info?user_id=' + row.userId + '"><i class="glyphicon glyphicon-eye-open"></i> 详情</a> ';
+        html += '<a href="' + AjaxUtil.ctx + 'system/user/edit?user_id=' + row.userId + '"><i class="glyphicon glyphicon-edit"></i> 编辑</a> ';
+        if (row.isForbidden === 1) {
+            html += '<a data-message="确定恢复该用户吗？" data-url="' + AjaxUtil.ctx + 'system/user/recover?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok"></i> 恢复</a>';
+        } else if (row.roleId !== 1) {
+            html += '<a data-message="确定屏蔽该用户吗？" data-url="' + AjaxUtil.ctx + 'system/user/forbidden?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 屏蔽</a>';
+        }
+        return html;
+    }
+
+    $(function () {
+        initTable({
+            domId: "systemUserTable",
+            url: AjaxUtil.ctx + "system/user/list",
+            uniqueId: "userId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {
+                    role_id: $("#role_id").val(),
+                    username: $("#username").val()
+                };
+            },
+            columns: [
+                {field: "userId", title: "ID", width: "8%", align: "center"},
+                {
+                    field: "username", title: "用户名", width: "15%", formatter: function (value, row) {
+                        return userInfoLink(row, value);
+                    }
+                },
+                {
+                    field: "givenName", title: "姓名", formatter: function (value, row) {
+                        return userInfoLink(row, value);
+                    }
+                },
+                {field: "email", title: "邮箱", width: "15%"},
+                {field: "mobile", title: "手机号", width: "11%", align: "center"},
+                {field: "roleId", title: "角色", width: "15%", align: "center", formatter: roleFormatter},
+                {field: "isForbidden", title: "状态", width: "8%", align: "center", formatter: statusFormatter},
+                {field: "operate", title: "操作", width: "16%", align: "center", formatter: actionFormatter}
+            ],
+            onLoadSuccess: function () {
+                Layers.bindIframe("[name='info']", "用户详情", "500px", "1000px");
+            }
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("systemUserTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("systemUserSearchForm", "systemUserTable");
+    }
 </script>
 </body>
 </html>

@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.mapper.LoginAuthMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 import org.tinycloud.mmwiki.web.Paginator;
 
 /**
@@ -38,6 +39,19 @@ public class LoginAuthService {
                     }
                 });
         return new AuthPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/auth/list?keyword=" + search));
+    }
+
+    public PageModel<LoginAuth> pageModel(String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        PageInfo<LoginAuth> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> {
+                    if (search.isEmpty()) {
+                        loginAuthMapper.pageAllActive();
+                    } else {
+                        loginAuthMapper.pageByKeyword(search);
+                    }
+                });
+        return PageModel.from(pageInfo);
     }
 
     public LoginAuth findById(Integer loginAuthId) {

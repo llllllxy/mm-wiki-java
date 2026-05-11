@@ -7,72 +7,95 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layui/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                <form th:action="@{/system/contact/import}" method="get">
-                    <input type="hidden" name="page" value="1">
-                    <input type="hidden" name="number" th:value="${paginator != null ? paginator.perPageNums : 20}">
+                <form id="contactImportSearchForm" role="form">
                     <div class="col-sm-offset-8 col-sm-4">
                         <div class="input-group">
-                            <input class="form-control" name="username" type="text" th:value="${username}" placeholder="用户名">
+                            <input id="username" class="form-control" name="username" type="text" th:value="${username}"
+                                   placeholder="用户名">
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-primary" onclick="reloadTable()"><i
+                                        class="glyphicon glyphicon-search"></i></button>
+                                <button type="button" class="btn btn-warning" onclick="resetSearchForm()"><i
+                                        class="glyphicon glyphicon-repeat"></i></button>
                             </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th class="w8p">ID</th>
-                    <th class="w13p">用户名</th>
-                    <th class="w13p">姓名</th>
-                    <th>职位</th>
-                    <th class="w15p">手机号</th>
-                    <th class="w20p">邮箱</th>
-                    <th class="w11p">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="user : ${users}">
-                    <td class="center" th:text="${user.userId}">1</td>
-                    <td th:text="${user.username}">user</td>
-                    <td th:text="${user.givenName}">name</td>
-                    <td th:text="${user.position}">position</td>
-                    <td class="center" th:text="${user.mobile}">mobile</td>
-                    <td th:text="${user.email}">email</td>
-                    <td class="center">
-                        <a th:if="${user.isForbidden != 1}"
-                           data-message="确定导入该用户为系统联系人吗？"
-                           data-url="/system/contact/save"
-                           th:data-params="|name=${user.givenName}&amp;mobile=${user.mobile}&amp;position=${user.position}&amp;email=${user.email}|"
-                           onclick="importContact(this.getAttribute('data-message'), this.getAttribute('data-url'), this.getAttribute('data-params'))">
-                            <i class="glyphicon glyphicon-import"></i>导入
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="panel-footer" th:if="${paginator != null and paginator.nums > 0}">
-            <th:block th:replace="~{fragments/paginator :: default(${paginator})}"></th:block>
+        <div class="panel-body" style="padding-top: 0">
+            <table id="contactImportTable"></table>
         </div>
     </div>
 </div>
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+    AjaxUtil.ctx = /*[[@{/}]]*/ "";
+
+    function actionFormatter(value, row) {
+        if (row.isForbidden === 1) {
+            return "";
+        }
+        var params = $.param({
+            name: row.givenName || "",
+            mobile: row.mobile || "",
+            position: row.position || "",
+            email: row.email || ""
+        });
+        return '<a data-message="确定导入该用户为系统联系人吗？" data-url="' + AjaxUtil.ctx + 'system/contact/save" data-params="' + tableHtml(params) + '" onclick="importContact(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'), this.getAttribute(\'data-params\'))"><i class="glyphicon glyphicon-import"></i>导入</a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "contactImportTable",
+            url: AjaxUtil.ctx + "system/contact/import",
+            uniqueId: "userId",
+            sortable: false,
+            pageSize: 20,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {username: $("#username").val()};
+            },
+            columns: [
+                {field: "userId", title: "ID", width: "8%", align: "center"},
+                {field: "username", title: "用户名", width: "13%"},
+                {field: "givenName", title: "姓名", width: "13%"},
+                {field: "position", title: "职位"},
+                {field: "mobile", title: "手机号", width: "15%", align: "center"},
+                {field: "email", title: "邮箱", width: "20%"},
+                {field: "operate", title: "操作", width: "11%", align: "center", formatter: actionFormatter}
+            ]
+        });
+    });
+
+    function reloadTable() {
+        reloadTableFirstPage("contactImportTable");
+    }
+
+    function resetSearchForm() {
+        resetTableSearch("contactImportSearchForm", "contactImportTable");
+    }
+
     function importContact(title, url, data) {
         Layers.confirmCallback(title, function () {
             Common.ajaxSubmitCallback(url, data, function (response) {
