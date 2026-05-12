@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Insert;
@@ -137,6 +138,6 @@ public interface LogDocumentMapper {
         @Param("userId") Integer userId,
         @Param("action") Integer action,
         @Param("comment") String comment,
-        @Param("createTime") Integer createTime
+        @Param("createTime") LocalDateTime createTime
     );
 }

@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.ui.Model;
@@ -37,7 +38,8 @@ public class GlobalModelAttributes {
         }
         model.addAttribute("system_name", configService.getValue("system_name", properties.getSystemNameFallback()));
 
-        CurrentUser currentUser = (CurrentUser) request.getAttribute(AuthInterceptor.CURRENT_USER_ATTR);
+        HttpSession session = request.getSession(false);
+        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(AuthInterceptor.SESSION_AUTHOR);
         if (currentUser != null) {
             model.addAttribute("login_user_id", currentUser.getUserId());
             model.addAttribute("login_username", currentUser.getUsername());

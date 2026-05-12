@@ -3,7 +3,6 @@ package org.tinycloud.mmwiki.vo;
 import java.util.List;
 
 import org.tinycloud.mmwiki.domain.User;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MemberPage view object.
@@ -19,11 +18,6 @@ public class MemberPage {
     private List<MemberView> users;
 
     /**
-     * paginator.
-     */
-    private Paginator paginator;
-
-    /**
      * manager.
      */
     private boolean manager;
@@ -36,14 +30,8 @@ public class MemberPage {
     public MemberPage() {
     }
 
-    public MemberPage(
-            List<MemberView> users,
-            Paginator paginator,
-            boolean manager,
-            List<User> otherUsers
-    ) {
+    public MemberPage(List<MemberView> users, boolean manager, List<User> otherUsers) {
         this.users = users;
-        this.paginator = paginator;
         this.manager = manager;
         this.otherUsers = otherUsers;
     }
@@ -55,15 +43,6 @@ public class MemberPage {
     public void setUsers(List<MemberView> users) {
         this.users = users;
     }
-
-    public Paginator getPaginator() {
-        return paginator;
-    }
-
-    public void setPaginator(Paginator paginator) {
-        this.paginator = paginator;
-    }
-
     public boolean isManager() {
         return manager;
     }

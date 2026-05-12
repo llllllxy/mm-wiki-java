@@ -2,7 +2,6 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.ActivityPage;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
 import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
@@ -25,7 +24,6 @@ import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -140,35 +138,14 @@ public class SystemProfileService {
     }
 
     /**
-     * 分页加载当前用户关注的文档。
+     * 加载当前用户关注文档页面的基础信息。
      */
-    public FollowDocPage loadFollowDocs(Integer userId, int page, int number) {
+    public FollowDocPage loadFollowDocs(Integer userId) {
         User user = requireUser(userId);
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        Map<String, Document> docs = documentMapper.findActiveByIds(docIds).stream()
-            .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
-
-        List<ProfileFollowedDocument> items = new ArrayList<>();
-        for (Follow follow : follows) {
-            Document document = docs.get(follow.getObjectId());
-            if (document != null) {
-                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.formatUnix(document.getUpdateTime())));
-            }
-        }
-
-        int offset = (page - 1) * number;
-        List<ProfileFollowedDocument> pageItems = offset >= items.size()
-            ? List.of()
-                : items.subList(offset, Math.min(items.size(), offset + number));
-
-        return new FollowDocPage(
-            user,
-            pageItems,
-            items.size(),
-            configService.getValue("auto_follow_doc_open", "0"),
-                Paginator.of(page, number, items.size(), "/system/profile/followDoc")
-        );
+        int count = docIds.isEmpty() ? 0 : documentMapper.findActiveByIds(docIds).size();
+        return new FollowDocPage(user, count, configService.getValue("auto_follow_doc_open", "0"));
     }
 
     public PageModel<ProfileFollowedDocument> loadFollowDocPage(Integer userId, int pageNum, int pageSize) {
@@ -182,7 +159,7 @@ public class SystemProfileService {
         for (Follow follow : follows) {
             Document document = docs.get(follow.getObjectId());
             if (document != null) {
-                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.formatUnix(document.getUpdateTime())));
+                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.format(document.getUpdateTime())));
             }
         }
 
@@ -191,26 +168,6 @@ public class SystemProfileService {
                 ? List.of()
                 : items.subList(offset, Math.min(items.size(), offset + pageSize));
         return PageModel.build((long) pageNum, (long) pageSize, pageItems, (long) items.size());
-    }
-
-    /**
-     * 分页加载当前用户的文档操作动态。
-     */
-    public ActivityPage loadActivity(Integer userId, String keyword, int page, int number) {
-        requireUser(userId);
-        String search = trim(keyword);
-
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isBlank()) {
-                        logDocumentMapper.pageByUserId(userId);
-                    } else {
-                        logDocumentMapper.pageByUserIdAndKeyword(userId, search);
-                    }
-                });
-        List<LogDocumentView> logs = pageInfo.getList();
-        logs = decorateLogs(logs);
-        return new ActivityPage(logs, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/profile/activity?keyword=" + search));
     }
 
     public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
@@ -257,7 +214,7 @@ public class SystemProfileService {
 
     private List<LogDocumentView> decorateLogs(List<LogDocumentView> logs) {
         for (LogDocumentView log : logs) {
-            log.setCreateTimeText(TimeUtils.formatUnix(log.getCreateTime()));
+            log.setCreateTimeText(TimeUtils.format(log.getCreateTime()));
         }
         return logs;
     }

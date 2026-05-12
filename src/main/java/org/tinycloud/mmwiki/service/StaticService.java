@@ -15,6 +15,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -80,7 +81,7 @@ public class StaticService {
 
     public List<Map<String, Object>> docCountByTime(int limitDay) {
         int days = Math.max(1, Math.min(limitDay, 365));
-        int start = Math.toIntExact(Instant.now().getEpochSecond() - days * 86400L);
+        LocalDateTime start = LocalDateTime.now().minusDays(days);
         return documentMapper.countGroupByCreateDate(start);
     }
 
@@ -100,7 +101,7 @@ public class StaticService {
         PageInfo<LogEntry> pageInfo = PageHelper.startPage(1, 5)
                 .doSelectPageInfo(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
         List<LogEntry> errLogs = pageInfo.getList();
-        errLogs.forEach(log -> log.setCreateTimeText(TimeUtils.formatUnix(log.getCreateTime())));
+        errLogs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new Monitor(serverInfo, pageInfo.getTotal(), errLogs);
     }
 

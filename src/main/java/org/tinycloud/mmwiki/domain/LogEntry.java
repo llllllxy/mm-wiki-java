@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 系统日志实体。
  *
@@ -57,7 +59,7 @@ public class LogEntry {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
     /**
      * 创建时间文本，页面展示扩展字段
      */
@@ -151,11 +153,11 @@ public class LogEntry {
         this.username = username;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
@@ -186,3 +188,4 @@ public class LogEntry {
         };
     }
 }
+

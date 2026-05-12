@@ -88,9 +88,10 @@ public interface RoleMapper {
     @Update("""
         update mw_role
         set is_delete = 1,
-            update_time = unix_timestamp(now())
+                update_time = now()
         where role_id = #{roleId}
           and is_delete = 0
         """)
     int markDeleted(@Param("roleId") Integer roleId);
 }
+

@@ -45,8 +45,7 @@ public class MainController extends ControllerSupport {
     @GetMapping("/main/default")
     public String defaultPage(HttpServletRequest request, Model model) {
         nav(model, "main");
-        CurrentUser currentUser = currentUser(request);
-        MainDefaultView view = mainService.loadDefaultView(currentUser.getUserId(), 1, 10);
+        MainDefaultView view = mainService.loadDefaultView();
         model.addAttribute("panel_title", view.getPanelTitle());
         model.addAttribute("panel_description", view.getPanelDescription());
         model.addAttribute("links", view.getLinks());

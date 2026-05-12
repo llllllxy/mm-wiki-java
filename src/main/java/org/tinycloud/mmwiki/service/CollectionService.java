@@ -1,10 +1,10 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
 import org.tinycloud.mmwiki.mapper.CollectionMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
@@ -45,7 +45,7 @@ public class CollectionService {
         entry.setUserId(userId);
         entry.setType(type);
         entry.setResourceId(resourceId);
-        entry.setCreateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        entry.setCreateTime(TimeUtils.now());
         collectionMapper.insert(entry);
         return JsonResponse.success("收藏成功！", redirect);
     }

@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.ui.Model;
 
 /**
@@ -12,7 +13,8 @@ import org.springframework.ui.Model;
 public abstract class ControllerSupport {
 
     protected CurrentUser currentUser(HttpServletRequest request) {
-        return (CurrentUser) request.getAttribute(AuthInterceptor.CURRENT_USER_ATTR);
+        HttpSession session = request.getSession(false);
+        return session == null ? null : (CurrentUser) session.getAttribute(AuthInterceptor.SESSION_AUTHOR);
     }
 
     protected void nav(Model model, String navName) {

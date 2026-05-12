@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 空间用户权限关系实体。
  *
@@ -29,11 +31,11 @@ public class SpaceUser {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
     /**
      * 更新时间
      */
-    private Integer updateTime;
+    private LocalDateTime updateTime;
 
     public Integer getSpaceUserId() {
         return spaceUserId;
@@ -67,19 +69,20 @@ public class SpaceUser {
         this.privilege = privilege;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Integer getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Integer updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 }
+

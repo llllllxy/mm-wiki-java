@@ -41,7 +41,7 @@ public interface UserMapper {
             update mw_user
             set last_time = #{lastTime},
                 last_ip = #{lastIp},
-                update_time = #{lastTime}
+                update_time = now()
             where user_id = #{userId}
             and is_delete = 0
             """)
@@ -214,7 +214,7 @@ public interface UserMapper {
                 position = #{position},
                 location = #{location},
                 im = #{im},
-                update_time = unix_timestamp(now())
+                update_time = now()
             where user_id = #{userId}
               and is_delete = 0
             """)
@@ -233,7 +233,7 @@ public interface UserMapper {
     @Update("""
             update mw_user
             set password = #{password},
-                update_time = unix_timestamp(now())
+                update_time = now()
             where user_id = #{userId}
               and is_delete = 0
             """)
@@ -242,7 +242,7 @@ public interface UserMapper {
     @Update("""
             update mw_user
             set is_forbidden = #{isForbidden},
-                update_time = unix_timestamp(now())
+                update_time = now()
             where user_id = #{userId}
               and is_delete = 0
             """)
@@ -259,7 +259,7 @@ public interface UserMapper {
     @Update("""
             update mw_user
             set role_id = #{roleId},
-                update_time = unix_timestamp(now())
+                update_time = now()
             where user_id = #{userId}
               and is_delete = 0
             """)
@@ -289,3 +289,4 @@ public interface UserMapper {
             """)
     long countByLastTimeAfter(@Param("startTime") Integer startTime);
 }
+

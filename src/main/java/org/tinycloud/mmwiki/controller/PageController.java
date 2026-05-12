@@ -48,8 +48,8 @@ public class PageController extends ControllerSupport {
         model.addAttribute("page_content", view.getPageContent());
         model.addAttribute("parent_documents", view.getParentDocuments());
         model.addAttribute("is_editor", view.isEditor());
-        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.getDocument().getCreateTime()));
-        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.getDocument().getUpdateTime()));
+        model.addAttribute("document_create_time", TimeUtils.format(view.getDocument().getCreateTime()));
+        model.addAttribute("document_update_time", TimeUtils.format(view.getDocument().getUpdateTime()));
         return "page/view";
     }
 
@@ -94,8 +94,8 @@ public class PageController extends ControllerSupport {
         model.addAttribute("page_content", view.getPageContent());
         model.addAttribute("create_user", view.getCreateUser());
         model.addAttribute("edit_user", view.getEditUser());
-        model.addAttribute("document_create_time", TimeUtils.formatUnix(view.getDocument().getCreateTime()));
-        model.addAttribute("document_update_time", TimeUtils.formatUnix(view.getDocument().getUpdateTime()));
+        model.addAttribute("document_create_time", TimeUtils.format(view.getDocument().getCreateTime()));
+        model.addAttribute("document_update_time", TimeUtils.format(view.getDocument().getUpdateTime()));
         return "page/display";
     }
 

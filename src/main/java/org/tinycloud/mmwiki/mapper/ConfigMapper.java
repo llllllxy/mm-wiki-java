@@ -34,8 +34,9 @@ public interface ConfigMapper {
     @Update("""
         update mw_config
         set value = #{value},
-            update_time = unix_timestamp(now())
+                update_time = now()
         where `key` = #{key}
         """)
     int updateValueByKey(@Param("key") String key, @Param("value") String value);
 }
+

@@ -4,12 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.mapper.AttachmentMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -45,7 +46,7 @@ public class AttachmentService {
     }
 
     public Attachment save(Integer userId, String documentId, String name, String path, int source) {
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         Attachment attachment = new Attachment();
         attachment.setUserId(userId);
         attachment.setDocumentId(documentId);
@@ -79,3 +80,4 @@ public class AttachmentService {
         attachmentMapper.deleteByDocumentId(documentId);
     }
 }
+

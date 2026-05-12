@@ -6,7 +6,6 @@ import org.tinycloud.mmwiki.vo.FollowDocView;
 import org.tinycloud.mmwiki.vo.FollowUserListPage;
 import org.tinycloud.mmwiki.vo.UserFollowView;
 import org.tinycloud.mmwiki.vo.UserFollowedDocument;
-import org.tinycloud.mmwiki.vo.UserListPage;
 import org.tinycloud.mmwiki.vo.UserProfileView;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -40,23 +38,6 @@ public class UserDirectoryService {
     private LogDocumentMapper logDocumentMapper;
     @Autowired
     private DocumentMapper documentMapper;
-
-    public UserListPage listUsers(CurrentUser currentUser, String username, int page, int number) {
-        String keyword = username == null ? "" : username.trim();
-
-        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (keyword.isBlank()) {
-                        userService.pageAllActive();
-                    } else {
-                        userService.pageByUsernameLike(keyword);
-                    }
-                });
-        List<User> users = pageInfo.getList();
-
-        markFollows(currentUser.getUserId(), users);
-        return new UserListPage(users, keyword, pageInfo.getTotal(), Paginator.of(page, number, pageInfo.getTotal(), "/user/list"));
-    }
 
     public PageModel<User> userPage(CurrentUser currentUser, String username, int pageNum, int pageSize) {
         String keyword = username == null ? "" : username.trim();

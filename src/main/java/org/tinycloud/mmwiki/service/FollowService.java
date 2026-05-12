@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.mapper.FollowMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -47,7 +47,7 @@ public class FollowService {
         follow.setUserId(userId);
         follow.setType(TYPE_DOC);
         follow.setObjectId(documentId);
-        follow.setCreateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        follow.setCreateTime(TimeUtils.now());
         followMapper.insert(follow);
     }
 
@@ -81,7 +81,7 @@ public class FollowService {
         follow.setUserId(currentUserId);
         follow.setType(type);
         follow.setObjectId(objectId);
-        follow.setCreateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        follow.setCreateTime(TimeUtils.now());
         followMapper.insert(follow);
         return JsonResponse.success("关注成功", redirect);
     }
@@ -113,3 +113,4 @@ public class FollowService {
         return type != null && type == TYPE_USER;
     }
 }
+

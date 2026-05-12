@@ -4,14 +4,17 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
@@ -19,7 +22,6 @@ import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -66,8 +68,8 @@ public class SystemUserController extends ControllerSupport {
         }
         model.addAttribute("user", user);
         model.addAttribute("roleName", roleService.roleName(user.getRoleId()));
-        model.addAttribute("createTimeText", TimeUtils.formatUnix(user.getCreateTime()));
-        model.addAttribute("updateTimeText", TimeUtils.formatUnix(user.getUpdateTime()));
+        model.addAttribute("createTimeText", TimeUtils.format(user.getCreateTime()));
+        model.addAttribute("updateTimeText", TimeUtils.format(user.getUpdateTime()));
         model.addAttribute("lastTimeText", TimeUtils.formatUnix(user.getLastTime()));
         return "system/user/info";
     }
@@ -91,7 +93,7 @@ public class SystemUserController extends ControllerSupport {
             throw new IllegalStateException("用户不存在！");
         }
         if (user.getRoleId() != null && user.getRoleId() == RoleService.ROOT_ROLE_ID
-            && currentUser(request).getRoleId() != RoleService.ROOT_ROLE_ID) {
+                && currentUser(request).getRoleId() != RoleService.ROOT_ROLE_ID) {
             throw new IllegalStateException("没有权限修改超级管理员！");
         }
         model.addAttribute("user", user);
@@ -137,13 +139,9 @@ public class SystemUserController extends ControllerSupport {
         return JsonResponse.success("恢复用户成功", "/system/user/list");
     }
 
-    private String rolePart(Integer roleId) {
-        return roleId == null ? "" : "&role_id=" + roleId;
-    }
-
-    private List<org.tinycloud.mmwiki.domain.Role> assignableRoles(HttpServletRequest request) {
+    private List<Role> assignableRoles(HttpServletRequest request) {
         boolean root = currentUser(request).getRoleId() != null && currentUser(request).getRoleId() == RoleService.ROOT_ROLE_ID;
-        List<org.tinycloud.mmwiki.domain.Role> roles = roleService.findAllActive();
+        List<Role> roles = roleService.findAllActive();
         if (root) {
             return roles;
         }

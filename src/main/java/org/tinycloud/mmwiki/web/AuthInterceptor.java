@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -35,7 +35,6 @@ import org.tinycloud.mmwiki.util.IpUtils;
 public class AuthInterceptor implements HandlerInterceptor {
 
     public static final String SESSION_AUTHOR = "author";
-    public static final String CURRENT_USER_ATTR = "currentUser";
 
     private final UserService userService;
     private final ObjectMapper objectMapper;
@@ -65,9 +64,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         Object sessionValue = session.getAttribute(SESSION_AUTHOR);
-        if (!(sessionValue instanceof CurrentUser currentUser)) {
+        if (!(sessionValue instanceof CurrentUser)) {
             return handleUnauthenticated(request, response);
         }
+        CurrentUser currentUser = (CurrentUser) sessionValue;
 
         User refreshedUser = userService.findActiveById(currentUser.getUserId());
         if (refreshedUser == null || refreshedUser.getIsForbidden() == 1) {
@@ -77,13 +77,13 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         CurrentUser refreshed = CurrentUser.from(refreshedUser);
         session.setAttribute(SESSION_AUTHOR, refreshed);
-        request.setAttribute(CURRENT_USER_ATTR, refreshed);
         return checkSystemAccess(request, response, refreshed);
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        CurrentUser currentUser = (CurrentUser) request.getAttribute(CURRENT_USER_ATTR);
+        HttpSession session = request.getSession(false);
+        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(SESSION_AUTHOR);
         if (currentUser == null || !shouldRecordOperation(request)) {
             return;
         }
@@ -99,7 +99,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             logEntry.setReferer(left(header(request, "Referer"), 100));
             logEntry.setUserId(currentUser.getUserId());
             logEntry.setUsername(currentUser.getUsername());
-            logEntry.setCreateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+            logEntry.setCreateTime(LocalDateTime.now());
             logMapper.insert(logEntry);
         } catch (RuntimeException ignored) {
             // Logging must never break the user-facing request path.

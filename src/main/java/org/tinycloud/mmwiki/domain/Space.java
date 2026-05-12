@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 空间信息实体。
  *
@@ -45,11 +47,11 @@ public class Space {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
     /**
      * 更新时间
      */
-    private Integer updateTime;
+    private LocalDateTime updateTime;
     /**
      * 当前用户是否收藏，页面展示扩展字段
      */
@@ -127,19 +129,19 @@ public class Space {
         this.isDelete = isDelete;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Integer getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Integer updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -167,3 +169,4 @@ public class Space {
         this.createDateText = createDateText;
     }
 }
+

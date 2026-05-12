@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.util;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -12,7 +13,8 @@ import java.time.format.DateTimeFormatter;
  */
 public final class TimeUtils {
 
-    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.systemDefault());
 
     private TimeUtils() {
     }
@@ -28,5 +30,28 @@ public final class TimeUtils {
             return "";
         }
         return DEFAULT_FORMATTER.format(Instant.ofEpochSecond(epochSeconds.longValue()));
+    }
+
+    /**
+     * 将日期时间转为字符串。
+     *
+     * @param dateTime 日期时间
+     * @return 时间字符串
+     */
+    public static String format(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "";
+        }
+        return DEFAULT_FORMATTER.format(dateTime);
+    }
+
+
+    /**
+     * 当前本地日期时间。
+     *
+     * @return 当前日期时间
+     */
+    public static LocalDateTime now() {
+        return LocalDateTime.now();
     }
 }

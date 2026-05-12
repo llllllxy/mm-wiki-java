@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 联系人信息实体。
  *
@@ -33,11 +35,11 @@ public class Contact {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
     /**
      * 更新时间
      */
-    private Integer updateTime;
+    private LocalDateTime updateTime;
 
     public Integer getContactId() {
         return contactId;
@@ -79,19 +81,20 @@ public class Contact {
         this.position = position;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Integer getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Integer updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 }
+

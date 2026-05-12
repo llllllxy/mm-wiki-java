@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 收藏信息实体。
  *
@@ -29,7 +31,7 @@ public class CollectionEntry {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
 
     public Integer getCollectionId() {
         return collectionId;
@@ -63,11 +65,12 @@ public class CollectionEntry {
         this.resourceId = resourceId;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 }
+

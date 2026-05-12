@@ -2,17 +2,16 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.LinkPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.Link;
 import org.tinycloud.mmwiki.mapper.LinkMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
+
+import java.time.LocalDateTime;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -25,19 +24,6 @@ public class LinkService {
 
     @Autowired
     private LinkMapper linkMapper;
-
-    public LinkPage list(String keyword, int page, int number) {
-        String search = keyword == null ? "" : keyword.trim();
-        PageInfo<Link> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isEmpty()) {
-                        linkMapper.pageAll();
-                    } else {
-                        linkMapper.pageByKeyword(search);
-                    }
-                });
-        return new LinkPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/link/list?keyword=" + search));
-    }
 
     public PageModel<Link> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
@@ -61,7 +47,7 @@ public class LinkService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         link.setCreateTime(now);
         link.setUpdateTime(now);
         linkMapper.insert(link);
@@ -76,7 +62,7 @@ public class LinkService {
         if (validation != null) {
             return validation;
         }
-        link.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        link.setUpdateTime(LocalDateTime.now());
         linkMapper.update(link);
         return JsonResponse.success("修改链接成功", "/system/link/list");
     }

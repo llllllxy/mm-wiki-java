@@ -1,11 +1,13 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.SpaceUser;
 import org.tinycloud.mmwiki.mapper.SpaceUserMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -36,7 +38,7 @@ public class SpaceUserService {
     }
 
     public void add(Integer spaceId, Integer userId, Integer privilege) {
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         SpaceUser spaceUser = new SpaceUser();
         spaceUser.setSpaceId(spaceId);
         spaceUser.setUserId(userId);
@@ -50,7 +52,7 @@ public class SpaceUserService {
         SpaceUser spaceUser = new SpaceUser();
         spaceUser.setSpaceUserId(spaceUserId);
         spaceUser.setPrivilege(privilege);
-        spaceUser.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        spaceUser.setUpdateTime(TimeUtils.now());
         spaceUserMapper.updatePrivilege(spaceUser);
     }
 
@@ -62,3 +64,4 @@ public class SpaceUserService {
         spaceUserMapper.deleteBySpaceId(spaceId);
     }
 }
+

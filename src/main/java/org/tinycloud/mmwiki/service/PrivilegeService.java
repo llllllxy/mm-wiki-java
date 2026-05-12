@@ -1,8 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
 import org.tinycloud.mmwiki.vo.PrivilegeGroups;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -61,7 +63,7 @@ public class PrivilegeService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         privilege.setCreateTime(now);
         privilege.setUpdateTime(now);
         privilegeMapper.insert(privilege);
@@ -79,7 +81,7 @@ public class PrivilegeService {
         if (validation != null) {
             return validation;
         }
-        privilege.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        privilege.setUpdateTime(TimeUtils.now());
         privilegeMapper.update(privilege);
         return JsonResponse.success("修改权限成功", "/system/privilege/list");
     }
@@ -139,3 +141,4 @@ public class PrivilegeService {
         return null;
     }
 }
+

@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.tinycloud.mmwiki.domain.Contact;
 import org.tinycloud.mmwiki.domain.Link;
-import org.tinycloud.mmwiki.domain.LogDocumentView;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MainDefaultView view object.
@@ -26,11 +24,6 @@ public class MainDefaultView {
     private String panelDescription;
 
     /**
-     * logDocuments.
-     */
-    private List<LogDocumentView> logDocuments;
-
-    /**
      * links.
      */
     private List<Link> links;
@@ -40,28 +33,19 @@ public class MainDefaultView {
      */
     private List<Contact> contacts;
 
-    /**
-     * paginator.
-     */
-    private Paginator paginator;
-
     public MainDefaultView() {
     }
 
     public MainDefaultView(
             String panelTitle,
             String panelDescription,
-            List<LogDocumentView> logDocuments,
             List<Link> links,
-            List<Contact> contacts,
-            Paginator paginator
+            List<Contact> contacts
     ) {
         this.panelTitle = panelTitle;
         this.panelDescription = panelDescription;
-        this.logDocuments = logDocuments;
         this.links = links;
         this.contacts = contacts;
-        this.paginator = paginator;
     }
 
     public String getPanelTitle() {
@@ -80,14 +64,6 @@ public class MainDefaultView {
         this.panelDescription = panelDescription;
     }
 
-    public List<LogDocumentView> getLogDocuments() {
-        return logDocuments;
-    }
-
-    public void setLogDocuments(List<LogDocumentView> logDocuments) {
-        this.logDocuments = logDocuments;
-    }
-
     public List<Link> getLinks() {
         return links;
     }
@@ -102,14 +78,6 @@ public class MainDefaultView {
 
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
-    }
-
-    public Paginator getPaginator() {
-        return paginator;
-    }
-
-    public void setPaginator(Paginator paginator) {
-        this.paginator = paginator;
     }
 
 }

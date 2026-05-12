@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.mapper;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -168,7 +169,7 @@ public interface DocumentMapper {
         @Param("spaceId") Integer spaceId,
         @Param("startSequence") Integer startSequence,
         @Param("delta") Integer delta,
-        @Param("updateTime") Integer updateTime
+        @Param("updateTime") LocalDateTime updateTime
     );
 
     @Update("""
@@ -244,12 +245,12 @@ public interface DocumentMapper {
     List<Map<String, Object>> findSpaceDocumentRank(@Param("size") int size);
 
     @Select("""
-        select from_unixtime(create_time, '%Y-%m-%d') as date, count(*) as total
+            select date_format(create_time, '%Y-%m-%d') as date, count(*) as total
         from mw_document
         where is_delete = 0
           and create_time >= #{startTime}
-        group by from_unixtime(create_time, '%Y-%m-%d')
+            group by date_format(create_time, '%Y-%m-%d')
         order by date asc
         """)
-    List<Map<String, Object>> countGroupByCreateDate(@Param("startTime") Integer startTime);
+    List<Map<String, Object>> countGroupByCreateDate(@Param("startTime") LocalDateTime startTime);
 }

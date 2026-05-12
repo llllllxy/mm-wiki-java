@@ -2,10 +2,11 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.ImportPage;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -14,7 +15,7 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.ContactMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
+
 
 /**
  * MM-Wiki 业务服务实现。
@@ -43,7 +44,7 @@ public class ContactService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         contact.setCreateTime(now);
         contact.setUpdateTime(now);
         contactMapper.insert(contact);
@@ -58,7 +59,7 @@ public class ContactService {
         if (validation != null) {
             return validation;
         }
-        contact.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        contact.setUpdateTime(TimeUtils.now());
         contactMapper.update(contact);
         return JsonResponse.success("修改联系人成功", "/system/contact/list");
     }
@@ -69,19 +70,6 @@ public class ContactService {
         }
         contactMapper.deleteById(contactId);
         return JsonResponse.success("删除联系人成功", "/system/contact/list");
-    }
-
-    public ImportPage importCandidates(String username, int page, int number) {
-        String search = username == null ? "" : username.trim();
-        PageInfo<User> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isEmpty()) {
-                        userService.pageAllActive();
-                    } else {
-                        userService.pageByUsernameLike(search);
-                    }
-                });
-        return new ImportPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/contact/import?username=" + search));
     }
 
     public PageModel<User> importCandidatePage(String username, int pageNum, int pageSize) {

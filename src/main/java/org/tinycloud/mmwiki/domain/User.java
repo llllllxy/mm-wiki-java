@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.domain;
 
+import java.time.LocalDateTime;
+
 /**
  * 用户信息实体。
  *
@@ -77,11 +79,11 @@ public class User {
     /**
      * 创建时间
      */
-    private Integer createTime;
+    private LocalDateTime createTime;
     /**
      * 更新时间
      */
-    private Integer updateTime;
+    private LocalDateTime updateTime;
     /**
      * 当前登录用户是否关注该用户，页面展示扩展字段，非 mw_user 表字段
      */
@@ -219,19 +221,19 @@ public class User {
         this.isDelete = isDelete;
     }
 
-    public Integer getCreateTime() {
+    public LocalDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Integer createTime) {
+    public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Integer getUpdateTime() {
+    public LocalDateTime getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Integer updateTime) {
+    public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
     }
 
@@ -251,3 +253,4 @@ public class User {
         this.followId = followId;
     }
 }
+

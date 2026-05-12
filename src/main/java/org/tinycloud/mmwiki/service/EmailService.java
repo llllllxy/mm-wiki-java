@@ -1,7 +1,8 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -101,7 +102,7 @@ public class EmailService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         emailServer.setCreateTime(now);
         emailServer.setUpdateTime(now);
         emailServer.setIsUsed(0);
@@ -120,7 +121,7 @@ public class EmailService {
         if (validation != null) {
             return validation;
         }
-        emailServer.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        emailServer.setUpdateTime(TimeUtils.now());
         emailMapper.update(emailServer);
         return JsonResponse.success("修改邮件服务器成功", "/system/email/list");
     }
@@ -167,7 +168,7 @@ public class EmailService {
         Context context = baseContext();
         context.setVariable("document_name", "MM-Wiki 邮件服务器测试");
         context.setVariable("username", "System");
-        context.setVariable("update_time", TimeUtils.formatUnix(Math.toIntExact(Instant.now().getEpochSecond())));
+        context.setVariable("update_time", TimeUtils.format(TimeUtils.now()));
         context.setVariable("document_content", "如果你收到这封邮件，说明当前 SMTP 邮件服务器配置可用。");
         String body = templateEngine.process(TEST_NOTICE_TEMPLATE, context);
 
@@ -198,7 +199,7 @@ public class EmailService {
         Context context = baseContext();
         context.setVariable("document_name", document.getName());
         context.setVariable("username", StringUtils.hasText(username) ? username : "System");
-        context.setVariable("update_time", TimeUtils.formatUnix(document.getUpdateTime()));
+        context.setVariable("update_time", TimeUtils.format(document.getUpdateTime()));
         context.setVariable("document_content", abbreviate(content, 500));
         context.setVariable("comment", StringUtils.hasText(comment) ? comment : "无");
         context.setVariable("document_url", documentUrl);
@@ -233,8 +234,8 @@ public class EmailService {
 
     private Context baseContext() {
         Context context = new Context();
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
-        context.setVariable("now_time", TimeUtils.formatUnix(now));
+        LocalDateTime now = LocalDateTime.now();
+        context.setVariable("now_time", TimeUtils.format(now));
         context.setVariable("copyright", properties.getCopyright());
         return context;
     }
@@ -321,3 +322,4 @@ public class EmailService {
         return null;
     }
 }
+

@@ -27,8 +27,8 @@ CREATE TABLE `mw_user` (
   `role_id` int(10) NOT NULL DEFAULT '0' COMMENT '角色 id',
   `is_forbidden` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否屏蔽，0 否 1 是',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0 否 1 是',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
@@ -41,8 +41,8 @@ CREATE TABLE `mw_role` (
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '角色名称',
   `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '角色类型 0 自定义角色，1 系统角色',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除，0 否 1 是',
-  `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统角色表';
 
@@ -61,8 +61,8 @@ CREATE TABLE `mw_privilege` (
   `target` varchar(200) NOT NULL DEFAULT '' COMMENT '目标地址',
   `is_display` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否显示：0不显示 1显示',
   `sequence` int(10) NOT NULL DEFAULT '0' COMMENT '排序(越小越靠前)',
-  `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`privilege_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统权限表';
 
@@ -74,7 +74,7 @@ CREATE TABLE `mw_role_privilege` (
   `role_privilege_id` int(10) NOT NULL AUTO_INCREMENT COMMENT '角色权限关系 id',
   `role_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '角色id',
   `privilege_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '权限id',
-  `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`role_privilege_id`),
   KEY (`role_id`),
   KEY (`privilege_id`)
@@ -93,8 +93,8 @@ CREATE TABLE `mw_space` (
   `is_share` tinyint(4) NOT NULL DEFAULT '1' COMMENT '文档是否允许分享 0 否 1 是',
   `is_export` tinyint(4) NOT NULL DEFAULT '1' COMMENT '文档是否允许导出 0 否 1 是',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0 否 1 是',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`space_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空间表';
 
@@ -107,8 +107,8 @@ CREATE TABLE `mw_space_user` (
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户 id',
   `space_id` int(10) NOT NULL DEFAULT '0' COMMENT '空间 id',
   `privilege` tinyint(4) NOT NULL DEFAULT '0' COMMENT '空间成员操作权限 0 浏览者 1 编辑者 2 管理员',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '修改时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`space_user_id`),
   UNIQUE KEY (`user_id`, `space_id`),
   KEY (`user_id`),
@@ -130,8 +130,8 @@ CREATE TABLE `mw_document` (
   `create_user_id` int(10) NOT NULL DEFAULT '0' COMMENT '创建用户 id',
   `edit_user_id` int(10) NOT NULL DEFAULT '0' COMMENT '最后修改用户 id',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0 否 1 是',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`document_id`),
   KEY (`parent_id`),
   KEY (`space_id`)
@@ -146,7 +146,7 @@ CREATE TABLE `mw_collection` (
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
   `type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '收藏类型 1 文档 2 空间',
   `resource_id` varchar(50) NOT NULL DEFAULT '0' COMMENT '收藏资源 id ',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`collection_id`),
   KEY (`user_id`),
   UNIQUE key (`user_id`, `resource_id`, `type`)
@@ -161,7 +161,7 @@ CREATE TABLE `mw_follow` (
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
   `type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '关注类型 1 文档 2 用户',
   `object_id` varchar(50) NOT NULL DEFAULT '0' COMMENT '关注对象 id',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`follow_id`),
   KEY (`user_id`),
   KEY (`object_id`),
@@ -179,7 +179,7 @@ CREATE TABLE `mw_log_document` (
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
   `action` tinyint(4) NOT NULL DEFAULT '1' COMMENT '动作 1 创建 2 修改 3 删除',
   `comment` varchar(255) NOT NULL DEFAULT '' COMMENT '备注信息',
-  `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`log_document_id`),
   KEY (`document_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='文档日志表';
@@ -200,7 +200,7 @@ CREATE TABLE `mw_log` (
   `referer` varchar(100) NOT NULL DEFAULT '' COMMENT 'referer',
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
   `username` varchar(100) NOT NULL DEFAULT '' COMMENT '用户名',
-  `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`log_id`),
   KEY (`level`, `username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统操作日志表';
@@ -221,8 +221,8 @@ CREATE TABLE `mw_email` (
   `password` varchar(50) NOT NULL DEFAULT '' COMMENT '密码',
   `is_ssl` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否使用ssl， 0 默认不使用 1 使用',
   `is_used` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否被使用， 0 默认不使用 1 使用',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`email_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='邮件服务器表';
 
@@ -235,8 +235,8 @@ CREATE TABLE `mw_link` (
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '链接名称',
   `url` varchar(100) NOT NULL DEFAULT '' COMMENT '链接地址',
   `sequence` int(10) NOT NULL DEFAULT '0' COMMENT '排序号(越小越靠前)',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`link_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='快捷链接表';
 
@@ -252,8 +252,8 @@ CREATE TABLE `mw_login_auth` (
   `ext_data` varchar(500) NOT NULL DEFAULT '' COMMENT '额外数据: token=aaa&key=bbb',
   `is_used` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否被使用， 0 默认不使用 1 使用',
   `is_delete` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否删除 0 否 1 是',
-  `create_time` int(11) NOT NULL COMMENT '创建时间',
-  `update_time` int(11) NOT NULL COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`login_auth_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='统一登录认证表';
 
@@ -266,8 +266,8 @@ CREATE TABLE `mw_config` (
   `name` varchar(100) NOT NULL DEFAULT '' COMMENT '配置名称',
   `key` varchar(50) NOT NULL DEFAULT '' COMMENT '配置键',
   `value` text NOT NULL COMMENT '配置值',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`config_id`),
   unique KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='全局配置表';
@@ -282,8 +282,8 @@ CREATE TABLE `mw_contact` (
   `mobile` varchar(50) NOT NULL DEFAULT '' COMMENT '联系电话',
   `email` varchar(50) NOT NULL DEFAULT '' COMMENT '邮箱',
   `position` varchar(100) NOT NULL DEFAULT '' COMMENT '联系人职位',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`contact_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='联系人表';
 
@@ -298,8 +298,8 @@ CREATE TABLE `mw_attachment` (
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '附件名称',
   `path` varchar(100) NOT NULL DEFAULT '' COMMENT '附件路径',
   `source` tinyint(4) NOT NULL DEFAULT '0' COMMENT '附件来源， 0 默认是附件 1 图片',
-  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次更新时间',
   PRIMARY KEY (`attachment_id`),
   KEY (`document_id`, `source`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='附件信息表';

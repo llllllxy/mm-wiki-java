@@ -4,7 +4,6 @@ import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.vo.DocumentEditData;
 import org.tinycloud.mmwiki.vo.DocumentViewData;
 import org.tinycloud.mmwiki.vo.ExportPayload;
-import org.tinycloud.mmwiki.vo.HistoryPage;
 import org.tinycloud.mmwiki.vo.SharedPageView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,8 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -45,10 +43,10 @@ import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -59,7 +57,7 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class DocumentService {
 
-    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     private static final Pattern INVALID_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
 
     @Autowired
@@ -298,7 +296,7 @@ public class DocumentService {
             return JsonResponse.error("该文档名称已经存在。");
         }
 
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = TimeUtils.now();
         int nextSequence = Objects.requireNonNullElse(documentMapper.findMaxSequence(parentId, spaceId), 0) + 1;
         Document document = new Document();
         document.setDocumentId(UUID.randomUUID().toString().replace("-", ""));
@@ -365,7 +363,7 @@ public class DocumentService {
         boolean nameChanged = !targetName.equals(document.getName());
         documentFileService.renamePageOrDirectory(oldPageFile, targetName, document.getType(), nameChanged);
 
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = TimeUtils.now();
         document.setName(targetName);
         document.setEditUserId(currentUser.getUserId());
         document.setUpdateTime(now);
@@ -401,7 +399,7 @@ public class DocumentService {
             return JsonResponse.error("您没有权限移动该空间文档。");
         }
 
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = TimeUtils.now();
         if ("next".equals(moveType) || "prev".equals(moveType)) {
             int updateSequence = Objects.requireNonNullElse(targetDocument.getSequence(), 0);
             if ("next".equals(moveType)) {
@@ -464,7 +462,7 @@ public class DocumentService {
 
         List<Document> parents = getParentDocuments(document);
         String pageFile = documentFileService.resolvePageFile(document, parents);
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = TimeUtils.now();
         document.setEditUserId(currentUser.getUserId());
         document.setUpdateTime(now);
         documentMapper.markDeleted(document);
@@ -473,24 +471,6 @@ public class DocumentService {
         followService.deleteDocumentFollowers(documentId);
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, "删除文档", now);
         return JsonResponse.success("删除文档成功", "/document/index?document_id=" + document.getParentId());
-    }
-
-    /**
-     * 分页加载文档历史记录。
-     */
-    public HistoryPage loadHistory(String documentId, CurrentUser currentUser, int page, int number) {
-        Document document = requireDocument(documentId);
-        Space space = spaceService.requireSpace(document.getSpaceId());
-        Access access = accessService.access(currentUser, space);
-        if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限查看该空间修改历史。");
-        }
-
-        PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
-        List<DocumentHistoryView> history = pageInfo.getList();
-        history.forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
-        return new HistoryPage(history, Paginator.of(page, number, pageInfo.getTotal(), "/document/history?document_id=" + documentId));
     }
 
     public PageModel<DocumentHistoryView> historyPage(String documentId, CurrentUser currentUser, int pageNum, int pageSize) {
@@ -567,10 +547,10 @@ public class DocumentService {
         }
     }
 
-    private String formatTime(Integer epoch) {
-        if (epoch == null || epoch <= 0) {
+    private String formatTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
             return "";
         }
-        return DATE_ONLY.format(Instant.ofEpochSecond(epoch));
+        return DATE_ONLY.format(dateTime);
     }
 }

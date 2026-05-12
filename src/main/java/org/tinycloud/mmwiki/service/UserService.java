@@ -1,7 +1,8 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.util.HashUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -166,7 +168,7 @@ public class UserService {
         if (userMapper.countByUsername(user.getUsername()) > 0) {
             return JsonResponse.error("用户名已经存在！");
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         user.setPassword(encodePassword(user.getPassword()));
         user.setCreateTime(now);
         user.setUpdateTime(now);
@@ -195,7 +197,7 @@ public class UserService {
         if (validation != null) {
             return validation;
         }
-        user.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        user.setUpdateTime(TimeUtils.now());
         if (StringUtils.hasText(user.getPassword()) && isRoot(operator)) {
             user.setPassword(encodePassword(user.getPassword().trim()));
             userMapper.updateSystemUserWithPassword(user);
@@ -274,3 +276,4 @@ public class UserService {
         return value == null ? "" : value.trim();
     }
 }
+

@@ -2,11 +2,11 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.AuthPage;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import java.net.URI;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -14,7 +14,6 @@ import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.mapper.LoginAuthMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -27,19 +26,6 @@ public class LoginAuthService {
 
     @Autowired
     private LoginAuthMapper loginAuthMapper;
-
-    public AuthPage list(String keyword, int page, int number) {
-        String search = keyword == null ? "" : keyword.trim();
-        PageInfo<LoginAuth> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isEmpty()) {
-                        loginAuthMapper.pageAllActive();
-                    } else {
-                        loginAuthMapper.pageByKeyword(search);
-                    }
-                });
-        return new AuthPage(pageInfo.getList(), search, Paginator.of(page, number, pageInfo.getTotal(), "/system/auth/list?keyword=" + search));
-    }
 
     public PageModel<LoginAuth> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
@@ -67,7 +53,7 @@ public class LoginAuthService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         loginAuth.setCreateTime(now);
         loginAuth.setUpdateTime(now);
         loginAuth.setIsUsed(0);
@@ -84,7 +70,7 @@ public class LoginAuthService {
         if (validation != null) {
             return validation;
         }
-        loginAuth.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        loginAuth.setUpdateTime(TimeUtils.now());
         loginAuthMapper.update(loginAuth);
         return JsonResponse.success("修改登录认证成功", "/system/auth/list");
     }

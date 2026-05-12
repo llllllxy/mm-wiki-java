@@ -1,7 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
 import org.tinycloud.mmwiki.vo.DocumentViewData;
-import org.tinycloud.mmwiki.vo.HistoryPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.config;
 
 import java.nio.file.Path;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -15,6 +16,8 @@ import org.tinycloud.mmwiki.web.AuthInterceptor;
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_PATTERN = "yyyy-MM-dd";
 
     private final AuthInterceptor authInterceptor;
     private final MmwikiProperties mmwikiProperties;

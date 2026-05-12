@@ -3,7 +3,6 @@ package org.tinycloud.mmwiki.controller;
 import org.tinycloud.mmwiki.vo.MemberPage;
 import org.tinycloud.mmwiki.vo.MemberView;
 import org.tinycloud.mmwiki.vo.SpaceDownload;
-import org.tinycloud.mmwiki.vo.SpacePage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,7 +1,5 @@
 package org.tinycloud.mmwiki.controller;
 
-import org.tinycloud.mmwiki.vo.PluginPage;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,9 +27,7 @@ public class SystemPluginController extends ControllerSupport {
 
     @GetMapping("/system/plugin/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
-        PluginPage view = pluginService.list(keyword, 1, 20);
-        model.addAttribute("plugins", view.getPlugins());
-        model.addAttribute("keyword", view.getKeyword());
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/plugin/list";
     }
 

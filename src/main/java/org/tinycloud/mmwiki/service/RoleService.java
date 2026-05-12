@@ -2,10 +2,11 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.RolePage;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -21,7 +22,6 @@ import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -74,21 +74,6 @@ public class RoleService {
         };
     }
 
-    public RolePage list(String keyword, int page, int number) {
-        String search = keyword == null ? "" : keyword.trim();
-        PageInfo<Role> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isEmpty()) {
-                        roleMapper.pageAll();
-                    } else {
-                        roleMapper.pageByKeyword(search);
-                    }
-                });
-        List<Role> roles = pageInfo.getList();
-        roles.forEach(role -> role.setUpdateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(role.getUpdateTime())));
-        return new RolePage(roles, search, Paginator.of(page, number, pageInfo.getTotal(), "/system/role/list?keyword=" + search));
-    }
-
     public PageModel<Role> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
         PageInfo<Role> pageInfo = PageHelper.startPage(pageNum, pageSize)
@@ -99,7 +84,7 @@ public class RoleService {
                         roleMapper.pageByKeyword(search);
                     }
                 });
-        pageInfo.getList().forEach(role -> role.setUpdateTimeText(org.tinycloud.mmwiki.util.TimeUtils.formatUnix(role.getUpdateTime())));
+        pageInfo.getList().forEach(role -> role.setUpdateTimeText(TimeUtils.format(role.getUpdateTime())));
         return PageModel.from(pageInfo);
     }
 
@@ -109,7 +94,7 @@ public class RoleService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         role.setType(CUSTOM_ROLE_TYPE);
         role.setCreateTime(now);
         role.setUpdateTime(now);
@@ -133,7 +118,7 @@ public class RoleService {
         if (validation != null) {
             return validation;
         }
-        role.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+        role.setUpdateTime(TimeUtils.now());
         roleMapper.update(role);
         return JsonResponse.success("修改角色成功", "/system/role/list");
     }
@@ -181,7 +166,7 @@ public class RoleService {
         if (privilegeIds != null) {
             merged.addAll(privilegeIds);
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         rolePrivilegeMapper.deleteByRoleId(roleId);
         rolePrivilegeMapper.insertBatch(roleId, new ArrayList<>(merged), now);
         return JsonResponse.success("角色授权成功", "/system/role/list");

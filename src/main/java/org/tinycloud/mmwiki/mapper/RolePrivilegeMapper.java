@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -47,6 +48,6 @@ public interface RolePrivilegeMapper {
     int insertBatch(
         @Param("roleId") Integer roleId,
         @Param("privilegeIds") List<Integer> privilegeIds,
-        @Param("createTime") Integer createTime
+        @Param("createTime") LocalDateTime createTime
     );
 }

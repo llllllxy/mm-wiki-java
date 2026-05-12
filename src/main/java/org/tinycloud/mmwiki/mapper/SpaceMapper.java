@@ -129,9 +129,10 @@ public interface SpaceMapper {
     @Update("""
         update mw_space
         set is_delete = 1,
-            update_time = unix_timestamp(now())
+                update_time = now()
         where space_id = #{spaceId}
           and is_delete = 0
         """)
     int markDeleted(@Param("spaceId") Integer spaceId);
 }
+

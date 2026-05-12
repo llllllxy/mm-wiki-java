@@ -3,6 +3,7 @@ package org.tinycloud.mmwiki.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.util.IpUtils;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.AuthInterceptor;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
@@ -114,7 +116,8 @@ public class AuthService {
             return JsonResponse.error("统一登录失败！");
         }
 
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        int loginTime = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         String realUsername = loginAuth.getUsernamePrefix() + "_" + cleanUsername;
         User user = new User();
         user.setUsername(realUsername);
@@ -128,7 +131,7 @@ public class AuthService {
         user.setLocation(value(profile.getLocation()));
         user.setIm(value(profile.getIm()));
         user.setLastIp(IpUtils.getClientIp(request));
-        user.setLastTime(now);
+        user.setLastTime(loginTime);
         user.setCreateTime(now);
         user.setUpdateTime(now);
 

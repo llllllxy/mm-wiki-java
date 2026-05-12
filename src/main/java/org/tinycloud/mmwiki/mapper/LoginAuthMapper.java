@@ -124,7 +124,7 @@ public interface LoginAuthMapper {
     @Update("""
         update mw_login_auth
         set is_used = 1,
-            update_time = unix_timestamp(now())
+                update_time = now()
         where login_auth_id = #{loginAuthId}
           and is_delete = 0
         """)
@@ -133,9 +133,10 @@ public interface LoginAuthMapper {
     @Update("""
         update mw_login_auth
         set is_delete = 1,
-            update_time = unix_timestamp(now())
+                update_time = now()
         where login_auth_id = #{loginAuthId}
           and is_delete = 0
         """)
     int markDeleted(@Param("loginAuthId") Integer loginAuthId);
 }
+

@@ -1,6 +1,5 @@
 package org.tinycloud.mmwiki.controller;
 
-import org.tinycloud.mmwiki.vo.ActivityPage;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
 import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
@@ -89,7 +88,7 @@ public class SystemProfileController extends ControllerSupport {
     @GetMapping("/system/profile/followDoc")
     public String followDoc(HttpServletRequest request, Model model) {
         FollowDocPage view =
-                systemProfileService.loadFollowDocs(currentUser(request).getUserId(), 1, 10);
+                systemProfileService.loadFollowDocs(currentUser(request).getUserId());
         model.addAttribute("user", view.getUser());
         model.addAttribute("count", view.getCount());
         model.addAttribute("autoFollowDoc", view.getAutoFollowDoc());

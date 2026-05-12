@@ -96,7 +96,7 @@ public interface EmailMapper {
     @Update("""
         update mw_email
         set is_used = 1,
-            update_time = unix_timestamp(now())
+                update_time = now()
         where email_id = #{emailId}
         """)
     int markUsed(@Param("emailId") Integer emailId);
@@ -107,3 +107,4 @@ public interface EmailMapper {
         """)
     int deleteById(@Param("emailId") Integer emailId);
 }
+

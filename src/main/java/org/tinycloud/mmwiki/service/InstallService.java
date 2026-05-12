@@ -16,6 +16,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -233,27 +234,27 @@ public class InstallService {
 
     private void createAdmin() throws Exception {
         String sql = "INSERT mw_user SET username=?, password=?, given_name=?, role_id=?, create_time=?, update_time=?";
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         try (Connection connection = connectToDatabase(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, data.getDatabaseConf().get("admin_name"));
             statement.setString(2, HashUtils.md5(HashUtils.sha256(data.getDatabaseConf().get("admin_pass"))));
             statement.setString(3, data.getDatabaseConf().get("admin_name"));
             statement.setInt(4, 1);
-            statement.setInt(5, now);
-            statement.setInt(6, now);
+            statement.setObject(5, now);
+            statement.setObject(6, now);
             statement.executeUpdate();
         }
     }
 
     private void insertSystemVersion() throws Exception {
         String sql = "INSERT mw_config SET `name`=?, `key`=?, `value`=?, create_time=?, update_time=?";
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         try (Connection connection = connectToDatabase(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, "系统版本号");
             statement.setString(2, "system_version");
             statement.setString(3, properties.getVersion());
-            statement.setInt(4, now);
-            statement.setInt(5, now);
+            statement.setObject(4, now);
+            statement.setObject(5, now);
             statement.executeUpdate();
         }
     }

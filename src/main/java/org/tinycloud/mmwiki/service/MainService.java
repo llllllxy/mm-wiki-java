@@ -21,7 +21,6 @@ import org.tinycloud.mmwiki.mapper.LinkMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -59,28 +58,20 @@ public class MainService {
         return documentMapper.findActiveByIds(documentIds);
     }
 
-    public MainDefaultView loadDefaultView(Integer userId, int page, int number) {
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(userId));
-        List<LogDocumentView> logDocuments = pageInfo.getList();
-        for (LogDocumentView logDocument : logDocuments) {
-            logDocument.setCreateTimeText(TimeUtils.formatUnix(logDocument.getCreateTime()));
-        }
-
+    public MainDefaultView loadDefaultView() {
         List<Link> links = linkMapper.findAllOrderBySequence();
         List<Contact> contacts = contactMapper.findAll();
         String panelTitle = configService.getValue("main_title", "");
         String panelDescription = configService.getValue("main_description", "");
-        Paginator paginator = Paginator.of(page, number, pageInfo.getTotal(), "/main/default");
 
-        return new MainDefaultView(panelTitle, panelDescription, logDocuments, links, contacts, paginator);
+        return new MainDefaultView(panelTitle, panelDescription, links, contacts);
     }
 
     public PageModel<LogDocumentView> recentDocumentPage(Integer userId, int pageNum, int pageSize) {
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(userId));
         for (LogDocumentView logDocument : pageInfo.getList()) {
-            logDocument.setCreateTimeText(TimeUtils.formatUnix(logDocument.getCreateTime()));
+            logDocument.setCreateTimeText(TimeUtils.format(logDocument.getCreateTime()));
         }
         return PageModel.from(pageInfo);
     }

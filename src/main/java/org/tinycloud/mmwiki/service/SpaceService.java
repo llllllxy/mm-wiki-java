@@ -7,13 +7,12 @@ import org.tinycloud.mmwiki.vo.MemberPage;
 import org.tinycloud.mmwiki.vo.MemberView;
 import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
 import org.tinycloud.mmwiki.vo.SpaceDownload;
-import org.tinycloud.mmwiki.vo.SpacePage;
+import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +43,6 @@ import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.tinycloud.mmwiki.web.Paginator;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -55,7 +53,7 @@ import org.tinycloud.mmwiki.web.Paginator;
 @Service
 public class SpaceService {
 
-    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
+    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Pattern INVALID_SPACE_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
     private static final int SPACE_MANAGER_PRIVILEGE = 2;
 
@@ -105,29 +103,6 @@ public class SpaceService {
             }
         }
         return tags;
-    }
-
-    /**
-     * 分页加载当前用户可访问的空间列表。
-     */
-    public SpacePage listSpaces(CurrentUser currentUser, String keyword, int page, int number) {
-        return listSpaces(currentUser, keyword, page, number, "/space/list");
-    }
-
-    public SpacePage listSpaces(CurrentUser currentUser, String keyword, int page, int number, String basePath) {
-        String search = keyword == null ? "" : keyword.trim();
-        PageInfo<Space> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> {
-                    if (search.isBlank()) {
-                        spaceMapper.pageAll();
-                    } else {
-                        spaceMapper.pageByKeyword(search);
-                    }
-                });
-        List<Space> spaces = pageInfo.getList();
-        markCollections(currentUser, spaces);
-        decorate(spaces);
-        return new SpacePage(spaces, pageInfo.getTotal(), search, Paginator.of(page, number, pageInfo.getTotal(), basePath));
     }
 
     public PageModel<Space> listSpacesPage(CurrentUser currentUser, String keyword, int pageNum, int pageSize) {
@@ -219,14 +194,28 @@ public class SpaceService {
             List<Integer> allMemberIds = spaceUserService.findBySpaceId(spaceId).stream().map(SpaceUser::getUserId).toList();
             otherUsers = allMemberIds.isEmpty() ? userService.findAllActive() : userService.findActiveExcludingIds(allMemberIds);
         }
-        return new MemberPage(views, Paginator.of(page, number, pageInfo.getTotal(), basePath), manager, otherUsers);
+        return new MemberPage(views, manager, otherUsers);
     }
 
     public PageModel<MemberView> listMembersPage(CurrentUser currentUser, Integer spaceId, int pageNum, int pageSize) {
-        MemberPage view = listMembers(currentUser, spaceId, pageNum, pageSize);
-        long total = view.getPaginator() == null ? view.getUsers().size() : view.getPaginator().getNums();
-        long totalPage = view.getPaginator() == null ? 0L : view.getPaginator().getTotalPages();
-        return PageModel.build((long) pageNum, (long) pageSize, view.getUsers(), total, totalPage);
+        Space space = requireSpace(spaceId);
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
+            throw new IllegalStateException("您没有权限访问该空间成员列表。");
+        }
+        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
+        List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
+        Map<Integer, User> users = userIds.isEmpty() ? Map.of() : userService.findActiveByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getUserId, item -> item));
+        List<MemberView> views = new ArrayList<>();
+        for (SpaceUser member : pageInfo.getList()) {
+            User user = users.get(member.getUserId());
+            if (user != null) {
+                views.add(new MemberView(user, member.getPrivilege(), member.getSpaceUserId()));
+            }
+        }
+        return PageModel.build((long) pageInfo.getPageNum(), (long) pageInfo.getPageSize(), views, pageInfo.getTotal(), (long) pageInfo.getPages());
     }
 
     @Transactional
@@ -238,7 +227,7 @@ public class SpaceService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         space.setCreateTime(now);
         space.setUpdateTime(now);
         spaceMapper.insert(space);
@@ -277,7 +266,7 @@ public class SpaceService {
         if (validation != null) {
             return validation;
         }
-        int now = Math.toIntExact(Instant.now().getEpochSecond());
+        LocalDateTime now = LocalDateTime.now();
         space.setUpdateTime(now);
         spaceMapper.update(space);
 
@@ -317,7 +306,7 @@ public class SpaceService {
         if (documents.size() == 1) {
             Document defaultDocument = documents.get(0);
             defaultDocument.setEditUserId(currentUser.getUserId());
-            defaultDocument.setUpdateTime(Math.toIntExact(Instant.now().getEpochSecond()));
+            defaultDocument.setUpdateTime(TimeUtils.now());
             documentMapper.markDeleted(defaultDocument);
             attachmentService.deleteByDocumentId(defaultDocument.getDocumentId());
             documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentFileService.DOCUMENT_TYPE_DIR);
@@ -397,8 +386,8 @@ public class SpaceService {
 
     private void decorate(List<Space> spaces) {
         for (Space space : spaces) {
-            if (space.getCreateTime() != null && space.getCreateTime() > 0) {
-                space.setCreateDateText(DATE_ONLY.format(Instant.ofEpochSecond(space.getCreateTime())));
+            if (space.getCreateTime() != null) {
+                space.setCreateDateText(DATE_ONLY.format(space.getCreateTime()));
             } else {
                 space.setCreateDateText("");
             }

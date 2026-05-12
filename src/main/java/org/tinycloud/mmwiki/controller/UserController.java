@@ -3,7 +3,6 @@ package org.tinycloud.mmwiki.controller;
 import org.tinycloud.mmwiki.vo.FollowDocView;
 import org.tinycloud.mmwiki.vo.FollowUserListPage;
 import org.tinycloud.mmwiki.vo.UserFollowView;
-import org.tinycloud.mmwiki.vo.UserListPage;
 import org.tinycloud.mmwiki.vo.UserProfileView;
 
 import org.springframework.beans.factory.annotation.Autowired;

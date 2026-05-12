@@ -15,6 +15,7 @@ import org.tinycloud.mmwiki.service.InstallService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
+
 /**
  * MM-Wiki 页面与接口控制器。
  *
