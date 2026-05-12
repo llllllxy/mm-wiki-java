@@ -25,36 +25,33 @@ public class SystemSpaceUserController extends ControllerSupport {
     @PostMapping("/system/space_user/save")
     @ResponseBody
     public JsonResponse<Void> save(
-        HttpServletRequest request,
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("user_id") Integer userId,
         @RequestParam("privilege") Integer privilege
     ) {
-        spaceService.addMember(currentUser(request), spaceId, userId, privilege);
+        spaceService.addMember(currentUser(), spaceId, userId, privilege);
         return JsonResponse.success("添加成员成功", "/system/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/system/space_user/remove")
     @ResponseBody
     public JsonResponse<Void> remove(
-        HttpServletRequest request,
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("user_id") Integer userId,
         @RequestParam("space_user_id") Integer spaceUserId
     ) {
-        spaceService.removeMember(currentUser(request), spaceId, userId, spaceUserId);
+        spaceService.removeMember(currentUser(), spaceId, userId, spaceUserId);
         return JsonResponse.success("移除成员成功", "/system/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/system/space_user/modify")
     @ResponseBody
     public JsonResponse<Void> modify(
-        HttpServletRequest request,
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("space_user_id") Integer spaceUserId,
         @RequestParam("privilege") Integer privilege
     ) {
-        spaceService.updateMemberPrivilege(currentUser(request), spaceId, spaceUserId, privilege);
+        spaceService.updateMemberPrivilege(currentUser(), spaceId, spaceUserId, privilege);
         return JsonResponse.success("更新权限成功");
     }
 }

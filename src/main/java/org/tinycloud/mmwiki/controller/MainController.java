@@ -33,9 +33,9 @@ public class MainController extends ControllerSupport {
     private MainService mainService;
 
     @GetMapping({"/", "/main/index"})
-    public String index(HttpServletRequest request, Model model) {
+    public String index(Model model) {
         nav(model, "main");
-        CurrentUser currentUser = currentUser(request);
+        CurrentUser currentUser = currentUser();
         List<Document> documents = mainService.loadCollectedDocuments(currentUser.getUserId());
         model.addAttribute("documents", documents);
         model.addAttribute("count", documents.size());
@@ -43,7 +43,7 @@ public class MainController extends ControllerSupport {
     }
 
     @GetMapping("/main/default")
-    public String defaultPage(HttpServletRequest request, Model model) {
+    public String defaultPage(Model model) {
         nav(model, "main");
         MainDefaultView view = mainService.loadDefaultView();
         model.addAttribute("panel_title", view.getPanelTitle());
@@ -55,10 +55,11 @@ public class MainController extends ControllerSupport {
 
     @PostMapping("/main/default")
     @ResponseBody
-    public JsonResponse<PageModel<LogDocumentView>> defaultData(@RequestParam(defaultValue = "1") int pageNum,
-                                                                @RequestParam(defaultValue = "10") int pageSize,
-                                                                HttpServletRequest request) {
-        return JsonResponse.success("查询成功", mainService.recentDocumentPage(currentUser(request).getUserId(), pageNum, pageSize));
+    public JsonResponse<PageModel<LogDocumentView>> defaultData(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return JsonResponse.success("查询成功", mainService.recentDocumentPage(currentUser().getUserId(), pageNum, pageSize));
     }
 
     @GetMapping("/main/about")
@@ -71,10 +72,9 @@ public class MainController extends ControllerSupport {
     public String search(
         @RequestParam(defaultValue = "") String keyword,
         @RequestParam(name = "search_type", defaultValue = "title") String searchType,
-        HttpServletRequest request,
         Model model
     ) {
-        CurrentUser currentUser = currentUser(request);
+        CurrentUser currentUser = currentUser();
         SearchView view = mainService.searchDocuments(currentUser.getUserId(), keyword, searchType);
         model.addAttribute("search_type", view.getSearchType());
         model.addAttribute("keyword", view.getKeyword());

@@ -32,7 +32,7 @@ public class CollectionController extends ControllerSupport {
         @RequestParam("resource_id") String resourceId,
         HttpServletRequest request
     ) {
-        CurrentUser currentUser = currentUser(request);
+        CurrentUser currentUser = currentUser();
         return collectionService.add(currentUser.getUserId(), type, resourceId, request.getHeader("Referer"));
     }
 
@@ -42,7 +42,7 @@ public class CollectionController extends ControllerSupport {
         @RequestParam("collection_id") Integer collectionId,
         HttpServletRequest request
     ) {
-        CurrentUser currentUser = currentUser(request);
+        CurrentUser currentUser = currentUser();
         return collectionService.cancel(currentUser.getUserId(), collectionId, request.getHeader("Referer"));
     }
 }

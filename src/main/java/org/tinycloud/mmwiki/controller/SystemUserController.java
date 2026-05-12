@@ -75,43 +75,43 @@ public class SystemUserController extends ControllerSupport {
     }
 
     @GetMapping("/system/user/add")
-    public String add(HttpServletRequest request, Model model) {
-        model.addAttribute("roles", assignableRoles(request));
+    public String add(Model model) {
+        model.addAttribute("roles", assignableRoles());
         return "system/user/form";
     }
 
     @PostMapping("/system/user/save")
     @ResponseBody
-    public JsonResponse<Void> save(HttpServletRequest request, User user) {
-        return userService.saveSystemUser(user, currentUser(request));
+    public JsonResponse<Void> save(User user) {
+        return userService.saveSystemUser(user, currentUser());
     }
 
     @GetMapping("/system/user/edit")
-    public String edit(@RequestParam("user_id") Integer userId, HttpServletRequest request, Model model) {
+    public String edit(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
             throw new IllegalStateException("用户不存在！");
         }
         if (user.getRoleId() != null && user.getRoleId() == RoleService.ROOT_ROLE_ID
-                && currentUser(request).getRoleId() != RoleService.ROOT_ROLE_ID) {
+                && currentUser().getRoleId() != RoleService.ROOT_ROLE_ID) {
             throw new IllegalStateException("没有权限修改超级管理员！");
         }
         model.addAttribute("user", user);
-        model.addAttribute("roles", assignableRoles(request));
-        model.addAttribute("canChangePassword", currentUser(request).getRoleId() == RoleService.ROOT_ROLE_ID);
+        model.addAttribute("roles", assignableRoles());
+        model.addAttribute("canChangePassword", currentUser().getRoleId() == RoleService.ROOT_ROLE_ID);
         return "system/user/edit";
     }
 
     @PostMapping("/system/user/modify")
     @ResponseBody
-    public JsonResponse<Void> modify(HttpServletRequest request, User user) {
-        return userService.updateSystemUser(user, currentUser(request));
+    public JsonResponse<Void> modify(User user) {
+        return userService.updateSystemUser(user, currentUser());
     }
 
     @PostMapping("/system/user/forbidden")
     @ResponseBody
-    public JsonResponse<Void> forbidden(HttpServletRequest request, @RequestParam("user_id") Integer userId) {
-        if (currentUser(request).getUserId().equals(userId)) {
+    public JsonResponse<Void> forbidden(@RequestParam("user_id") Integer userId) {
+        if (currentUser().getUserId().equals(userId)) {
             return JsonResponse.error("不能屏蔽当前登录用户。");
         }
         User user = userService.findActiveById(userId);
@@ -139,8 +139,8 @@ public class SystemUserController extends ControllerSupport {
         return JsonResponse.success("恢复用户成功", "/system/user/list");
     }
 
-    private List<Role> assignableRoles(HttpServletRequest request) {
-        boolean root = currentUser(request).getRoleId() != null && currentUser(request).getRoleId() == RoleService.ROOT_ROLE_ID;
+    private List<Role> assignableRoles() {
+        boolean root = currentUser().getRoleId() != null && currentUser().getRoleId() == RoleService.ROOT_ROLE_ID;
         List<Role> roles = roleService.findAllActive();
         if (root) {
             return roles;

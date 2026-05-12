@@ -21,9 +21,9 @@ public class SystemMainController extends ControllerSupport {
     private SystemService systemService;
 
     @GetMapping("/system/main/index")
-    public String index(HttpServletRequest request, Model model) {
+    public String index(Model model) {
         nav(model, "system");
-        model.addAttribute("menuGroups", systemService.loadMenuGroups(currentUser(request)));
+        model.addAttribute("menuGroups", systemService.loadMenuGroups(currentUser()));
         return "system/main/index";
     }
 

@@ -38,8 +38,8 @@ public class PageController extends ControllerSupport {
     private DocumentService documentService;
 
     @GetMapping("/page/view")
-    public String view(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
-        DocumentViewData view = documentService.loadDocumentView(documentId, currentUser(request));
+    public String view(@RequestParam("document_id") String documentId, Model model) throws Exception {
+        DocumentViewData view = documentService.loadDocumentView(documentId, currentUser());
         model.addAttribute("space", view.getSpace());
         model.addAttribute("document", view.getDocument());
         model.addAttribute("collection_id", view.getCollectionId());
@@ -54,8 +54,8 @@ public class PageController extends ControllerSupport {
     }
 
     @GetMapping("/page/edit")
-    public String edit(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
-        DocumentEditData editData = documentService.loadEditData(documentId, currentUser(request));
+    public String edit(@RequestParam("document_id") String documentId, Model model) throws Exception {
+        DocumentEditData editData = documentService.loadEditData(documentId, currentUser());
         model.addAttribute("document", editData.getDocument());
         model.addAttribute("page_content", editData.getPageContent());
         model.addAttribute("sendEmail", editData.getSendEmail());
@@ -75,7 +75,7 @@ public class PageController extends ControllerSupport {
             HttpServletRequest request
     ) throws Exception {
         return documentService.modifyPage(
-                currentUser(request),
+                currentUser(),
                 documentId,
                 name,
                 content,
@@ -100,10 +100,15 @@ public class PageController extends ControllerSupport {
     }
 
     @GetMapping("/page/export")
-    public ResponseEntity<ByteArrayResource> export(@RequestParam("document_id") String documentId,
-                                                    @RequestParam(name = "output", required = false, defaultValue = "markdown") String output,
-                                                    HttpServletRequest request) throws Exception {
-        ExportPayload payload = documentService.exportDocument(documentId, currentUser(request), output);
+    public ResponseEntity<ByteArrayResource> export(
+            @RequestParam("document_id") String documentId,
+            @RequestParam(
+                    name = "output",
+                    required = false,
+                    defaultValue = "markdown"
+            ) String output
+    ) throws Exception {
+        ExportPayload payload = documentService.exportDocument(documentId, currentUser(), output);
         String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)

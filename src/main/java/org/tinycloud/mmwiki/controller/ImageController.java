@@ -47,15 +47,14 @@ public class ImageController extends ControllerSupport {
     @ResponseBody
     public EditorImageResponse upload(
             @RequestParam("document_id") String documentId,
-            @RequestParam("editormd-image-file") MultipartFile file,
-            HttpServletRequest request
+            @RequestParam("editormd-image-file") MultipartFile file
     ) throws Exception {
         Document document = documentService.findActiveById(documentId);
         if (document == null) {
             return EditorImageResponse.error("文档不存在。");
         }
         Space space = spaceService.requireSpace(document.getSpaceId());
-        Access access = accessService.access(currentUser(request), space);
+        Access access = accessService.access(currentUser(), space);
         if (!access.isEditor()) {
             return EditorImageResponse.error("您没有权限操作该空间文档。");
         }
@@ -70,7 +69,7 @@ public class ImageController extends ControllerSupport {
         file.transferTo(saveFile);
         try {
             String relativePath = "images/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename();
-            attachmentService.save(currentUser(request).getUserId(), documentId, file.getOriginalFilename(), relativePath, AttachmentService.SOURCE_IMAGE);
+            attachmentService.save(currentUser().getUserId(), documentId, file.getOriginalFilename(), relativePath, AttachmentService.SOURCE_IMAGE);
             return EditorImageResponse.success("上传成功", "/" + relativePath);
         } catch (Exception ex) {
             Files.deleteIfExists(saveFile);

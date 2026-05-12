@@ -45,18 +45,20 @@ public class SystemSpaceController extends ControllerSupport {
 
     @PostMapping("/system/space/list")
     @ResponseBody
-    public JsonResponse<PageModel<Space>> listData(@RequestParam(defaultValue = "1") int pageNum,
-                                                   @RequestParam(defaultValue = "20") int pageSize,
-                                                   @RequestParam(defaultValue = "") String keyword,
-                                                   HttpServletRequest request) {
-        return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(request), keyword, pageNum, pageSize));
+    public JsonResponse<PageModel<Space>> listData(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(defaultValue = "") String keyword
+    ) {
+        return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(), keyword, pageNum, pageSize));
     }
 
     @GetMapping("/system/space/member")
-    public String member(@RequestParam("space_id") Integer spaceId,
-                         HttpServletRequest request,
-                         Model model) {
-        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, 1, 15, "/system/space/member?space_id=" + spaceId);
+    public String member(
+            @RequestParam("space_id") Integer spaceId,
+            Model model
+    ) {
+        MemberPage view = spaceService.listMembers(currentUser(), spaceId, 1, 15, "/system/space/member?space_id=" + spaceId);
         model.addAttribute("space_id", spaceId);
         model.addAttribute("otherUsers", view.getOtherUsers());
         return "system/space/member";
@@ -64,11 +66,12 @@ public class SystemSpaceController extends ControllerSupport {
 
     @PostMapping("/system/space/member")
     @ResponseBody
-    public JsonResponse<PageModel<MemberView>> memberData(@RequestParam("space_id") Integer spaceId,
-                                                          @RequestParam(defaultValue = "1") int pageNum,
-                                                          @RequestParam(defaultValue = "15") int pageSize,
-                                                          HttpServletRequest request) {
-        return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(request), spaceId, pageNum, pageSize));
+    public JsonResponse<PageModel<MemberView>> memberData(
+            @RequestParam("space_id") Integer spaceId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "15") int pageSize
+    ) {
+        return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(), spaceId, pageNum, pageSize));
     }
 
     @GetMapping("/system/space/add")
@@ -78,8 +81,8 @@ public class SystemSpaceController extends ControllerSupport {
 
     @PostMapping("/system/space/save")
     @ResponseBody
-    public JsonResponse<Void> save(HttpServletRequest request, Space space) throws IOException {
-        return spaceService.createSpace(currentUser(request), space);
+    public JsonResponse<Void> save(Space space) throws IOException {
+        return spaceService.createSpace(currentUser(), space);
     }
 
     @GetMapping("/system/space/edit")
@@ -90,14 +93,14 @@ public class SystemSpaceController extends ControllerSupport {
 
     @PostMapping("/system/space/modify")
     @ResponseBody
-    public JsonResponse<Void> modify(HttpServletRequest request, Space space) throws IOException {
-        return spaceService.updateSpace(currentUser(request), space);
+    public JsonResponse<Void> modify(Space space) throws IOException {
+        return spaceService.updateSpace(currentUser(), space);
     }
 
     @PostMapping("/system/space/delete")
     @ResponseBody
-    public JsonResponse<Void> delete(HttpServletRequest request, @RequestParam("space_id") Integer spaceId) throws IOException {
-        return spaceService.deleteSpace(currentUser(request), spaceId);
+    public JsonResponse<Void> delete(@RequestParam("space_id") Integer spaceId) throws IOException {
+        return spaceService.deleteSpace(currentUser(), spaceId);
     }
 
     @GetMapping("/system/space/download")

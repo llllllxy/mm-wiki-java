@@ -16,8 +16,6 @@ import org.tinycloud.mmwiki.web.AuthInterceptor;
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_PATTERN = "yyyy-MM-dd";
 
     private final AuthInterceptor authInterceptor;
     private final MmwikiProperties mmwikiProperties;

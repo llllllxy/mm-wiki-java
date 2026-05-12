@@ -30,13 +30,13 @@ public class FollowController extends ControllerSupport {
         HttpServletRequest request
     ) {
         String redirect = request.getHeader("Referer");
-        return followService.add(currentUser(request).getUserId(), type, objectId, redirect == null ? "" : redirect);
+        return followService.add(currentUser().getUserId(), type, objectId, redirect == null ? "" : redirect);
     }
 
     @PostMapping("/follow/cancel")
     @ResponseBody
     public JsonResponse<Void> cancel(@RequestParam("follow_id") Integer followId, HttpServletRequest request) {
         String redirect = request.getHeader("Referer");
-        return followService.cancel(currentUser(request).getUserId(), followId, redirect == null ? "" : redirect);
+        return followService.cancel(currentUser().getUserId(), followId, redirect == null ? "" : redirect);
     }
 }

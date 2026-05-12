@@ -56,26 +56,27 @@ public class SpaceController extends ControllerSupport {
 
     @PostMapping("/space/list")
     @ResponseBody
-    public JsonResponse<PageModel<Space>> listData(@RequestParam(defaultValue = "1") int pageNum,
-                                                   @RequestParam(defaultValue = "20") int pageSize,
-                                                   @RequestParam(defaultValue = "") String keyword,
-                                                   HttpServletRequest request) {
-        return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(request), keyword, pageNum, pageSize));
+    public JsonResponse<PageModel<Space>> listData(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(defaultValue = "") String keyword
+    ) {
+        return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(), keyword, pageNum, pageSize));
     }
 
     @GetMapping("/space/collection")
-    public String collection(HttpServletRequest request, Model model) {
+    public String collection(Model model) {
         nav(model, "space");
-        SpaceCollectionPage view = spaceService.listCollectedSpaces(currentUser(request));
+        SpaceCollectionPage view = spaceService.listCollectedSpaces(currentUser());
         model.addAttribute("spaces", view.getSpaces());
         model.addAttribute("count", view.getCount());
         return "space/collection";
     }
 
     @GetMapping("/space/search")
-    public String search(@RequestParam("tag") String tag, HttpServletRequest request, Model model) {
+    public String search(@RequestParam("tag") String tag, Model model) {
         nav(model, "space");
-        SpaceCollectionPage view = spaceService.searchByTag(currentUser(request), tag);
+        SpaceCollectionPage view = spaceService.searchByTag(currentUser(), tag);
         model.addAttribute("tag", tag);
         model.addAttribute("spaces", view.getSpaces());
         model.addAttribute("count", view.getCount());
@@ -83,8 +84,8 @@ public class SpaceController extends ControllerSupport {
     }
 
     @GetMapping("/space/document")
-    public String document(@RequestParam("space_id") Integer spaceId, HttpServletRequest request) {
-        CurrentUser currentUser = currentUser(request);
+    public String document(@RequestParam("space_id") Integer spaceId) {
+        CurrentUser currentUser = currentUser();
         Space space = spaceService.requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
@@ -95,10 +96,11 @@ public class SpaceController extends ControllerSupport {
     }
 
     @GetMapping("/space/member")
-    public String member(@RequestParam("space_id") Integer spaceId,
-                         HttpServletRequest request,
-                         Model model) {
-        MemberPage view = spaceService.listMembers(currentUser(request), spaceId, 1, 20);
+    public String member(
+            @RequestParam("space_id") Integer spaceId,
+            Model model
+    ) {
+        MemberPage view = spaceService.listMembers(currentUser(), spaceId, 1, 20);
         model.addAttribute("space_id", spaceId);
         model.addAttribute("otherUsers", view.getOtherUsers());
         return view.isManager() ? "space/manager_member" : "space/member";
@@ -106,11 +108,12 @@ public class SpaceController extends ControllerSupport {
 
     @PostMapping("/space/member")
     @ResponseBody
-    public JsonResponse<PageModel<MemberView>> memberData(@RequestParam("space_id") Integer spaceId,
-                                                          @RequestParam(defaultValue = "1") int pageNum,
-                                                          @RequestParam(defaultValue = "20") int pageSize,
-                                                          HttpServletRequest request) {
-        return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(request), spaceId, pageNum, pageSize));
+    public JsonResponse<PageModel<MemberView>> memberData(
+            @RequestParam("space_id") Integer spaceId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "20") int pageSize
+    ) {
+        return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(), spaceId, pageNum, pageSize));
     }
 
     @PostMapping("/space/addMember")
@@ -118,10 +121,9 @@ public class SpaceController extends ControllerSupport {
     public JsonResponse<Void> addMember(
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("user_id") Integer userId,
-        @RequestParam("privilege") Integer privilege,
-        HttpServletRequest request
+        @RequestParam("privilege") Integer privilege
     ) {
-        spaceService.addMember(currentUser(request), spaceId, userId, privilege);
+        spaceService.addMember(currentUser(), spaceId, userId, privilege);
         return JsonResponse.success("添加成员成功", "/space/member?space_id=" + spaceId);
     }
 
@@ -130,10 +132,9 @@ public class SpaceController extends ControllerSupport {
     public JsonResponse<Void> removeMember(
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("user_id") Integer userId,
-        @RequestParam("space_user_id") Integer spaceUserId,
-        HttpServletRequest request
+        @RequestParam("space_user_id") Integer spaceUserId
     ) {
-        spaceService.removeMember(currentUser(request), spaceId, userId, spaceUserId);
+        spaceService.removeMember(currentUser(), spaceId, userId, spaceUserId);
         return JsonResponse.success("移除成员成功", "/space/member?space_id=" + spaceId);
     }
 
@@ -142,10 +143,9 @@ public class SpaceController extends ControllerSupport {
     public JsonResponse<Void> modifyMember(
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("space_user_id") Integer spaceUserId,
-        @RequestParam("privilege") Integer privilege,
-        HttpServletRequest request
+        @RequestParam("privilege") Integer privilege
     ) {
-        spaceService.updateMemberPrivilege(currentUser(request), spaceId, spaceUserId, privilege);
+        spaceService.updateMemberPrivilege(currentUser(), spaceId, spaceUserId, privilege);
         return JsonResponse.success("更新权限成功");
     }
 }

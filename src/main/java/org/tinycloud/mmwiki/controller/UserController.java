@@ -39,10 +39,11 @@ public class UserController extends ControllerSupport {
     }
 
     @GetMapping("/user/list")
-    public String list(@RequestParam(defaultValue = "") String username,
-                       HttpServletRequest request,
-                       Model model) {
-        CurrentUser currentUser = currentUser(request);
+    public String list(
+            @RequestParam(defaultValue = "") String username,
+            Model model
+    ) {
+        CurrentUser currentUser = currentUser();
         model.addAttribute("username", username == null ? "" : username.trim());
         model.addAttribute("login_user_id", currentUser.getUserId());
         return "user/list";
@@ -50,16 +51,17 @@ public class UserController extends ControllerSupport {
 
     @PostMapping("/user/list")
     @ResponseBody
-    public JsonResponse<PageModel<User>> listData(@RequestParam(defaultValue = "1") int pageNum,
-                                                  @RequestParam(defaultValue = "20") int pageSize,
-                                                  @RequestParam(defaultValue = "") String username,
-                                                  HttpServletRequest request) {
-        return JsonResponse.success("查询成功", userDirectoryService.userPage(currentUser(request), username, pageNum, pageSize));
+    public JsonResponse<PageModel<User>> listData(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(defaultValue = "") String username
+    ) {
+        return JsonResponse.success("查询成功", userDirectoryService.userPage(currentUser(), username, pageNum, pageSize));
     }
 
     @GetMapping("/user/follow")
-    public String follow(HttpServletRequest request, Model model) {
-        CurrentUser currentUser = currentUser(request);
+    public String follow(Model model) {
+        CurrentUser currentUser = currentUser();
         FollowUserListPage view = userDirectoryService.listFollowedUsers(currentUser.getUserId());
         model.addAttribute("users", view.getUsers());
         model.addAttribute("count", view.getCount());
@@ -67,8 +69,8 @@ public class UserController extends ControllerSupport {
     }
 
     @GetMapping("/user/info")
-    public String info(@RequestParam("user_id") Integer userId, HttpServletRequest request, Model model) {
-        CurrentUser currentUser = currentUser(request);
+    public String info(@RequestParam("user_id") Integer userId, Model model) {
+        CurrentUser currentUser = currentUser();
         if (currentUser.getUserId().equals(userId)) {
             return "redirect:/system/main/index";
         }
@@ -80,8 +82,8 @@ public class UserController extends ControllerSupport {
     }
 
     @GetMapping("/user/followUser")
-    public String followUser(@RequestParam("user_id") Integer userId, HttpServletRequest request, Model model) {
-        CurrentUser currentUser = currentUser(request);
+    public String followUser(@RequestParam("user_id") Integer userId, Model model) {
+        CurrentUser currentUser = currentUser();
         UserFollowView view = userDirectoryService.loadUserFollowView(userId, currentUser.getUserId());
         model.addAttribute("user", view.getUser());
         model.addAttribute("users", view.getUsers());

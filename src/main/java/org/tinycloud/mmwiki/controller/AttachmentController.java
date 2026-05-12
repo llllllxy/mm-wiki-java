@@ -49,9 +49,9 @@ public class AttachmentController extends ControllerSupport {
     private DocumentFileService documentFileService;
 
     @GetMapping("/attachment/page")
-    public String page(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) {
+    public String page(@RequestParam("document_id") String documentId, Model model) {
         Document document = requireDocument(documentId);
-        Access access = requireAccess(request, document);
+        Access access = requireAccess(document);
         model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_ATTACHMENT));
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_upload", access.isEditor());
@@ -60,9 +60,9 @@ public class AttachmentController extends ControllerSupport {
     }
 
     @GetMapping("/attachment/image")
-    public String image(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) {
+    public String image(@RequestParam("document_id") String documentId, Model model) {
         Document document = requireDocument(documentId);
-        Access access = requireAccess(request, document);
+        Access access = requireAccess(document);
         model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_IMAGE));
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_delete", access.isManager());
@@ -73,11 +73,10 @@ public class AttachmentController extends ControllerSupport {
     @ResponseBody
     public JsonResponse<Void> upload(
         @RequestParam("document_id") String documentId,
-        @RequestParam("attachment") MultipartFile file,
-        HttpServletRequest request
+        @RequestParam("attachment") MultipartFile file
     ) throws Exception {
         Document document = requireDocument(documentId);
-        Access access = requireAccess(request, document);
+        Access access = requireAccess(document);
         if (!access.isEditor()) {
             return JsonResponse.error("您没有权限操作该空间文档。");
         }
@@ -92,7 +91,7 @@ public class AttachmentController extends ControllerSupport {
         file.transferTo(saveFile);
         try {
             attachmentService.save(
-                currentUser(request).getUserId(),
+                    currentUser().getUserId(),
                 documentId,
                 file.getOriginalFilename(),
                 "attachment/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename(),
@@ -107,13 +106,13 @@ public class AttachmentController extends ControllerSupport {
 
     @PostMapping("/attachment/delete")
     @ResponseBody
-    public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId, HttpServletRequest request) throws Exception {
+    public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
             return JsonResponse.error("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
-        Access access = requireAccess(request, document);
+        Access access = requireAccess(document);
         if (!access.isManager()) {
             return JsonResponse.error("您没有权限删除该空间文档附件。");
         }
@@ -125,13 +124,13 @@ public class AttachmentController extends ControllerSupport {
     }
 
     @GetMapping("/attachment/download")
-    public ResponseEntity<PathResource> download(@RequestParam("attachment_id") Integer attachmentId, HttpServletRequest request) throws Exception {
+    public ResponseEntity<PathResource> download(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
             throw new IllegalStateException("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
-        Access access = requireAccess(request, document);
+        Access access = requireAccess(document);
         if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限下载该空间附件。");
         }
@@ -152,9 +151,9 @@ public class AttachmentController extends ControllerSupport {
         return document;
     }
 
-    private Access requireAccess(HttpServletRequest request, Document document) {
+    private Access requireAccess(Document document) {
         Space space = spaceService.requireSpace(document.getSpaceId());
-        Access access = accessService.access(currentUser(request), space);
+        Access access = accessService.access(currentUser(), space);
         if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限访问该空间文档。");
         }

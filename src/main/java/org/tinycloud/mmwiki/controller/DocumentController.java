@@ -29,8 +29,8 @@ public class DocumentController extends ControllerSupport {
     private DocumentService documentService;
 
     @GetMapping("/document/index")
-    public String index(@RequestParam("document_id") String documentId, HttpServletRequest request, Model model) throws Exception {
-        DocumentViewData view = documentService.loadDocumentView(documentId, currentUser(request));
+    public String index(@RequestParam("document_id") String documentId, Model model) throws Exception {
+        DocumentViewData view = documentService.loadDocumentView(documentId, currentUser());
         model.addAttribute("documents", view.getDocuments());
         model.addAttribute("documentsJson", documentService.toTreeJson(view.getDocuments()));
         model.addAttribute("default_document_id", view.getDocument().getDocumentId());
@@ -45,10 +45,9 @@ public class DocumentController extends ControllerSupport {
     public String add(
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("parent_id") String parentId,
-        HttpServletRequest request,
         Model model
     ) throws Exception {
-        DocumentViewData parentView = documentService.loadDocumentView(parentId, currentUser(request));
+        DocumentViewData parentView = documentService.loadDocumentView(parentId, currentUser());
         model.addAttribute("parent_documents", documentService.getParentDocuments(parentView.getDocument()));
         model.addAttribute("parent_id", parentId);
         model.addAttribute("space_id", spaceId);
@@ -61,10 +60,9 @@ public class DocumentController extends ControllerSupport {
         @RequestParam("space_id") Integer spaceId,
         @RequestParam("parent_id") String parentId,
         @RequestParam("type") Integer type,
-        @RequestParam("name") String name,
-        HttpServletRequest request
+        @RequestParam("name") String name
     ) throws Exception {
-        return documentService.createDocument(currentUser(request), spaceId, parentId, type, name);
+        return documentService.createDocument(currentUser(), spaceId, parentId, type, name);
     }
 
     @GetMapping("/document/history")
@@ -78,11 +76,12 @@ public class DocumentController extends ControllerSupport {
 
     @PostMapping("/document/history")
     @ResponseBody
-    public JsonResponse<PageModel<DocumentHistoryView>> historyData(@RequestParam("document_id") String documentId,
-                                                                    @RequestParam(defaultValue = "1") int pageNum,
-                                                                    @RequestParam(defaultValue = "10") int pageSize,
-                                                                    HttpServletRequest request) {
-        return JsonResponse.success("查询成功", documentService.historyPage(documentId, currentUser(request), pageNum, pageSize));
+    public JsonResponse<PageModel<DocumentHistoryView>> historyData(
+            @RequestParam("document_id") String documentId,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return JsonResponse.success("查询成功", documentService.historyPage(documentId, currentUser(), pageNum, pageSize));
     }
 
     @PostMapping("/document/move")
@@ -90,15 +89,18 @@ public class DocumentController extends ControllerSupport {
     public JsonResponse<Void> move(
         @RequestParam("document_id") String documentId,
         @RequestParam("target_id") String targetId,
-        @RequestParam(name = "move_type", required = false, defaultValue = "") String moveType,
-        HttpServletRequest request
+        @RequestParam(
+                name = "move_type",
+                required = false,
+                defaultValue = ""
+        ) String moveType
     ) throws Exception {
-        return documentService.moveDocument(currentUser(request), documentId, targetId, moveType);
+        return documentService.moveDocument(currentUser(), documentId, targetId, moveType);
     }
 
     @PostMapping("/document/delete")
     @ResponseBody
-    public JsonResponse<Void> delete(@RequestParam("document_id") String documentId, HttpServletRequest request) throws Exception {
-        return documentService.deleteDocument(currentUser(request), documentId);
+    public JsonResponse<Void> delete(@RequestParam("document_id") String documentId) throws Exception {
+        return documentService.deleteDocument(currentUser(), documentId);
     }
 }
