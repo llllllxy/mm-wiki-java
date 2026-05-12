@@ -174,8 +174,7 @@ public class SpaceService {
                 throw new IllegalStateException("您没有权限访问该空间成员列表。");
             }
         }
-        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(page, number)
-                .doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
+        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(page, number).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
         List<SpaceUser> members = pageInfo.getList();
         List<Integer> userIds = members.stream().map(SpaceUser::getUserId).toList();
         Map<Integer, User> users = userIds.isEmpty() ? Map.of() : userService.findActiveByIds(userIds).stream()
@@ -218,10 +217,11 @@ public class SpaceService {
         return PageModel.build((long) pageInfo.getPageNum(), (long) pageInfo.getPageSize(), views, pageInfo.getTotal(), (long) pageInfo.getPages());
     }
 
-    @Transactional
+
     /**
      * 创建空间并初始化默认文档目录。
      */
+    @Transactional
     public JsonResponse<Void> createSpace(CurrentUser currentUser, Space space) throws IOException {
         JsonResponse<Void> validation = validateSpace(space, null);
         if (validation != null) {

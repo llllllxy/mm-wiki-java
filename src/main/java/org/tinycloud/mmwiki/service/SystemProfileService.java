@@ -8,11 +8,14 @@ import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
 import org.tinycloud.mmwiki.vo.ProfileInfoView;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.Document;
@@ -34,8 +37,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 @Service
 public class SystemProfileService {
 
-    private static final Pattern EMAIL_PATTERN =
-        Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     @Autowired
     private UserService userService;
@@ -53,10 +55,11 @@ public class SystemProfileService {
      */
     public ProfileInfoView loadInfo(Integer userId) {
         User user = requireUser(userId);
+        // 最近动态，查询前10条
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
                 .doSelectPageInfo(() -> logDocumentMapper.pageByUserId(userId));
         List<LogDocumentView> logs = pageInfo.getList();
-        logs = decorateLogs(logs);
+        logs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new ProfileInfoView(user, logs, logs.size());
     }
 
@@ -70,17 +73,10 @@ public class SystemProfileService {
     /**
      * 保存当前用户的个人资料。
      */
-    public JsonResponse<Void> modifyProfile(
-        Integer userId,
-        String givenName,
-        String email,
-        String mobile,
-        String phone,
-        String department,
-        String position,
-        String location,
-        String im
-    ) {
+    public JsonResponse<Void> modifyProfile(Integer userId, String givenName,
+                                            String email, String mobile,
+                                            String phone, String department,
+                                            String position, String location, String im) {
         if (!StringUtils.hasText(givenName)) {
             return JsonResponse.error("姓名不能为空。");
         }
@@ -94,16 +90,10 @@ public class SystemProfileService {
             return JsonResponse.error("手机号不能为空。");
         }
 
-        userService.updateProfile(
-            userId,
-            givenName.trim(),
-            email.trim(),
-            mobile.trim(),
-            trim(phone),
-            trim(department),
-            trim(position),
-            trim(location),
-            trim(im)
+        userService.updateProfile(userId, givenName.trim(),
+                email.trim(), mobile.trim(),
+                trim(phone), trim(department),
+                trim(position), trim(location), trim(im)
         );
         return JsonResponse.success("个人资料修改成功", "/system/profile/info");
     }
@@ -112,14 +102,14 @@ public class SystemProfileService {
      * 加载当前用户关注与粉丝信息。
      */
     public FollowUserView loadFollowUsers(Integer userId) {
-        User user = requireUser(userId);
+        User user = this.requireUser(userId);
 
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_USER);
         List<Integer> followedIds = follows.stream()
-            .map(item -> Integer.valueOf(item.getObjectId()))
-            .toList();
+                .map(item -> Integer.valueOf(item.getObjectId()))
+                .toList();
         Map<String, Follow> followIndex = follows.stream()
-            .collect(java.util.stream.Collectors.toMap(Follow::getObjectId, item -> item, (left, right) -> left, LinkedHashMap::new));
+                .collect(Collectors.toMap(Follow::getObjectId, item -> item, (left, right) -> left, LinkedHashMap::new));
 
         List<User> users = new ArrayList<>();
         for (User followedUser : userService.findActiveByIds(followedIds)) {
@@ -141,15 +131,20 @@ public class SystemProfileService {
      * 加载当前用户关注文档页面的基础信息。
      */
     public FollowDocPage loadFollowDocs(Integer userId) {
-        User user = requireUser(userId);
-        List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
-        List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        int count = docIds.isEmpty() ? 0 : documentMapper.findActiveByIds(docIds).size();
-        return new FollowDocPage(user, count, configService.getValue("auto_follow_doc_open", "0"));
+        User user = this.requireUser(userId);
+        return new FollowDocPage(user, configService.getValue("auto_follow_doc_open", "0"));
     }
 
+    /**
+     * 加载当前用户关注的文档列表。
+     *
+     * @param userId   用户ID
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 分页数据
+     */
     public PageModel<ProfileFollowedDocument> loadFollowDocPage(Integer userId, int pageNum, int pageSize) {
-        User user = requireUser(userId);
+        User user = this.requireUser(userId);
         List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         Map<String, Document> docs = documentMapper.findActiveByIds(docIds).stream()
@@ -181,7 +176,7 @@ public class SystemProfileService {
                         logDocumentMapper.pageByUserIdAndKeyword(userId, search);
                     }
                 });
-        decorateLogs(pageInfo.getList());
+        pageInfo.getList().forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return PageModel.from(pageInfo);
     }
 
@@ -204,20 +199,21 @@ public class SystemProfileService {
         return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
     }
 
+
+    /**
+     * 获取用户。
+     *
+     * @param userId 用户ID
+     * @return 用户
+     */
     private User requireUser(Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new IllegalStateException("用户不存在。");
+            throw new IllegalStateException("用户不存在！");
         }
         return user;
     }
 
-    private List<LogDocumentView> decorateLogs(List<LogDocumentView> logs) {
-        for (LogDocumentView log : logs) {
-            log.setCreateTimeText(TimeUtils.format(log.getCreateTime()));
-        }
-        return logs;
-    }
 
     private String trim(String value) {
         return value == null ? "" : value.trim();

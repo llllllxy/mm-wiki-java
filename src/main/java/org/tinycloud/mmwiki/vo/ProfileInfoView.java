@@ -31,11 +31,7 @@ public class ProfileInfoView {
     public ProfileInfoView() {
     }
 
-    public ProfileInfoView(
-            User user,
-            List<LogDocumentView> logDocuments,
-            int count
-    ) {
+    public ProfileInfoView(User user, List<LogDocumentView> logDocuments, int count) {
         this.user = user;
         this.logDocuments = logDocuments;
         this.count = count;

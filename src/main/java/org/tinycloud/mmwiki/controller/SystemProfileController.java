@@ -50,27 +50,25 @@ public class SystemProfileController extends ControllerSupport {
 
     @PostMapping("/system/profile/modify")
     @ResponseBody
-    public JsonResponse<Void> modify(
-        HttpServletRequest request,
-        @RequestParam("given_name") String givenName,
-        @RequestParam("email") String email,
-        @RequestParam("mobile") String mobile,
-        @RequestParam(value = "phone", defaultValue = "") String phone,
-        @RequestParam(value = "department", defaultValue = "") String department,
-        @RequestParam(value = "position", defaultValue = "") String position,
-        @RequestParam(value = "location", defaultValue = "") String location,
-        @RequestParam(value = "im", defaultValue = "") String im
-    ) {
+    public JsonResponse<Void> modify(HttpServletRequest request,
+                                     @RequestParam("given_name") String givenName,
+                                     @RequestParam("email") String email,
+                                     @RequestParam("mobile") String mobile,
+                                     @RequestParam(value = "phone", defaultValue = "") String phone,
+                                     @RequestParam(value = "department", defaultValue = "") String department,
+                                     @RequestParam(value = "position", defaultValue = "") String position,
+                                     @RequestParam(value = "location", defaultValue = "") String location,
+                                     @RequestParam(value = "im", defaultValue = "") String im) {
         return systemProfileService.modifyProfile(
-            currentUser(request).getUserId(),
-            givenName,
-            email,
-            mobile,
-            phone,
-            department,
-            position,
-            location,
-            im
+                currentUser(request).getUserId(),
+                givenName,
+                email,
+                mobile,
+                phone,
+                department,
+                position,
+                location,
+                im
         );
     }
 
@@ -87,10 +85,8 @@ public class SystemProfileController extends ControllerSupport {
 
     @GetMapping("/system/profile/followDoc")
     public String followDoc(HttpServletRequest request, Model model) {
-        FollowDocPage view =
-                systemProfileService.loadFollowDocs(currentUser(request).getUserId());
+        FollowDocPage view = systemProfileService.loadFollowDocs(currentUser(request).getUserId());
         model.addAttribute("user", view.getUser());
-        model.addAttribute("count", view.getCount());
         model.addAttribute("autoFollowDoc", view.getAutoFollowDoc());
         return "system/profile/follow_doc";
     }
@@ -126,10 +122,10 @@ public class SystemProfileController extends ControllerSupport {
     @PostMapping("/system/profile/savePass")
     @ResponseBody
     public JsonResponse<Void> savePass(
-        HttpServletRequest request,
-        @RequestParam("pwd") String password,
-        @RequestParam("pwd_new") String passwordNew,
-        @RequestParam("pwd_confirm") String passwordConfirm
+            HttpServletRequest request,
+            @RequestParam("pwd") String password,
+            @RequestParam("pwd_new") String passwordNew,
+            @RequestParam("pwd_confirm") String passwordConfirm
     ) {
         return systemProfileService.savePassword(currentUser(request).getUserId(), password, passwordNew, passwordConfirm);
     }

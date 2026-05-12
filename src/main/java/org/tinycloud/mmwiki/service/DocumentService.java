@@ -1,32 +1,9 @@
 package org.tinycloud.mmwiki.service;
 
-import org.tinycloud.mmwiki.vo.Access;
-import org.tinycloud.mmwiki.vo.DocumentEditData;
-import org.tinycloud.mmwiki.vo.DocumentViewData;
-import org.tinycloud.mmwiki.vo.ExportPayload;
-import org.tinycloud.mmwiki.vo.SharedPageView;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -34,19 +11,26 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.tinycloud.mmwiki.domain.Attachment;
-import org.tinycloud.mmwiki.domain.CollectionEntry;
-import org.tinycloud.mmwiki.domain.Document;
-import org.tinycloud.mmwiki.domain.DocumentHistoryView;
-import org.tinycloud.mmwiki.domain.DocumentTreeNode;
-import org.tinycloud.mmwiki.domain.Space;
-import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.vo.*;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -137,15 +121,15 @@ public class DocumentService {
         CollectionEntry collection = collectionService.findByUserTypeAndResourceId(currentUser.getUserId(), CollectionService.TYPE_DOC, documentId);
 
         return new DocumentViewData(
-            space,
-            document,
-            spaceDocument,
-            documents,
-            parentDocuments,
-            users.get(document.getCreateUserId()),
-            users.get(document.getEditUserId()),
-            pageContent,
-            collection == null ? 0 : collection.getCollectionId(),
+                space,
+                document,
+                spaceDocument,
+                documents,
+                parentDocuments,
+                users.get(document.getCreateUserId()),
+                users.get(document.getEditUserId()),
+                pageContent,
+                collection == null ? 0 : collection.getCollectionId(),
                 access.isEditor(),
                 access.isManager()
         );
@@ -165,11 +149,11 @@ public class DocumentService {
         String pageContent = documentFileService.readPage(pageFile);
         Map<Integer, User> users = loadUsers(document.getCreateUserId(), document.getEditUserId());
         return new SharedPageView(
-            document,
-            parentDocuments,
-            pageContent,
-            users.get(document.getCreateUserId()),
-            users.get(document.getEditUserId())
+                document,
+                parentDocuments,
+                pageContent,
+                users.get(document.getCreateUserId()),
+                users.get(document.getEditUserId())
         );
     }
 
@@ -261,8 +245,8 @@ public class DocumentService {
         return new DocumentEditData(
                 view.getDocument(),
                 view.getPageContent(),
-            configService.getValue("send_email_open", "0"),
-            configService.getValue("auto_follow_doc_open", "0")
+                configService.getValue("send_email_open", "0"),
+                configService.getValue("auto_follow_doc_open", "0")
         );
     }
 
@@ -326,14 +310,14 @@ public class DocumentService {
      * 保存文档正文与基础属性，并记录编辑历史。
      */
     public JsonResponse<Void> modifyPage(
-        CurrentUser currentUser,
-        String documentId,
-        String newName,
-        String content,
-        String comment,
-        boolean followDocument,
-        boolean noticeUsers,
-        String documentUrl
+            CurrentUser currentUser,
+            String documentId,
+            String newName,
+            String content,
+            String comment,
+            boolean followDocument,
+            boolean noticeUsers,
+            String documentUrl
     ) throws IOException {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -488,8 +472,8 @@ public class DocumentService {
 
     private boolean isValidName(String name) {
         return StringUtils.hasText(name)
-            && !DocumentFileService.DEFAULT_FILE_NAME.equalsIgnoreCase(name)
-            && !INVALID_NAME.matcher(name).find();
+                && !DocumentFileService.DEFAULT_FILE_NAME.equalsIgnoreCase(name)
+                && !INVALID_NAME.matcher(name).find();
     }
 
     private Map<Integer, User> loadUsers(Integer... userIds) {
@@ -503,7 +487,7 @@ public class DocumentService {
             return Map.of();
         }
         return userService.findActiveByIds(ids).stream()
-            .collect(Collectors.toMap(User::getUserId, item -> item, (left, right) -> left, LinkedHashMap::new));
+                .collect(Collectors.toMap(User::getUserId, item -> item, (left, right) -> left, LinkedHashMap::new));
     }
 
     private Document requireDocument(String documentId) {

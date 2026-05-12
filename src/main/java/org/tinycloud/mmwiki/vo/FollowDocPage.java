@@ -15,10 +15,6 @@ public class FollowDocPage {
      */
     private User user;
 
-    /**
-     * count.
-     */
-    private int count;
 
     /**
      * autoFollowDoc.
@@ -28,9 +24,8 @@ public class FollowDocPage {
     public FollowDocPage() {
     }
 
-    public FollowDocPage(User user, int count, String autoFollowDoc) {
+    public FollowDocPage(User user, String autoFollowDoc) {
         this.user = user;
-        this.count = count;
         this.autoFollowDoc = autoFollowDoc;
     }
 
@@ -40,13 +35,6 @@ public class FollowDocPage {
 
     public void setUser(User user) {
         this.user = user;
-    }
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public String getAutoFollowDoc() {
