@@ -250,10 +250,11 @@ public class DocumentService {
         );
     }
 
-    @Transactional
+
     /**
      * 创建页面或目录文档，并同步初始化磁盘文件。
      */
+    @Transactional
     public JsonResponse<Void> createDocument(CurrentUser currentUser, Integer spaceId, String parentId, Integer type, String name) throws IOException {
         String cleanName = name == null ? "" : name.trim();
         if (spaceId == null || !StringUtils.hasText(parentId) || cleanName.isBlank()) {
@@ -305,10 +306,11 @@ public class DocumentService {
         return JsonResponse.success("创建文档成功", "/document/index?document_id=" + document.getDocumentId());
     }
 
-    @Transactional
+
     /**
      * 保存文档正文与基础属性，并记录编辑历史。
      */
+    @Transactional
     public JsonResponse<Void> modifyPage(
             CurrentUser currentUser,
             String documentId,
@@ -363,10 +365,11 @@ public class DocumentService {
         return JsonResponse.success("文档修改成功", "/document/index?document_id=" + documentId);
     }
 
-    @Transactional
+
     /**
      * 移动文档到新的目录位置并维护层级路径。
      */
+    @Transactional
     public JsonResponse<Void> moveDocument(CurrentUser currentUser, String documentId, String targetId, String moveType) throws IOException {
         if (!StringUtils.hasText(documentId) || !StringUtils.hasText(targetId)) {
             return JsonResponse.error("缺少文档参数。");
@@ -425,10 +428,11 @@ public class DocumentService {
         return JsonResponse.success("移动文档成功", "/document/index?document_id=" + documentId);
     }
 
-    @Transactional
+
     /**
      * 软删除文档并清理对应的文档资源。
      */
+    @Transactional
     public JsonResponse<Void> deleteDocument(CurrentUser currentUser, String documentId) throws IOException {
         if (!StringUtils.hasText(documentId)) {
             return JsonResponse.error("没有选择文档。");

@@ -6,7 +6,6 @@ import org.tinycloud.mmwiki.vo.MemberView;
 import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,11 +55,9 @@ public class SpaceController extends ControllerSupport {
 
     @PostMapping("/space/list")
     @ResponseBody
-    public JsonResponse<PageModel<Space>> listData(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "20") int pageSize,
-            @RequestParam(defaultValue = "") String keyword
-    ) {
+    public JsonResponse<PageModel<Space>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                   @RequestParam(defaultValue = "20") int pageSize,
+                                                   @RequestParam(defaultValue = "") String keyword) {
         return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(), keyword, pageNum, pageSize));
     }
 
@@ -89,39 +86,37 @@ public class SpaceController extends ControllerSupport {
         Space space = spaceService.requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限访问该空间。");
+            return "error/403";
         }
         Document spaceDefault = documentService.findSpaceDefaultDocument(spaceId);
         return "redirect:/document/index?document_id=" + spaceDefault.getDocumentId();
     }
 
     @GetMapping("/space/member")
-    public String member(
-            @RequestParam("space_id") Integer spaceId,
-            Model model
-    ) {
-        MemberPage view = spaceService.listMembers(currentUser(), spaceId, 1, 20);
+    public String member(@RequestParam("space_id") Integer spaceId,
+                         Model model) {
+        MemberPage view = spaceService.getMemberPageInfo(currentUser(), spaceId);
         model.addAttribute("space_id", spaceId);
+        // 获取非空间成员otherUsers
         model.addAttribute("otherUsers", view.getOtherUsers());
+        // 根据权限判断跳转的页面
         return view.isManager() ? "space/manager_member" : "space/member";
     }
 
     @PostMapping("/space/member")
     @ResponseBody
-    public JsonResponse<PageModel<MemberView>> memberData(
-            @RequestParam("space_id") Integer spaceId,
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "20") int pageSize
-    ) {
+    public JsonResponse<PageModel<MemberView>> memberData(@RequestParam("space_id") Integer spaceId,
+                                                          @RequestParam(defaultValue = "1") int pageNum,
+                                                          @RequestParam(defaultValue = "20") int pageSize) {
         return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(), spaceId, pageNum, pageSize));
     }
 
     @PostMapping("/space/addMember")
     @ResponseBody
     public JsonResponse<Void> addMember(
-        @RequestParam("space_id") Integer spaceId,
-        @RequestParam("user_id") Integer userId,
-        @RequestParam("privilege") Integer privilege
+            @RequestParam("space_id") Integer spaceId,
+            @RequestParam("user_id") Integer userId,
+            @RequestParam("privilege") Integer privilege
     ) {
         spaceService.addMember(currentUser(), spaceId, userId, privilege);
         return JsonResponse.success("添加成员成功", "/space/member?space_id=" + spaceId);
@@ -129,22 +124,18 @@ public class SpaceController extends ControllerSupport {
 
     @PostMapping("/space/removeMember")
     @ResponseBody
-    public JsonResponse<Void> removeMember(
-        @RequestParam("space_id") Integer spaceId,
-        @RequestParam("user_id") Integer userId,
-        @RequestParam("space_user_id") Integer spaceUserId
-    ) {
+    public JsonResponse<Void> removeMember(@RequestParam("space_id") Integer spaceId,
+                                           @RequestParam("user_id") Integer userId,
+                                           @RequestParam("space_user_id") Integer spaceUserId) {
         spaceService.removeMember(currentUser(), spaceId, userId, spaceUserId);
         return JsonResponse.success("移除成员成功", "/space/member?space_id=" + spaceId);
     }
 
     @PostMapping("/space/modifyMember")
     @ResponseBody
-    public JsonResponse<Void> modifyMember(
-        @RequestParam("space_id") Integer spaceId,
-        @RequestParam("space_user_id") Integer spaceUserId,
-        @RequestParam("privilege") Integer privilege
-    ) {
+    public JsonResponse<Void> modifyMember(@RequestParam("space_id") Integer spaceId,
+                                           @RequestParam("space_user_id") Integer spaceUserId,
+                                           @RequestParam("privilege") Integer privilege) {
         spaceService.updateMemberPrivilege(currentUser(), spaceId, spaceUserId, privilege);
         return JsonResponse.success("更新权限成功");
     }

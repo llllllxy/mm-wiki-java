@@ -16,7 +16,6 @@ import org.tinycloud.mmwiki.web.CurrentUser;
  */
 @Service
 public class AccessService {
-
     public static final int ROLE_ROOT_ID = 1;
     public static final int SPACE_EDITOR = 1;
     public static final int SPACE_MANAGER = 2;

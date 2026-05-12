@@ -13,11 +13,6 @@ import org.tinycloud.mmwiki.domain.User;
 public class MemberPage {
 
     /**
-     * users.
-     */
-    private List<MemberView> users;
-
-    /**
      * manager.
      */
     private boolean manager;
@@ -30,19 +25,12 @@ public class MemberPage {
     public MemberPage() {
     }
 
-    public MemberPage(List<MemberView> users, boolean manager, List<User> otherUsers) {
-        this.users = users;
+    public MemberPage(boolean manager, List<User> otherUsers) {
         this.manager = manager;
         this.otherUsers = otherUsers;
     }
 
-    public List<MemberView> getUsers() {
-        return users;
-    }
 
-    public void setUsers(List<MemberView> users) {
-        this.users = users;
-    }
     public boolean isManager() {
         return manager;
     }

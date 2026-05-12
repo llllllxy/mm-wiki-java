@@ -2,47 +2,30 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.vo.Access;
-import org.tinycloud.mmwiki.vo.MemberPage;
-import org.tinycloud.mmwiki.vo.MemberView;
-import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
-import org.tinycloud.mmwiki.vo.SpaceDownload;
-import org.tinycloud.mmwiki.util.TimeUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.tinycloud.mmwiki.domain.Attachment;
-import org.tinycloud.mmwiki.domain.CollectionEntry;
-import org.tinycloud.mmwiki.domain.Document;
-import org.tinycloud.mmwiki.domain.Space;
-import org.tinycloud.mmwiki.domain.SpaceUser;
-import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.vo.*;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -52,8 +35,6 @@ import org.tinycloud.mmwiki.web.PageModel;
  */
 @Service
 public class SpaceService {
-
-    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Pattern INVALID_SPACE_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
     private static final int SPACE_MANAGER_PRIVILEGE = 2;
 
@@ -109,11 +90,7 @@ public class SpaceService {
         String search = keyword == null ? "" : keyword.trim();
         PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> {
-                    if (search.isBlank()) {
-                        spaceMapper.pageAll();
-                    } else {
-                        spaceMapper.pageByKeyword(search);
-                    }
+                    spaceMapper.pageByKeyword(currentUser.getUserId(), search);
                 });
         List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
@@ -132,7 +109,7 @@ public class SpaceService {
         List<Integer> ids = collections.stream().map(entry -> Integer.valueOf(entry.getResourceId())).toList();
         List<Space> spaces = spaceMapper.findActiveByIds(ids);
         Map<Integer, Integer> collectionBySpace = collections.stream()
-            .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId));
+                .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId));
         for (Space space : spaces) {
             space.setCollection(true);
             space.setCollectionId(collectionBySpace.get(space.getSpaceId()));
@@ -151,21 +128,15 @@ public class SpaceService {
         return new SpaceCollectionPage(spaces, spaces.size());
     }
 
-    /**
-     * 分页加载空间成员与可添加用户。
-     */
-    public MemberPage listMembers(Integer spaceId, int page, int number) {
-        return listMembers(null, spaceId, page, number);
-    }
 
     /**
-     * 分页加载空间成员与可添加用户。
+     * 分页加载空间成员与可添加用户（非空间成员用户）。
      */
-    public MemberPage listMembers(CurrentUser currentUser, Integer spaceId, int page, int number) {
-        return listMembers(currentUser, spaceId, page, number, "/space/member?space_id=" + spaceId);
+    public MemberPage getMemberPageInfo(CurrentUser currentUser, Integer spaceId) {
+        return getMemberPageInfo(currentUser, spaceId, "/space/member?space_id=" + spaceId);
     }
 
-    public MemberPage listMembers(CurrentUser currentUser, Integer spaceId, int page, int number, String basePath) {
+    public MemberPage getMemberPageInfo(CurrentUser currentUser, Integer spaceId, String basePath) {
         Space space = requireSpace(spaceId);
         Access access = currentUser == null ? new Access(true, false, false) : null;
         if (currentUser != null) {
@@ -174,26 +145,14 @@ public class SpaceService {
                 throw new IllegalStateException("您没有权限访问该空间成员列表。");
             }
         }
-        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(page, number).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
-        List<SpaceUser> members = pageInfo.getList();
-        List<Integer> userIds = members.stream().map(SpaceUser::getUserId).toList();
-        Map<Integer, User> users = userIds.isEmpty() ? Map.of() : userService.findActiveByIds(userIds).stream()
-            .collect(Collectors.toMap(User::getUserId, item -> item));
-        List<MemberView> views = new ArrayList<>();
-        for (SpaceUser member : members) {
-            User user = users.get(member.getUserId());
-            if (user == null) {
-                continue;
-            }
-            views.add(new MemberView(user, member.getPrivilege(), member.getSpaceUserId()));
-        }
+
         boolean manager = access != null && access.isManager();
         List<User> otherUsers = Collections.emptyList();
         if (manager) {
-            List<Integer> allMemberIds = spaceUserService.findBySpaceId(spaceId).stream().map(SpaceUser::getUserId).toList();
-            otherUsers = allMemberIds.isEmpty() ? userService.findAllActive() : userService.findActiveExcludingIds(allMemberIds);
+            List<Integer> existsUserIds = spaceUserService.findBySpaceId(spaceId).stream().map(SpaceUser::getUserId).toList();
+            otherUsers = userService.findActiveExcludingIds(existsUserIds);
         }
-        return new MemberPage(views, manager, otherUsers);
+        return new MemberPage(manager, otherUsers);
     }
 
     public PageModel<MemberView> listMembersPage(CurrentUser currentUser, Integer spaceId, int pageNum, int pageSize) {
@@ -205,7 +164,7 @@ public class SpaceService {
         PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
         List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
-        Map<Integer, User> users = userIds.isEmpty() ? Map.of() : userService.findActiveByIds(userIds).stream()
+        Map<Integer, User> users = userIds.isEmpty() ? new HashMap<>() : userService.findActiveByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getUserId, item -> item));
         List<MemberView> views = new ArrayList<>();
         for (SpaceUser member : pageInfo.getList()) {
@@ -274,10 +233,10 @@ public class SpaceService {
         if (defaultDocument != null) {
             String oldPageFile = documentFileService.getDefaultPageFileBySpaceName(existing.getName());
             documentFileService.renamePageOrDirectory(
-                oldPageFile,
-                space.getName(),
-                DocumentFileService.DOCUMENT_TYPE_DIR,
-                !Objects.equals(existing.getName(), space.getName())
+                    oldPageFile,
+                    space.getName(),
+                    DocumentFileService.DOCUMENT_TYPE_DIR,
+                    !Objects.equals(existing.getName(), space.getName())
             );
             defaultDocument.setName(space.getName());
             defaultDocument.setEditUserId(currentUser.getUserId());
@@ -374,7 +333,7 @@ public class SpaceService {
     private void markCollections(CurrentUser currentUser, List<Space> spaces) {
         List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionService.TYPE_SPACE);
         Map<Integer, Integer> collectionBySpace = collections.stream()
-            .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId, (left, right) -> left));
+                .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId, (left, right) -> left));
         for (Space space : spaces) {
             Integer collectionId = collectionBySpace.get(space.getSpaceId());
             if (collectionId != null) {
@@ -387,7 +346,7 @@ public class SpaceService {
     private void decorate(List<Space> spaces) {
         for (Space space : spaces) {
             if (space.getCreateTime() != null) {
-                space.setCreateDateText(DATE_ONLY.format(space.getCreateTime()));
+                space.setCreateDateText(TimeUtils.format(space.getCreateTime()));
             } else {
                 space.setCreateDateText("");
             }

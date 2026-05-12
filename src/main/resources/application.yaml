@@ -57,6 +57,7 @@ logging:
 
 mybatis:
   type-aliases-package: org.tinycloud.mmwiki.domain
+  mapper-locations: classpath:/mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

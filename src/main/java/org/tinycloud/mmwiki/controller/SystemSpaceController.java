@@ -5,7 +5,7 @@ import org.tinycloud.mmwiki.vo.MemberView;
 import org.tinycloud.mmwiki.vo.SpaceDownload;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -54,11 +54,8 @@ public class SystemSpaceController extends ControllerSupport {
     }
 
     @GetMapping("/system/space/member")
-    public String member(
-            @RequestParam("space_id") Integer spaceId,
-            Model model
-    ) {
-        MemberPage view = spaceService.listMembers(currentUser(), spaceId, 1, 15, "/system/space/member?space_id=" + spaceId);
+    public String member(@RequestParam("space_id") Integer spaceId, Model model) {
+        MemberPage view = spaceService.getMemberPageInfo(currentUser(), spaceId, "/system/space/member?space_id=" + spaceId);
         model.addAttribute("space_id", spaceId);
         model.addAttribute("otherUsers", view.getOtherUsers());
         return "system/space/member";

@@ -2,9 +2,13 @@ package org.tinycloud.mmwiki.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.service.ConfigService;
 import org.tinycloud.mmwiki.service.InstallService;
@@ -17,6 +21,7 @@ import org.tinycloud.mmwiki.service.InstallService;
  */
 @ControllerAdvice
 public class GlobalModelAttributes {
+    private static final Logger log = LoggerFactory.getLogger(GlobalModelAttributes.class);
 
     private final MmwikiProperties properties;
     private final ConfigService configService;
@@ -27,6 +32,19 @@ public class GlobalModelAttributes {
         this.configService = configService;
         this.installService = installService;
     }
+
+    /**
+     * 全局异常捕获
+     *
+     * @param e BindException
+     */
+    @ResponseBody
+    @ExceptionHandler(RuntimeException.class)
+    public JsonResponse<Void> handleRuntimeException(RuntimeException e) {
+        log.error("handleBindException: ", e);
+        return JsonResponse.error(e.getMessage());
+    }
+
 
     @ModelAttribute
     public void populate(Model model, HttpServletRequest request) {

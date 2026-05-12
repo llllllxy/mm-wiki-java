@@ -26,11 +26,7 @@ public class Access {
     public Access() {
     }
 
-    public Access(
-            boolean visit,
-            boolean editor,
-            boolean manager
-    ) {
+    public Access(boolean visit, boolean editor, boolean manager) {
         this.visit = visit;
         this.editor = editor;
         this.manager = manager;
