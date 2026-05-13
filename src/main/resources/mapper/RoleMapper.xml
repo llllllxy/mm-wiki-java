@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.RoleMapper">
+
+    <select id="findAllActive" resultType="org.tinycloud.mmwiki.domain.Role">
+        select role_id, name, type, is_delete, create_time, update_time
+        from mw_role
+        where is_delete = 0
+        order by role_id asc
+    </select>
+
+    <select id="findActiveById" resultType="org.tinycloud.mmwiki.domain.Role">
+        select role_id, name, type, is_delete, create_time, update_time
+        from mw_role
+        where role_id = #{roleId}
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="pageAll" resultType="org.tinycloud.mmwiki.domain.Role">
+        select role_id, name, type, is_delete, create_time, update_time
+        from mw_role
+        where is_delete = 0
+        order by role_id desc
+    </select>
+
+    <select id="pageByKeyword" resultType="org.tinycloud.mmwiki.domain.Role">
+        select role_id, name, type, is_delete, create_time, update_time
+        from mw_role
+        where is_delete = 0
+          and name like concat('%', #{keyword}, '%')
+        order by role_id desc
+    </select>
+
+    <select id="countByName" resultType="long">
+        select count(*)
+        from mw_role
+        where is_delete = 0
+          and name = #{name}
+    </select>
+
+    <select id="countByNameAndNotId" resultType="long">
+        select count(*)
+        from mw_role
+        where is_delete = 0
+          and name = #{name}
+          and role_id &lt;&gt; #{roleId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="roleId">
+        insert into mw_role(name, type, is_delete, create_time, update_time)
+        values (#{name}, #{type}, 0, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        update mw_role
+        set name        = #{name},
+            update_time = #{updateTime}
+        where role_id = #{roleId}
+          and is_delete = 0
+    </update>
+
+    <update id="markDeleted">
+        update mw_role
+        set is_delete   = 1,
+            update_time = now()
+        where role_id = #{roleId}
+          and is_delete = 0
+    </update>
+
+</mapper>

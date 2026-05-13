@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.LogMapper">
+
+    <insert id="insert">
+        insert into mw_log(level, path, `get`, post, message, ip, user_agent, referer, user_id, username, create_time)
+        values (#{level}, #{path}, #{get}, #{post}, #{message}, #{ip}, #{userAgent}, #{referer}, #{userId}, #{username},
+                #{createTime})
+    </insert>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.LogEntry">
+        select log_id,
+               level,
+               path,
+               `get`,
+               post,
+               message,
+               ip,
+               user_agent,
+               referer,
+               user_id,
+               username,
+               create_time
+        from mw_log
+        where log_id = #{logId} limit 1
+    </select>
+
+    <select id="pageByFilters" resultType="org.tinycloud.mmwiki.domain.LogEntry">
+        select log_id, level, path, `get`, post, message, ip, user_agent, referer, user_id, username, create_time
+        from mw_log
+        where 1 = 1
+        <if test='level != null'>and level = #{level}</if>
+        <if test='message != null and message != ""'>and message like concat('%', #{message}, '%')</if>
+        <if test='username != null and username != ""'>and username like concat('%', #{username}, '%')</if>
+        order by log_id desc
+    </select>
+
+    <select id="pageByLevel" resultType="org.tinycloud.mmwiki.domain.LogEntry">
+        select log_id,
+               level,
+               path,
+               `get`,
+               post,
+               message,
+               ip,
+               user_agent,
+               referer,
+               user_id,
+               username,
+               create_time
+        from mw_log
+        where level = #{level}
+        order by log_id desc
+    </select>
+
+</mapper>

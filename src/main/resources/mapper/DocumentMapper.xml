@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.DocumentMapper">
+
+    <select id="findActiveByIds" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id, parent_id, space_id, name, type, path, sequence, create_user_id, edit_user_id, create_time,
+        update_time
+        from mw_document
+        where is_delete = 0
+        <choose>
+            <when test='documentIds != null and documentIds.size() > 0'>
+                and document_id in
+                <foreach collection='documentIds' item='id' open='(' separator=',' close=')'>
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                and 1 = 0
+            </otherwise>
+        </choose>
+        order by sequence asc, create_time asc
+    </select>
+
+    <select id="findVisibleByIds" resultType="org.tinycloud.mmwiki.domain.Document">
+        select distinct d.document_id, d.parent_id, d.space_id, d.name, d.type, d.path, d.sequence, d.create_user_id,
+        d.edit_user_id, d.create_time, d.update_time
+        from mw_document d
+        left join mw_space s on s.space_id = d.space_id
+        left join mw_space_user su on su.space_id = d.space_id and su.user_id = #{userId}
+        where d.is_delete = 0
+        and s.is_delete = 0
+        and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)
+        <choose>
+            <when test='documentIds != null and documentIds.size() > 0'>
+                and d.document_id in
+                <foreach collection='documentIds' item='id' open='(' separator=',' close=')'>
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                and 1 = 0
+            </otherwise>
+        </choose>
+        order by d.sequence asc, d.create_time asc
+    </select>
+
+    <select id="findActiveById" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where document_id = #{documentId}
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="findSpaceDefaultDocument" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where space_id = #{spaceId}
+          and parent_id = '0'
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="findAllSpaceDocuments" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where space_id = #{spaceId}
+          and parent_id &gt; '0'
+          and is_delete = 0
+        order by sequence asc
+    </select>
+
+    <select id="findActiveBySpaceId" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where space_id = #{spaceId}
+          and is_delete = 0
+        order by sequence asc, create_time asc
+    </select>
+
+    <select id="countActiveBySpaceId" resultType="long">
+        select count(*)
+        from mw_document
+        where space_id = #{spaceId}
+          and is_delete = 0
+    </select>
+
+    <select id="findByParentId" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where parent_id = #{parentId}
+          and is_delete = 0
+    </select>
+
+    <select id="findByNameParentIdAndSpaceId" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where name = #{name}
+          and parent_id = #{parentId}
+          and space_id = #{spaceId}
+          and type = #{type}
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="findMaxSequence" resultType="integer">
+        select coalesce(max(sequence), 0)
+        from mw_document
+        where parent_id = #{parentId}
+          and space_id = #{spaceId}
+    </select>
+
+    <insert id="insert">
+        insert into mw_document(document_id, parent_id, space_id, name, type, path, sequence, create_user_id,
+                                edit_user_id, is_delete, create_time, update_time)
+        values (#{documentId}, #{parentId}, #{spaceId}, #{name}, #{type}, #{path}, #{sequence}, #{createUserId},
+                #{editUserId}, 0, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateNameAndEditor">
+        update mw_document
+        set name         = #{name},
+            edit_user_id = #{editUserId},
+            update_time  = #{updateTime}
+        where document_id = #{documentId}
+          and is_delete = 0
+    </update>
+
+    <update id="updateDefaultDocumentName">
+        update mw_document
+        set name         = #{name},
+            edit_user_id = #{editUserId},
+            update_time  = #{updateTime}
+        where document_id = #{documentId}
+          and parent_id = '0'
+          and is_delete = 0
+    </update>
+
+    <update id="updateParentPathEditor">
+        update mw_document
+        set parent_id    = #{parentId},
+            path         = #{path},
+            edit_user_id = #{editUserId},
+            update_time  = #{updateTime}
+        where document_id = #{documentId}
+          and is_delete = 0
+    </update>
+
+    <update id="bumpSequenceBySpaceIdFrom">
+        update mw_document
+        set sequence    = sequence + #{delta},
+            update_time = #{updateTime}
+        where space_id = #{spaceId}
+          and sequence &gt;= #{startSequence}
+          and is_delete = 0
+    </update>
+
+    <update id="updateSequence">
+        update mw_document
+        set sequence     = #{sequence},
+            edit_user_id = #{editUserId},
+            update_time  = #{updateTime}
+        where document_id = #{documentId}
+          and is_delete = 0
+    </update>
+
+    <update id="markDeleted">
+        update mw_document
+        set is_delete    = 1,
+            edit_user_id = #{editUserId},
+            update_time  = #{updateTime}
+        where document_id = #{documentId}
+          and is_delete = 0
+    </update>
+
+    <select id="findVisibleByNameLike" resultType="org.tinycloud.mmwiki.domain.Document">
+        select distinct d.document_id,
+                        d.parent_id,
+                        d.space_id,
+                        d.name,
+                        d.type,
+                        d.path,
+                        d.sequence,
+                        d.create_user_id,
+                        d.edit_user_id,
+                        d.create_time,
+                        d.update_time
+        from mw_document d
+                 left join mw_space s on s.space_id = d.space_id
+                 left join mw_space_user su on su.space_id = d.space_id and su.user_id = #{userId}
+        where d.is_delete = 0
+          and d.name like concat('%', #{keyword}, '%')
+          and s.is_delete = 0
+          and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)
+        order by d.update_time desc
+    </select>
+
+    <select id="countActive" resultType="long">
+        select count(*)
+        from mw_document
+        where is_delete = 0
+    </select>
+
+    <select id="findTopCreateUserId" resultType="integer">
+        select create_user_id
+        from mw_document
+        where is_delete = 0
+          and create_user_id &gt; 0
+        group by create_user_id
+        order by count(*) desc limit 1
+    </select>
+
+    <select id="findTopEditUserId" resultType="integer">
+        select edit_user_id
+        from mw_document
+        where is_delete = 0
+          and edit_user_id &gt; 0
+        group by edit_user_id
+        order by count(*) desc limit 1
+    </select>
+
+    <select id="findSpaceDocumentRank" resultType="map">
+        select coalesce(s.name, '') as space_name, count(d.document_id) as total
+        from mw_document d
+                 left join mw_space s on s.space_id = d.space_id
+        where d.is_delete = 0
+        group by d.space_id, s.name
+        order by total desc
+            limit #{size}
+    </select>
+
+    <select id="countGroupByCreateDate" resultType="map">
+        select date_format(create_time, '%Y-%m-%d') as date, count(*) as total
+        from mw_document
+        where is_delete = 0
+          and create_time &gt;= #{startTime}
+        group by date_format(create_time, '%Y-%m-%d')
+        order by date asc
+    </select>
+
+</mapper>

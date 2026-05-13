@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.LinkMapper">
+
+    <select id="findAllOrderBySequence" resultType="org.tinycloud.mmwiki.domain.Link">
+        select *
+        from mw_link
+        order by sequence asc
+    </select>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.Link">
+        select *
+        from mw_link
+        where link_id = #{linkId} limit 1
+    </select>
+
+    <select id="pageAll" resultType="org.tinycloud.mmwiki.domain.Link">
+        select *
+        from mw_link
+        order by sequence asc, link_id desc
+    </select>
+
+    <select id="pageByKeyword" resultType="org.tinycloud.mmwiki.domain.Link">
+        select *
+        from mw_link
+        where name like concat('%', #{keyword}, '%')
+        order by sequence asc, link_id desc
+    </select>
+
+    <select id="countByName" resultType="long">
+        select count(*)
+        from mw_link
+        where name = #{name}
+    </select>
+
+    <select id="countByNameAndNotId" resultType="long">
+        select count(*)
+        from mw_link
+        where name = #{name}
+          and link_id &lt;&gt; #{linkId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="linkId">
+        insert into mw_link(name, url, sequence, create_time, update_time)
+        values (#{name}, #{url}, #{sequence}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        update mw_link
+        set name        = #{name},
+            url         = #{url},
+            sequence    = #{sequence},
+            update_time = #{updateTime}
+        where link_id = #{linkId}
+    </update>
+
+    <update id="deleteById">
+        delete
+        from mw_link
+        where link_id = #{linkId}
+    </update>
+
+</mapper>

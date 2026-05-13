@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.SpaceUserMapper">
+
+    <select id="findByUserId" resultType="org.tinycloud.mmwiki.domain.SpaceUser">
+        select *
+        from mw_space_user
+        where user_id = #{userId}
+    </select>
+
+    <select id="findBySpaceIdAndUserId" resultType="org.tinycloud.mmwiki.domain.SpaceUser">
+        select *
+        from mw_space_user
+        where space_id = #{spaceId}
+          and user_id = #{userId} limit 1
+    </select>
+
+    <select id="pageBySpaceId" resultType="org.tinycloud.mmwiki.domain.SpaceUser">
+        select *
+        from mw_space_user
+        where space_id = #{spaceId}
+    </select>
+
+    <select id="findBySpaceId" resultType="org.tinycloud.mmwiki.domain.SpaceUser">
+        select *
+        from mw_space_user
+        where space_id = #{spaceId}
+    </select>
+
+    <insert id="insert">
+        insert into mw_space_user(user_id, space_id, privilege, create_time, update_time)
+        values (#{userId}, #{spaceId}, #{privilege}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updatePrivilege">
+        update mw_space_user
+        set privilege   = #{privilege},
+            update_time = #{updateTime}
+        where space_user_id = #{spaceUserId}
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from mw_space_user
+        where space_user_id = #{spaceUserId}
+    </delete>
+
+    <delete id="deleteBySpaceId">
+        delete
+        from mw_space_user
+        where space_id = #{spaceId}
+    </delete>
+
+</mapper>

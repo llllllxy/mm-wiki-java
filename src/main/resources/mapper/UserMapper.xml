@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.UserMapper">
+
+    <select id="findActiveByUsername" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where username = #{username}
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="findActiveById" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where user_id = #{userId}
+          and is_delete = 0 limit 1
+    </select>
+
+    <update id="updateLoginSuccess">
+        update mw_user
+        set last_time   = #{lastTime},
+            last_ip     = #{lastIp},
+            update_time = now()
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <select id="findActiveByIds" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+        <choose>
+            <when test='userIds != null and userIds.size() > 0'>
+                and user_id in
+                <foreach collection='userIds' item='id' open='(' separator=',' close=')'>
+                    #{id}
+                </foreach>
+            </when>
+            <otherwise>
+                and 1 = 0
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllActive" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+        order by user_id asc
+    </select>
+
+    <select id="pageAllActive" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+        order by user_id desc
+    </select>
+
+    <select id="pageByUsernameLike" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+          and username like concat('%', #{username}, '%')
+        order by user_id desc
+    </select>
+
+    <select id="pageByFilters" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+        <if test='username != null and username != ""'>
+            and username like concat('%', #{username}, '%')
+        </if>
+        <if test='roleId != null'>
+            and role_id = #{roleId}
+        </if>
+        order by user_id desc
+    </select>
+
+    <select id="findActiveExcludingIds" resultType="org.tinycloud.mmwiki.domain.User">
+        select *
+        from mw_user
+        where is_delete = 0
+        <if test='excludedIds != null and excludedIds.size() > 0'>
+            and user_id not in
+            <foreach collection='excludedIds' item='id' open='(' separator=',' close=')'>
+                #{id}
+            </foreach>
+        </if>
+        order by user_id asc
+    </select>
+
+    <select id="countByUsername" resultType="long">
+        select count(*)
+        from mw_user
+        where username = #{username}
+          and is_delete = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
+        insert into mw_user(username, password, given_name, mobile, phone, email, department, position, location, im,
+                            last_ip, last_time, role_id, is_forbidden, is_delete, create_time, update_time)
+        values (#{username}, #{password}, #{givenName}, #{mobile}, #{phone}, #{email}, #{department}, #{position},
+                #{location}, #{im},
+                '', 0, #{roleId}, 0, 0, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="insertAuthUser" useGeneratedKeys="true" keyProperty="userId">
+        insert into mw_user(username, password, given_name, mobile, phone, email, department, position, location, im,
+                            last_ip, last_time, role_id, is_forbidden, is_delete, create_time, update_time)
+        values (#{username}, #{password}, #{givenName}, #{mobile}, #{phone}, #{email}, #{department}, #{position},
+                #{location}, #{im},
+                #{lastIp}, #{lastTime}, #{roleId}, 0, 0, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateAuthUserByUsername">
+        update mw_user
+        set given_name  = #{givenName},
+            password    = #{password},
+            email       = #{email},
+            mobile      = #{mobile},
+            phone       = #{phone},
+            department  = #{department},
+            position    = #{position},
+            location    = #{location},
+            im          = #{im},
+            last_time   = #{lastTime},
+            last_ip     = #{lastIp},
+            update_time = #{updateTime}
+        where username = #{username}
+          and is_delete = 0
+    </update>
+
+    <update id="updateSystemUser">
+        update mw_user
+        set given_name  = #{givenName},
+            email       = #{email},
+            mobile      = #{mobile},
+            phone       = #{phone},
+            department  = #{department},
+            position    = #{position},
+            location    = #{location},
+            im          = #{im},
+            role_id     = #{roleId},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <update id="updateSystemUserWithPassword">
+        update mw_user
+        set given_name  = #{givenName},
+            email       = #{email},
+            mobile      = #{mobile},
+            phone       = #{phone},
+            department  = #{department},
+            position    = #{position},
+            location    = #{location},
+            im          = #{im},
+            role_id     = #{roleId},
+            password    = #{password},
+            update_time = #{updateTime}
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <update id="updateProfile">
+        update mw_user
+        set given_name  = #{givenName},
+            email       = #{email},
+            mobile      = #{mobile},
+            phone       = #{phone},
+            department  = #{department},
+            position    = #{position},
+            location    = #{location},
+            im          = #{im},
+            update_time = now()
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <update id="updatePassword">
+        update mw_user
+        set password    = #{password},
+            update_time = now()
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <update id="updateForbidden">
+        update mw_user
+        set is_forbidden = #{isForbidden},
+            update_time  = now()
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <select id="countByRoleId" resultType="long">
+        select count(*)
+        from mw_user
+        where is_delete = 0
+          and role_id = #{roleId}
+    </select>
+
+    <update id="updateRoleId">
+        update mw_user
+        set role_id     = #{roleId},
+            update_time = now()
+        where user_id = #{userId}
+          and is_delete = 0
+    </update>
+
+    <select id="countNormalUsers" resultType="long">
+        select count(*)
+        from mw_user
+        where is_delete = 0
+          and is_forbidden = 0
+    </select>
+
+    <select id="countForbiddenUsers" resultType="long">
+        select count(*)
+        from mw_user
+        where is_delete = 0
+          and is_forbidden = 1
+    </select>
+
+    <select id="countByLastTimeAfter" resultType="long">
+        select count(*)
+        from mw_user
+        where is_delete = 0
+          and last_time &gt;= #{startTime}
+    </select>
+
+</mapper>

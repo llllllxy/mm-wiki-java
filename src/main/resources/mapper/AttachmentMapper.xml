@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.AttachmentMapper">
+
+    <select id="findByDocumentId" resultType="org.tinycloud.mmwiki.domain.Attachment">
+        select attachment_id,
+               user_id,
+               document_id,
+               name,
+               path,
+               source,
+               create_time,
+               update_time
+        from mw_attachment
+        where document_id = #{documentId}
+        order by attachment_id desc
+    </select>
+
+    <select id="findBySpaceId" resultType="org.tinycloud.mmwiki.domain.Attachment">
+        select a.attachment_id,
+               a.user_id,
+               a.document_id,
+               a.name,
+               a.path,
+               a.source,
+               a.create_time,
+               a.update_time
+        from mw_attachment a
+                 inner join mw_document d on d.document_id = a.document_id
+        where d.space_id = #{spaceId}
+          and d.is_delete = 0
+        order by a.attachment_id desc
+    </select>
+
+    <select id="findByDocumentIdAndSource" resultType="org.tinycloud.mmwiki.domain.Attachment">
+        select a.attachment_id,
+               a.user_id,
+               a.document_id,
+               a.name,
+               a.path,
+               a.source,
+               a.create_time,
+               a.update_time,
+               u.username
+        from mw_attachment a
+                 left join mw_user u on u.user_id = a.user_id
+        where a.document_id = #{documentId}
+          and a.source = #{source}
+        order by a.attachment_id desc
+    </select>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.Attachment">
+        select attachment_id,
+               user_id,
+               document_id,
+               name,
+               path,
+               source,
+               create_time,
+               update_time
+        from mw_attachment
+        where attachment_id = #{attachmentId} limit 1
+    </select>
+
+    <insert id="insert">
+        insert into mw_attachment(user_id, document_id, name, path, source, create_time, update_time)
+        values (#{userId}, #{documentId}, #{name}, #{path}, #{source}, #{createTime}, #{updateTime})
+    </insert>
+
+    <delete id="deleteById">
+        delete
+        from mw_attachment
+        where attachment_id = #{attachmentId}
+    </delete>
+
+    <delete id="deleteByDocumentId">
+        delete
+        from mw_attachment
+        where document_id = #{documentId}
+    </delete>
+
+</mapper>

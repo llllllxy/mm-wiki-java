@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.LogDocumentMapper">
+
+    <select id="pageVisibleByUserId" resultType="org.tinycloud.mmwiki.domain.LogDocumentView">
+        select ld.log_document_id,
+               ld.document_id,
+               ld.space_id,
+               ld.user_id,
+               ld.action,
+               ld.comment,
+               ld.create_time,
+               u.username,
+               u.given_name,
+               d.name as document_name,
+               d.type as document_type
+        from mw_log_document ld
+                 left join mw_user u on u.user_id = ld.user_id
+                 left join mw_document d on d.document_id = ld.document_id
+        where #{root} = true
+           or exists (select 1
+                      from mw_space s
+                      where s.space_id = ld.space_id
+                        and s.visit_level = 'public')
+           or exists (select 1
+                      from mw_space_user su
+                      where su.space_id = ld.space_id
+                        and su.user_id = #{userId})
+        order by ld.log_document_id desc
+    </select>
+
+    <select id="pageByUserIdVisibleToViewer" resultType="org.tinycloud.mmwiki.domain.LogDocumentView">
+        select ld.log_document_id,
+        ld.document_id,
+        ld.space_id,
+        ld.user_id,
+        ld.action,
+        ld.comment,
+        ld.create_time,
+        d.name as document_name,
+        d.type as document_type
+        from mw_log_document ld
+        left join mw_document d on d.document_id = ld.document_id
+        left join mw_space s on s.space_id = ld.space_id
+        left join mw_space_user su on su.space_id = ld.space_id and su.user_id = #{viewerUserId}
+        where ld.user_id = #{profileUserId}
+        and d.is_delete = 0
+        and s.is_delete = 0
+        and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)
+        <if test='keyword != null and keyword != ""'>
+            and (ld.comment like concat('%', #{keyword}, '%') or d.name like concat('%', #{keyword}, '%'))
+        </if>
+        order by ld.log_document_id desc
+    </select>
+
+    <select id="pageByUserId" resultType="org.tinycloud.mmwiki.domain.LogDocumentView">
+        select ld.log_document_id,
+               ld.document_id,
+               ld.space_id,
+               ld.user_id,
+               ld.action,
+               ld.comment,
+               ld.create_time,
+               d.name as document_name,
+               d.type as document_type
+        from mw_log_document ld
+                 left join mw_document d on d.document_id = ld.document_id
+        where ld.user_id = #{userId}
+        order by ld.log_document_id desc
+    </select>
+
+    <select id="pageByUserIdAndKeyword" resultType="org.tinycloud.mmwiki.domain.LogDocumentView">
+        select ld.log_document_id,
+               ld.document_id,
+               ld.space_id,
+               ld.user_id,
+               ld.action,
+               ld.comment,
+               ld.create_time,
+               d.name as document_name,
+               d.type as document_type
+        from mw_log_document ld
+                 left join mw_document d on d.document_id = ld.document_id
+        where ld.user_id = #{userId}
+          and (
+            ld.comment like concat('%', #{keyword}, '%')
+                or d.name like concat('%', #{keyword}, '%')
+            )
+        order by ld.log_document_id desc
+    </select>
+
+    <select id="pageByDocumentId" resultType="org.tinycloud.mmwiki.domain.DocumentHistoryView">
+        select ld.log_document_id,
+               ld.document_id,
+               ld.user_id,
+               ld.action,
+               ld.comment,
+               ld.create_time,
+               u.username
+        from mw_log_document ld
+                 left join mw_user u on u.user_id = ld.user_id
+        where ld.document_id = #{documentId}
+        order by ld.log_document_id desc
+    </select>
+
+    <select id="pageForSystem" resultType="org.tinycloud.mmwiki.domain.LogDocumentView">
+        select ld.log_document_id,
+        ld.document_id,
+        ld.space_id,
+        ld.user_id,
+        ld.action,
+        ld.comment,
+        ld.create_time,
+        u.username,
+        u.given_name,
+        d.name as document_name,
+        d.type as document_type
+        from mw_log_document ld
+        left join mw_user u on u.user_id = ld.user_id
+        left join mw_document d on d.document_id = ld.document_id
+        where 1 = 1
+        <if test='userId != null'>and ld.user_id = #{userId}</if>
+        <if test='keyword != null and keyword != ""'>
+            and (ld.comment like concat('%', #{keyword}, '%') or d.name like concat('%', #{keyword}, '%'))
+        </if>
+        order by ld.log_document_id desc
+    </select>
+
+    <insert id="insert">
+        insert into mw_log_document(document_id, space_id, user_id, action, comment, create_time)
+        values (#{documentId}, #{spaceId}, #{userId}, #{action}, #{comment}, #{createTime})
+    </insert>
+
+</mapper>

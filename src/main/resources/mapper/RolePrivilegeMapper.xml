@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.RolePrivilegeMapper">
+
+    <select id="findPrivilegeIdsByRoleId" resultType="integer">
+        select privilege_id
+        from mw_role_privilege
+        where role_id = #{roleId}
+        order by privilege_id asc
+    </select>
+
+    <delete id="deleteByRoleId">
+        delete
+        from mw_role_privilege
+        where role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteByPrivilegeId">
+        delete
+        from mw_role_privilege
+        where privilege_id = #{privilegeId}
+    </delete>
+
+    <insert id="insertBatch">
+        insert into mw_role_privilege(role_id, privilege_id, create_time) values
+        <foreach collection='privilegeIds' item='privilegeId' separator=','>
+            (#{roleId}, #{privilegeId}, #{createTime})
+        </foreach>
+    </insert>
+
+</mapper>

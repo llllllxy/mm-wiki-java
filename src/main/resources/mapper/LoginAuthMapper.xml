@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.LoginAuthMapper">
+
+    <select id="findAllActive" resultType="org.tinycloud.mmwiki.domain.LoginAuth">
+        select login_auth_id,
+               name,
+               username_prefix,
+               url,
+               ext_data,
+               is_used,
+               is_delete,
+               create_time,
+               update_time
+        from mw_login_auth
+        where is_delete = 0
+        order by login_auth_id desc
+    </select>
+
+    <select id="pageByKeyword" resultType="org.tinycloud.mmwiki.domain.LoginAuth">
+        select login_auth_id,
+               name,
+               username_prefix,
+               url,
+               ext_data,
+               is_used,
+               is_delete,
+               create_time,
+               update_time
+        from mw_login_auth
+        where is_delete = 0
+          and name like concat('%', #{keyword}, '%')
+        order by login_auth_id desc
+    </select>
+
+    <select id="pageAllActive" resultType="org.tinycloud.mmwiki.domain.LoginAuth">
+        select login_auth_id,
+               name,
+               username_prefix,
+               url,
+               ext_data,
+               is_used,
+               is_delete,
+               create_time,
+               update_time
+        from mw_login_auth
+        where is_delete = 0
+        order by login_auth_id desc
+    </select>
+
+    <select id="findActiveById" resultType="org.tinycloud.mmwiki.domain.LoginAuth">
+        select login_auth_id,
+               name,
+               username_prefix,
+               url,
+               ext_data,
+               is_used,
+               is_delete,
+               create_time,
+               update_time
+        from mw_login_auth
+        where login_auth_id = #{loginAuthId}
+          and is_delete = 0 limit 1
+    </select>
+
+    <select id="countByName" resultType="long">
+        select count(*)
+        from mw_login_auth
+        where is_delete = 0
+          and name = #{name}
+    </select>
+
+    <select id="countByNameAndNotId" resultType="long">
+        select count(*)
+        from mw_login_auth
+        where is_delete = 0
+          and name = #{name}
+          and login_auth_id &lt;&gt; #{loginAuthId}
+    </select>
+
+    <select id="countByUsernamePrefix" resultType="long">
+        select count(*)
+        from mw_login_auth
+        where is_delete = 0
+          and username_prefix = #{usernamePrefix}
+    </select>
+
+    <select id="countByUsernamePrefixAndNotId" resultType="long">
+        select count(*)
+        from mw_login_auth
+        where is_delete = 0
+          and username_prefix = #{usernamePrefix}
+          and login_auth_id &lt;&gt; #{loginAuthId}
+    </select>
+
+    <select id="findUsed" resultType="org.tinycloud.mmwiki.domain.LoginAuth">
+        select login_auth_id,
+               name,
+               username_prefix,
+               url,
+               ext_data,
+               is_used,
+               is_delete,
+               create_time,
+               update_time
+        from mw_login_auth
+        where is_delete = 0
+          and is_used = 1 limit 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="loginAuthId">
+        insert into mw_login_auth(name, username_prefix, url, ext_data, is_used, is_delete, create_time, update_time)
+        values (#{name}, #{usernamePrefix}, #{url}, #{extData}, #{isUsed}, #{isDelete}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        update mw_login_auth
+        set name            = #{name},
+            username_prefix = #{usernamePrefix},
+            url             = #{url},
+            ext_data        = #{extData},
+            update_time     = #{updateTime}
+        where login_auth_id = #{loginAuthId}
+          and is_delete = 0
+    </update>
+
+    <update id="clearUsed">
+        update mw_login_auth
+        set is_used = 0
+        where is_delete = 0
+    </update>
+
+    <update id="markUsed">
+        update mw_login_auth
+        set is_used     = 1,
+            update_time = now()
+        where login_auth_id = #{loginAuthId}
+          and is_delete = 0
+    </update>
+
+    <update id="markDeleted">
+        update mw_login_auth
+        set is_delete   = 1,
+            update_time = now()
+        where login_auth_id = #{loginAuthId}
+          and is_delete = 0
+    </update>
+
+</mapper>

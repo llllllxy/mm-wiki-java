@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.ConfigMapper">
+
+    <select id="findAll" resultType="org.tinycloud.mmwiki.domain.ConfigEntry">
+        select config_id, name, `key`, value, create_time, update_time
+        from mw_config
+        order by config_id asc
+    </select>
+
+    <select id="findValueByKey" resultType="string">
+        select value
+        from mw_config
+        where `key` = #{key} limit 1
+    </select>
+
+    <update id="updateValueByKey">
+        update mw_config
+        set value       = #{value},
+            update_time = now()
+        where `key` = #{key}
+    </update>
+
+</mapper>

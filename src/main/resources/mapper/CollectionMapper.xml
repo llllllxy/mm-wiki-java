@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.CollectionMapper">
+
+    <select id="findByUserIdAndType" resultType="org.tinycloud.mmwiki.domain.CollectionEntry">
+        select *
+        from mw_collection
+        where user_id = #{userId}
+          and type = #{type}
+    </select>
+
+    <select id="findByUserTypeAndResourceId" resultType="org.tinycloud.mmwiki.domain.CollectionEntry">
+        select *
+        from mw_collection
+        where user_id = #{userId}
+          and type = #{type}
+          and resource_id = #{resourceId} limit 1
+    </select>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.CollectionEntry">
+        select *
+        from mw_collection
+        where collection_id = #{collectionId} limit 1
+    </select>
+
+    <insert id="insert">
+        insert into mw_collection(user_id, type, resource_id, create_time)
+        values (#{userId}, #{type}, #{resourceId}, #{createTime})
+    </insert>
+
+    <delete id="deleteById">
+        delete
+        from mw_collection
+        where collection_id = #{collectionId}
+    </delete>
+
+    <select id="findResourceRank" resultType="map">
+        select c.resource_id, coalesce(d.name, '') as document_name, count(*) as total
+        from mw_collection c
+                 left join mw_document d on d.document_id = c.resource_id
+        where c.type = #{type}
+        group by c.resource_id, d.name
+        order by total desc
+            limit #{size}
+    </select>
+
+    <select id="findTopUserIdByType" resultType="integer">
+        select user_id
+        from mw_collection
+        where type = #{type}
+        group by user_id
+        order by count(*) desc limit 1
+    </select>
+
+</mapper>

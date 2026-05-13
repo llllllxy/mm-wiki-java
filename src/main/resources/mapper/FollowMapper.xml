@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.FollowMapper">
+
+    <select id="findByUserTypeAndObjectId" resultType="org.tinycloud.mmwiki.domain.Follow">
+        select follow_id, user_id, type, object_id, create_time
+        from mw_follow
+        where user_id = #{userId}
+          and type = #{type}
+          and object_id = #{objectId} limit 1
+    </select>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.Follow">
+        select follow_id, user_id, type, object_id, create_time
+        from mw_follow
+        where follow_id = #{followId} limit 1
+    </select>
+
+    <select id="findByUserIdAndType" resultType="org.tinycloud.mmwiki.domain.Follow">
+        select follow_id, user_id, type, object_id, create_time
+        from mw_follow
+        where user_id = #{userId}
+          and type = #{type}
+        order by follow_id desc
+    </select>
+
+    <select id="findByObjectIdAndType" resultType="org.tinycloud.mmwiki.domain.Follow">
+        select follow_id, user_id, type, object_id, create_time
+        from mw_follow
+        where object_id = #{objectId}
+          and type = #{type}
+        order by follow_id desc
+    </select>
+
+    <insert id="insert">
+        insert into mw_follow(user_id, type, object_id, create_time)
+        values (#{userId}, #{type}, #{objectId}, #{createTime})
+    </insert>
+
+    <delete id="deleteById">
+        delete
+        from mw_follow
+        where follow_id = #{followId}
+    </delete>
+
+    <delete id="deleteByObjectIdAndType">
+        delete
+        from mw_follow
+        where object_id = #{objectId}
+          and type = #{type}
+    </delete>
+
+    <select id="findTopObjectIdByType" resultType="integer">
+        select cast(object_id as signed)
+        from mw_follow
+        where type = #{type}
+        group by object_id
+        order by count(*) desc limit 1
+    </select>
+
+</mapper>

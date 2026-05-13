@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.tinycloud.mmwiki.mapper.PrivilegeMapper">
+
+    <select id="findDisplayed" resultType="org.tinycloud.mmwiki.domain.Privilege">
+        select privilege_id,
+               name,
+               parent_id,
+               type,
+               controller, action, icon, target, is_display, sequence, create_time, update_time
+        from mw_privilege
+        where is_display = 1
+        order by sequence asc, privilege_id asc
+    </select>
+
+    <select id="findAllOrderBySequence" resultType="org.tinycloud.mmwiki.domain.Privilege">
+        select privilege_id,
+               name,
+               parent_id,
+               type,
+               controller, action, icon, target, is_display, sequence, create_time, update_time
+        from mw_privilege
+        order by sequence asc, privilege_id asc
+    </select>
+
+    <select id="findById" resultType="org.tinycloud.mmwiki.domain.Privilege">
+        select privilege_id,
+               name,
+               parent_id,
+               type,
+               controller, action, icon, target, is_display, sequence, create_time, update_time
+        from mw_privilege
+        where privilege_id = #{privilegeId}
+            limit 1
+    </select>
+
+    <select id="findControllerPrivilege" resultType="org.tinycloud.mmwiki.domain.Privilege">
+        select privilege_id,
+               name,
+               parent_id,
+               type,
+               controller, action, icon, target, is_display, sequence, create_time, update_time
+        from mw_privilege
+        where type = 'controller'
+          and lower (controller) = lower (#{controller})
+          and lower (action) = lower (#{action})
+            limit 1
+    </select>
+
+    <select id="countChildren" resultType="long">
+        select count(*)
+        from mw_privilege
+        where parent_id = #{privilegeId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="privilegeId">
+        insert into mw_privilege(name, parent_id, type, controller, action, icon, target, is_display, sequence,
+                                 create_time, update_time)
+        values (#{name}, #{parentId}, #{type}, #{controller}, #{action}, #{icon}, #{target}, #{isDisplay}, #{sequence},
+                #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        update mw_privilege
+        set name        = #{name},
+            parent_id   = #{parentId},
+            type        = #{type},
+            controller  = #{controller},
+            action      = #{action},
+            icon        = #{icon},
+            target      = #{target},
+            is_display  = #{isDisplay},
+            sequence    = #{sequence},
+            update_time = #{updateTime}
+        where privilege_id = #{privilegeId}
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from mw_privilege
+        where privilege_id = #{privilegeId}
+    </delete>
+
+</mapper>
