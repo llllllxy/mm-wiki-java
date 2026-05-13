@@ -55,14 +55,13 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var loginUserId = /*[[${login_user_id}]]*/ 0;
 
     function usernameFormatter(value, row) {
         if (row.userId === loginUserId) {
-            return '<strong><a href="' + AjaxUtil.ctx + 'system/main/index" target="_parent">' + tableHtml(value) + '</a></strong>';
+            return '<strong><a href="/system/main/index" target="_parent">' + tableHtml(value) + '</a></strong>';
         }
-        return '<strong>' + tableLink(AjaxUtil.ctx + "user/info?user_id=" + row.userId, value, null) + '</strong>';
+        return '<strong>' + tableLink("/user/info?user_id=" + row.userId, value, null) + '</strong>';
     }
 
     function actionFormatter(value, row) {
@@ -70,15 +69,15 @@
             return "";
         }
         if (row.follow) {
-            return '<a data-url="' + AjaxUtil.ctx + 'follow/cancel?follow_id=' + row.followId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart"></i></a>';
+            return '<a data-url="/follow/cancel?follow_id=' + row.followId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart"></i></a>';
         }
-        return '<a data-url="' + AjaxUtil.ctx + 'follow/add?type=2&object_id=' + row.userId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart-empty"></i></a>';
+        return '<a data-url="/follow/add?type=2&object_id=' + row.userId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart-empty"></i></a>';
     }
 
     $(function () {
         initTable({
             domId: "userTable",
-            url: AjaxUtil.ctx + "user/list",
+            url: "/user/list",
             uniqueId: "userId",
             sortable: false,
             pageSize: 20,

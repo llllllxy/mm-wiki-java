@@ -1,7 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,10 +24,10 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
+import org.tinycloud.mmwiki.util.JsonUtils;
 
 /**
  * 统一登录认证服务。
@@ -43,9 +42,6 @@ public class UnifiedAuthService {
 
     private static final String LDAP_DEFAULT_ACCOUNT_PATTERN = "(&(objectClass=User)(userPrincipalName=%s))";
     private static final String LDAP_DEFAULT_GIVEN_NAME_KEY = "displayName";
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(15))
@@ -81,7 +77,10 @@ public class UnifiedAuthService {
             throw new IllegalStateException("登录认证失败, httpCode=" + response.statusCode());
         }
 
-        HttpAuthResponse authResponse = objectMapper.readValue(response.body(), HttpAuthResponse.class);
+        HttpAuthResponse authResponse = JsonUtils.readValue(response.body(), HttpAuthResponse.class);
+        if (authResponse == null) {
+            throw new IllegalStateException("登录认证失败");
+        }
         if (StringUtils.hasText(authResponse.getMessage())) {
             throw new IllegalStateException("登录认证失败, message=" + authResponse.getMessage());
         }
@@ -95,7 +94,10 @@ public class UnifiedAuthService {
         if (!StringUtils.hasText(loginAuth.getExtData())) {
             throw new IllegalArgumentException("LDAP 配置数据错误");
         }
-        LdapAuthConfig config = objectMapper.readValue(loginAuth.getExtData(), LdapAuthConfig.class);
+        LdapAuthConfig config = JsonUtils.readValue(loginAuth.getExtData(), LdapAuthConfig.class);
+        if (config == null) {
+            throw new IllegalArgumentException("LDAP 配置数据错误");
+        }
         config.applyDefaults();
         if (!StringUtils.hasText(config.getGivenNameKey())) {
             throw new IllegalArgumentException("LDAP 配置 given_name_key 错误");

@@ -54,7 +54,6 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
 
     function typeFormatter(value) {
         return value === 1 ? tableLabel("系统", "label-danger") : tableLabel("自定义", "label-success");
@@ -63,12 +62,12 @@
     function actionFormatter(value, row) {
         var html = "";
         if (row.roleId !== 1) {
-            html += '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/role/edit?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
-            html += '<a name="privilege" data-link="' + AjaxUtil.ctx + 'system/role/privilege?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-lock"></i>权限</a> ';
+            html += '<a name="edit" data-link="/system/role/edit?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
+            html += '<a name="privilege" data-link="/system/role/privilege?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-lock"></i>权限</a> ';
         }
-        html += '<a name="user" data-link="' + AjaxUtil.ctx + 'system/role/user?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-user"></i>用户</a> ';
+        html += '<a name="user" data-link="/system/role/user?role_id=' + row.roleId + '"><i class="glyphicon glyphicon-user"></i>用户</a> ';
         if (row.roleId !== 1 && row.type === 0) {
-            html += '<a data-message="确定删除吗？" data-url="' + AjaxUtil.ctx + 'system/role/delete?role_id=' + row.roleId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-trash"></i>删除</a>';
+            html += '<a data-message="确定删除吗？" data-url="/system/role/delete?role_id=' + row.roleId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-trash"></i>删除</a>';
         }
         return html;
     }
@@ -76,7 +75,7 @@
     $(function () {
         initTable({
             domId: "systemRoleTable",
-            url: AjaxUtil.ctx + "system/role/list",
+            url: "/system/role/list",
             uniqueId: "roleId",
             sortable: false,
             pageSize: 20,

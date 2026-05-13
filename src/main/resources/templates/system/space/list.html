@@ -55,10 +55,9 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
 
     function nameFormatter(value, row) {
-        return '<a href="' + AjaxUtil.ctx + 'space/document?space_id=' + row.spaceId + '" target="_parent" title="查看空间文档"><strong>' + tableHtml(value) + '</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a>';
+        return '<a href="/space/document?space_id=' + row.spaceId + '" target="_parent" title="查看空间文档"><strong>' + tableHtml(value) + '</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a>';
     }
 
     function visitFormatter(value) {
@@ -76,16 +75,16 @@
     }
 
     function actionFormatter(value, row) {
-        return '<a name="user" data-link="' + AjaxUtil.ctx + 'system/space/member?space_id=' + row.spaceId + '"><i class="fa fa-group"></i> 成员</a> ' +
-            '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ' +
-            '<a href="' + AjaxUtil.ctx + 'system/space/download?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-download-alt"></i> 下载</a> ' +
-            '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="' + AjaxUtil.ctx + 'system/space/delete?space_id=' + row.spaceId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
+        return '<a name="user" data-link="/system/space/member?space_id=' + row.spaceId + '"><i class="fa fa-group"></i> 成员</a> ' +
+            '<a name="edit" data-link="/system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ' +
+            '<a href="/system/space/download?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-download-alt"></i> 下载</a> ' +
+            '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="/system/space/delete?space_id=' + row.spaceId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
     }
 
     $(function () {
         initTable({
             domId: "systemSpaceTable",
-            url: AjaxUtil.ctx + "system/space/list",
+            url: "/system/space/list",
             uniqueId: "spaceId",
             sortable: false,
             pageSize: 20,

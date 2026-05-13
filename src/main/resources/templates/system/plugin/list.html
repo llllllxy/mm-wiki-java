@@ -55,21 +55,20 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
 
     function coverFormatter(value) {
         return value ? '<img src="' + tableHtml(value) + '" style="height: 60px; max-width: 120px" alt="">' : "";
     }
 
     function actionFormatter(value, row) {
-        return '<a name="config" data-link="' + AjaxUtil.ctx + 'system/plugin/config?plugin_id=' + row.pluginId + '" class="btn btn-sm btn-default" role="button"><i class="fa fa-wrench"></i> 配置</a> ' +
+        return '<a name="config" data-link="/system/plugin/config?plugin_id=' + row.pluginId + '" class="btn btn-sm btn-default" role="button"><i class="fa fa-wrench"></i> 配置</a> ' +
             '<input type="checkbox" value="1">';
     }
 
     $(function () {
         initTable({
             domId: "pluginTable",
-            url: AjaxUtil.ctx + "system/plugin/list",
+            url: "/system/plugin/list",
             uniqueId: "pluginId",
             sortable: false,
             pageSize: 20,

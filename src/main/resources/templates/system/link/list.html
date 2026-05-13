@@ -56,21 +56,20 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
 
     function urlFormatter(value) {
         return tableLink(value, value, "_blank");
     }
 
     function actionFormatter(value, row) {
-        return '<a name="edit" data-link="' + AjaxUtil.ctx + 'system/link/edit?link_id=' + row.linkId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ' +
-            '<a data-message="确定删除吗？" data-url="' + AjaxUtil.ctx + 'system/link/delete?link_id=' + row.linkId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+        return '<a name="edit" data-link="/system/link/edit?link_id=' + row.linkId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ' +
+            '<a data-message="确定删除吗？" data-url="/system/link/delete?link_id=' + row.linkId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
     }
 
     $(function () {
         initTable({
             domId: "systemLinkTable",
-            url: AjaxUtil.ctx + "system/link/list",
+            url: "/system/link/list",
             uniqueId: "linkId",
             sortable: false,
             pageSize: 10,

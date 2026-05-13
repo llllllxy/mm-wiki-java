@@ -42,11 +42,10 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var currentTag = /*[[${tag}]]*/ "";
 
     function nameFormatter(value, row) {
-        return '<a href="' + AjaxUtil.ctx + 'space/document?space_id=' + row.spaceId + '" target="_parent" title="查看空间文档"><strong>' + tableHtml(value) + '</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a>';
+        return '<a href="/space/document?space_id=' + row.spaceId + '" target="_parent" title="查看空间文档"><strong>' + tableHtml(value) + '</strong> <span class="text text-primary"><i class="glyphicon glyphicon-new-window"></i></span></a>';
     }
 
     function visitFormatter(value) {
@@ -61,19 +60,19 @@
 
     function actionFormatter(value, row) {
         var collectUrl = row.collection
-            ? AjaxUtil.ctx + "collection/cancel?collection_id=" + row.collectionId
-            : AjaxUtil.ctx + "collection/add?type=2&resource_id=" + row.spaceId;
+            ? "/collection/cancel?collection_id=" + row.collectionId
+            : "/collection/add?type=2&resource_id=" + row.spaceId;
         var collectIcon = row.collection ? "glyphicon-star" : "glyphicon-star-empty";
         return '<div class="btn-group btn-group-sm" role="group">' +
             '<a data-url="' + collectUrl + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))" type="button" class="btn btn-default"><i class="glyphicon ' + collectIcon + '"> </i></a>' +
-            '<a name="user" data-link="' + AjaxUtil.ctx + 'space/member?space_id=' + row.spaceId + '" type="button" class="btn btn-default"><i class="fa fa-group"></i></a>' +
+            '<a name="user" data-link="/space/member?space_id=' + row.spaceId + '" type="button" class="btn btn-default"><i class="fa fa-group"></i></a>' +
             '</div>';
     }
 
     $(function () {
         initTable({
             domId: "spaceTable",
-            url: AjaxUtil.ctx + "space/search",
+            url: "/space/search",
             uniqueId: "spaceId",
             sortable: false,
             pageSize: 20,

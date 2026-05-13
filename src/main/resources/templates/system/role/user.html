@@ -35,7 +35,6 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var roleId = /*[[${roleId}]]*/ 0;
     var roleName = /*[[${role.name}]]*/ "";
 
@@ -47,13 +46,13 @@
         if (row.userId === 1) {
             return "无";
         }
-        return '<a data-message="确定重置该用户为默认角色吗？" data-url="' + AjaxUtil.ctx + 'system/role/resetUser?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-refresh"></i>重置角色</a>';
+        return '<a data-message="确定重置该用户为默认角色吗？" data-url="/system/role/resetUser?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-refresh"></i>重置角色</a>';
     }
 
     $(function () {
         initTable({
             domId: "systemRoleUserTable",
-            url: AjaxUtil.ctx + "system/role/user",
+            url: "/system/role/user",
             uniqueId: "userId",
             sortable: false,
             pageSize: 15,

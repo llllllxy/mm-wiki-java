@@ -62,11 +62,10 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var spaceId = /*[[${space_id}]]*/ 0;
 
     function privilegeSelectFormatter(value, row) {
-        var url = AjaxUtil.ctx + "space/modifyMember?space_id=" + spaceId + "&space_user_id=" + row.spaceUserId;
+        var url = "/space/modifyMember?space_id=" + spaceId + "&space_user_id=" + row.spaceUserId;
         var html = '<select name="edit_privilege" class="form-control input-xs" data-link="' + url + '">';
         html += '<option value="0"' + (row.privilege === 0 ? " selected" : "") + '>浏览者</option>';
         html += '<option value="1"' + (row.privilege === 1 ? " selected" : "") + '>编辑者</option>';
@@ -89,7 +88,7 @@
         $(".selectpicker").selectpicker();
         initTable({
             domId: "spaceManagerMemberTable",
-            url: AjaxUtil.ctx + "space/member",
+            url: "/space/member",
             uniqueId: "spaceUserId",
             sortable: false,
             pageSize: 20,

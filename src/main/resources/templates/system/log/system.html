@@ -70,7 +70,6 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var systemLogInfoUrl = /*[[@{/system/log/info}]]*/ "";
 
     function htmlEncode(value) {
@@ -90,7 +89,7 @@
     $(function () {
         var options = {
             domId: "systemLogTable",
-            url: AjaxUtil.ctx + "system/log/system/list",
+            url: "/system/log/system/list",
             uniqueId: "logId",
             sortable: false,
             sortName: "logId",

@@ -2,9 +2,6 @@ package org.tinycloud.mmwiki.service;
 
 import org.tinycloud.mmwiki.vo.EnvView;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -31,6 +28,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.InstallData;
 import org.tinycloud.mmwiki.util.HashUtils;
+import org.tinycloud.mmwiki.util.JsonUtils;
 
 /**
  * 安装向导流程、数据库初始化和外部配置生成服务。
@@ -48,9 +46,6 @@ public class InstallService {
 
     @Autowired
     private ThreadPoolTaskExecutor asyncServiceExecutor;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MmwikiProperties properties;
@@ -411,12 +406,12 @@ public class InstallService {
         data.setIsSuccess(InstallData.INSTALL_FAILED);
     }
 
-    private void installSuccess() throws JsonProcessingException {
+    private void installSuccess() {
         Map<String, String> result = new LinkedHashMap<>();
         result.put("cmd", "java -jar mmwiki-0.0.1-SNAPSHOT.jar");
         result.put("url", "http://127.0.0.1:" + data.getSystemConf().get("port"));
         result.put("config", configDir.resolve("application.yaml").toString());
-        data.setResult(objectMapper.writeValueAsString(result));
+        data.setResult(JsonUtils.writeValueAsString(result));
         data.setStatus(InstallData.INSTALL_END);
         data.setIsSuccess(InstallData.INSTALL_SUCCESS);
     }

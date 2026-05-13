@@ -80,7 +80,6 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var loginUserId = /*[[${login_user_id}]]*/ 0;
 
     function documentFormatter(value, row) {
@@ -88,21 +87,21 @@
         if (row.action === 3) {
             return '<i class="fa ' + icon + '"></i> ' + tableHtml(row.documentName);
         }
-        return '<a href="' + AjaxUtil.ctx + 'document/index?document_id=' + row.documentId + '" target="_parent" class="text text-info text-font-15"><i class="fa ' + icon + '"></i> ' + tableHtml(row.documentName) + '</a>';
+        return '<a href="/document/index?document_id=' + row.documentId + '" target="_parent" class="text text-info text-font-15"><i class="fa ' + icon + '"></i> ' + tableHtml(row.documentName) + '</a>';
     }
 
     function userFormatter(value, row) {
         var text = tableHtml(row.username) + "（" + tableHtml(row.givenName) + "）";
         if (row.userId === loginUserId) {
-            return '<a href="' + AjaxUtil.ctx + 'system/main/index" target="_parent">' + text + '</a>';
+            return '<a href="/system/main/index" target="_parent">' + text + '</a>';
         }
-        return '<a href="' + AjaxUtil.ctx + 'user/info?user_id=' + row.userId + '">' + text + '</a>';
+        return '<a href="/user/info?user_id=' + row.userId + '">' + text + '</a>';
     }
 
     $(function () {
         initTable({
             domId: "recentDocumentTable",
-            url: AjaxUtil.ctx + "main/default",
+            url: "/main/default",
             uniqueId: "logDocumentId",
             sortable: false,
             pageSize: 10,

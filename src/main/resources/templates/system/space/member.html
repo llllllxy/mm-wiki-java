@@ -65,11 +65,10 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var spaceId = /*[[${space_id}]]*/ 0;
 
     function privilegeSelectFormatter(value, row) {
-        var url = AjaxUtil.ctx + "system/space_user/modify?space_id=" + spaceId + "&space_user_id=" + row.spaceUserId;
+        var url = "/system/space_user/modify?space_id=" + spaceId + "&space_user_id=" + row.spaceUserId;
         var html = '<select name="edit_privilege" class="form-control input-xs" data-link="' + url + '">';
         html += '<option value="0"' + (row.privilege === 0 ? " selected" : "") + '>浏览者</option>';
         html += '<option value="1"' + (row.privilege === 1 ? " selected" : "") + '>编辑者</option>';
@@ -79,7 +78,7 @@
     }
 
     function actionFormatter(value, row) {
-        return '<a data-message="确定要移除该成员吗？" data-url="' + AjaxUtil.ctx + 'system/space_user/remove?space_user_id=' + row.spaceUserId + '&space_id=' + spaceId + '&user_id=' + row.user.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
+        return '<a data-message="确定要移除该成员吗？" data-url="/system/space_user/remove?space_user_id=' + row.spaceUserId + '&space_id=' + spaceId + '&user_id=' + row.user.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
     }
 
     function bindPrivilegeChange() {
@@ -92,7 +91,7 @@
         $(".selectpicker").selectpicker();
         initTable({
             domId: "systemSpaceMemberTable",
-            url: AjaxUtil.ctx + "system/space/member",
+            url: "/system/space/member",
             uniqueId: "spaceUserId",
             sortable: false,
             pageSize: 15,

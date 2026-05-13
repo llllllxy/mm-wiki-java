@@ -57,19 +57,18 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
 
     function documentFormatter(value, row) {
         if (row.action === 3) {
             return tableHtml(value);
         }
-        return tableLink(AjaxUtil.ctx + "document/index?document_id=" + row.documentId, value, "_parent");
+        return tableLink("/document/index?document_id=" + row.documentId, value, "_parent");
     }
 
     $(function () {
         initTable({
             domId: "documentLogTable",
-            url: AjaxUtil.ctx + "system/log/document",
+            url: "/system/log/document",
             uniqueId: "logDocumentId",
             sortable: false,
             pageSize: 20,

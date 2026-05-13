@@ -1,7 +1,5 @@
 package org.tinycloud.mmwiki.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
+import org.tinycloud.mmwiki.util.JsonUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.*;
 import org.tinycloud.mmwiki.web.CurrentUser;
@@ -79,9 +78,6 @@ public class DocumentService {
 
     @Autowired
     private PdfExportService pdfExportService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private ThreadPoolTaskExecutor asyncServiceExecutor;
@@ -202,11 +198,7 @@ public class DocumentService {
             node.setParent(document.getType() != null && document.getType() == DocumentFileService.DOCUMENT_TYPE_DIR);
             return node;
         }).toList();
-        try {
-            return objectMapper.writeValueAsString(treeNodes);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Unable to serialize document tree", ex);
-        }
+        return JsonUtils.writeValueAsString(treeNodes);
     }
 
     /**

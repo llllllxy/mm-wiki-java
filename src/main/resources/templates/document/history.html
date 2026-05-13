@@ -32,13 +32,12 @@
     </div>
 </div>
 <script type="text/javascript" th:inline="javascript">
-    AjaxUtil.ctx = /*[[@{/}]]*/ "";
     var documentId = /*[[${documentId}]]*/ "";
 
     $(function () {
         initTable({
             domId: "documentHistoryTable",
-            url: AjaxUtil.ctx + "document/history",
+            url: "/document/history",
             uniqueId: "logDocumentId",
             sortable: false,
             pageSize: 10,

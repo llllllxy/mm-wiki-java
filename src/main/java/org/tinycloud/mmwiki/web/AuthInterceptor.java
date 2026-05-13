@@ -1,6 +1,5 @@
 package org.tinycloud.mmwiki.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -12,6 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -24,6 +24,8 @@ import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.IpUtils;
+import org.tinycloud.mmwiki.util.JsonUtils;
+import org.tinycloud.mmwiki.util.RequestUtils;
 
 /**
  * MM-Wiki Web 层支持组件。
@@ -36,25 +38,14 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     public static final String SESSION_AUTHOR = "author";
 
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
-    private final PrivilegeMapper privilegeMapper;
-    private final RolePrivilegeMapper rolePrivilegeMapper;
-    private final LogMapper logMapper;
-
-    public AuthInterceptor(
-            UserService userService,
-            ObjectMapper objectMapper,
-            PrivilegeMapper privilegeMapper,
-            RolePrivilegeMapper rolePrivilegeMapper,
-            LogMapper logMapper
-    ) {
-        this.userService = userService;
-        this.objectMapper = objectMapper;
-        this.privilegeMapper = privilegeMapper;
-        this.rolePrivilegeMapper = rolePrivilegeMapper;
-        this.logMapper = logMapper;
-    }
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private PrivilegeMapper privilegeMapper;
+    @Autowired
+    private RolePrivilegeMapper rolePrivilegeMapper;
+    @Autowired
+    private LogMapper logMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -107,14 +98,11 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     private boolean handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (isAjax(request)) {
+        if (RequestUtils.expectsJsonResponse(request)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            objectMapper.writeValue(
-                    response.getWriter(),
-                    JsonResponse.error("未登录或登录已失效！", "/author/index")
-            );
+            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("未登录或登录已失效！", "/author/index")));
             return false;
         }
 
@@ -148,23 +136,15 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     private boolean handleForbidden(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (isAjax(request) || "POST".equalsIgnoreCase(request.getMethod())) {
+        if (RequestUtils.expectsJsonResponse(request)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            objectMapper.writeValue(
-                    response.getWriter(),
-                    JsonResponse.error("抱歉，您没有权限操作！", "/system/main/index")
-            );
+            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("抱歉，您没有权限操作！", "/system/main/index")));
             return false;
         }
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "您没有权限访问该页面！");
         return false;
-    }
-
-    private boolean isAjax(HttpServletRequest request) {
-        String requestedWith = request.getHeader("X-Requested-With");
-        return "XMLHttpRequest".equalsIgnoreCase(requestedWith);
     }
 
     private boolean shouldRecordOperation(HttpServletRequest request) {

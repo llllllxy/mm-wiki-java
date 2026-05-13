@@ -85,7 +85,7 @@
                             <a th:if="${collection_id != 0}" type="button" class="btn btn-default"
                                th:data-url="@{/collection/cancel(collection_id=${collection_id})}"
                                onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
-                                    class="glyphicon glyphicon-star"></i>&nbsp;取消</a>
+                                    class="glyphicon glyphicon-star"></i>&nbsp;取消收藏</a>
                             <a th:if="${follow_id == 0}" type="button" class="btn btn-default"
                                th:data-url="@{/follow/add(type=1,object_id=${document.documentId})}"
                                onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
