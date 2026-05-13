@@ -102,7 +102,7 @@ public class SystemSpaceController extends ControllerSupport {
 
     @GetMapping("/system/space/download")
     public ResponseEntity<ByteArrayResource> download(@RequestParam("space_id") Integer spaceId) throws IOException {
-        SpaceDownload payload = spaceService.downloadSpace(spaceId);
+        SpaceDownload payload = spaceService.downloadSpace(currentUser(), spaceId);
         String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)

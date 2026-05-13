@@ -25,6 +25,7 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
@@ -143,11 +144,11 @@ public class SystemProfileService {
      * @param pageSize 每页数量
      * @return 分页数据
      */
-    public PageModel<ProfileFollowedDocument> loadFollowDocPage(Integer userId, int pageNum, int pageSize) {
-        User user = this.requireUser(userId);
+    public PageModel<ProfileFollowedDocument> loadFollowDocPage(CurrentUser currentUser, int pageNum, int pageSize) {
+        User user = this.requireUser(currentUser.getUserId());
         List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        Map<String, Document> docs = documentMapper.findActiveByIds(docIds).stream()
+        Map<String, Document> docs = documentMapper.findVisibleByIds(currentUser.getUserId(), isRoot(currentUser), docIds).stream()
                 .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
 
         List<ProfileFollowedDocument> items = new ArrayList<>();
@@ -217,5 +218,11 @@ public class SystemProfileService {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private boolean isRoot(CurrentUser currentUser) {
+        return currentUser != null
+                && currentUser.getRoleId() != null
+                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 }

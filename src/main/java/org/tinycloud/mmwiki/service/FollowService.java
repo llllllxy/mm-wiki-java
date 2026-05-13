@@ -6,8 +6,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
+import org.tinycloud.mmwiki.domain.Space;
+import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.FollowMapper;
+import org.tinycloud.mmwiki.mapper.SpaceMapper;
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
@@ -27,6 +34,14 @@ public class FollowService {
     private FollowMapper followMapper;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private SpaceMapper spaceMapper;
+    @Autowired
+    private AccessService accessService;
+    @Autowired
+    private UserService userService;
 
     public void autoFollowDocument(Integer userId, String documentId) {
         if (!"1".equals(configService.getValue("auto_follow_doc_open", "0"))) {
@@ -59,31 +74,56 @@ public class FollowService {
         return followMapper.findByObjectIdAndType(objectId, type);
     }
 
+    public Follow findByUserTypeAndObjectId(Integer userId, Integer type, String objectId) {
+        return followMapper.findByUserTypeAndObjectId(userId, type, objectId);
+    }
+
     public Map<String, Follow> indexByObjectId(Integer userId, Integer type) {
         return findByUserIdAndType(userId, type).stream()
             .collect(Collectors.toMap(Follow::getObjectId, Function.identity(), (left, right) -> left));
     }
 
-    public JsonResponse<Void> add(Integer currentUserId, Integer type, String objectId, String redirect) {
+    public JsonResponse<Void> add(CurrentUser currentUser, Integer type, String objectId, String redirect) {
         if (objectId == null || objectId.isBlank()) {
             return JsonResponse.error("没有选择关注对象。");
         }
         if (!TYPE_DOCEquals(type) && !TYPE_USEREquals(type)) {
             return JsonResponse.error("关注类型错误。");
         }
-        if (TYPE_USEREquals(type) && objectId.equals(String.valueOf(currentUserId))) {
+        if (TYPE_USEREquals(type) && objectId.equals(String.valueOf(currentUser.getUserId()))) {
             return JsonResponse.error("不能关注自己。");
         }
-        if (followMapper.findByUserTypeAndObjectId(currentUserId, type, objectId) != null) {
+        if (!canFollow(currentUser, type, objectId)) {
+            return JsonResponse.error("您没有权限关注该对象。");
+        }
+        if (followMapper.findByUserTypeAndObjectId(currentUser.getUserId(), type, objectId) != null) {
             return JsonResponse.error("您已关注过，不能重复关注。");
         }
         Follow follow = new Follow();
-        follow.setUserId(currentUserId);
+        follow.setUserId(currentUser.getUserId());
         follow.setType(type);
         follow.setObjectId(objectId);
         follow.setCreateTime(TimeUtils.now());
         followMapper.insert(follow);
         return JsonResponse.success("关注成功", redirect);
+    }
+
+    private boolean canFollow(CurrentUser currentUser, Integer type, String objectId) {
+        if (TYPE_USEREquals(type)) {
+            try {
+                User user = userService.findActiveById(Integer.valueOf(objectId));
+                return user != null;
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+        }
+        Document document = documentMapper.findActiveById(objectId);
+        if (document == null) {
+            return false;
+        }
+        Space space = spaceMapper.findActiveById(document.getSpaceId());
+        Access access = accessService.access(currentUser, space);
+        return access.isVisit();
     }
 
     public JsonResponse<Void> cancel(Integer currentUserId, Integer followId, String redirect) {

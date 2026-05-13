@@ -43,6 +43,7 @@ public class PageController extends ControllerSupport {
         model.addAttribute("space", view.getSpace());
         model.addAttribute("document", view.getDocument());
         model.addAttribute("collection_id", view.getCollectionId());
+        model.addAttribute("follow_id", view.getFollowId());
         model.addAttribute("create_user", view.getCreateUser());
         model.addAttribute("edit_user", view.getEditUser());
         model.addAttribute("page_content", view.getPageContent());

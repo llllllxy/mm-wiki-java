@@ -3,8 +3,14 @@ package org.tinycloud.mmwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
+import org.tinycloud.mmwiki.domain.Document;
+import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.mapper.CollectionMapper;
+import org.tinycloud.mmwiki.mapper.DocumentMapper;
+import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
@@ -21,6 +27,12 @@ public class CollectionService {
 
     @Autowired
     private CollectionMapper collectionMapper;
+    @Autowired
+    private DocumentMapper documentMapper;
+    @Autowired
+    private SpaceMapper spaceMapper;
+    @Autowired
+    private AccessService accessService;
 
     public CollectionEntry findByUserTypeAndResourceId(Integer userId, int type, String resourceId) {
         return collectionMapper.findByUserTypeAndResourceId(userId, type, resourceId);
@@ -30,24 +42,45 @@ public class CollectionService {
         return collectionMapper.findByUserIdAndType(userId, type);
     }
 
-    public JsonResponse<Void> add(Integer userId, int type, String resourceId, String redirect) {
+    public JsonResponse<Void> add(CurrentUser currentUser, int type, String resourceId, String redirect) {
         if (resourceId == null || resourceId.isBlank()) {
             return JsonResponse.error("没有选择收藏资源！");
         }
         if (type != TYPE_DOC && type != TYPE_SPACE) {
             return JsonResponse.error("收藏类型错误！");
         }
-        CollectionEntry exists = collectionMapper.findByUserTypeAndResourceId(userId, type, resourceId);
+        if (!canVisit(currentUser, type, resourceId)) {
+            return JsonResponse.error("您没有权限收藏该资源。");
+        }
+        CollectionEntry exists = collectionMapper.findByUserTypeAndResourceId(currentUser.getUserId(), type, resourceId);
         if (exists != null) {
             return JsonResponse.error("您已收藏过，不能重复收藏！");
         }
         CollectionEntry entry = new CollectionEntry();
-        entry.setUserId(userId);
+        entry.setUserId(currentUser.getUserId());
         entry.setType(type);
         entry.setResourceId(resourceId);
         entry.setCreateTime(TimeUtils.now());
         collectionMapper.insert(entry);
         return JsonResponse.success("收藏成功！", redirect);
+    }
+
+    private boolean canVisit(CurrentUser currentUser, int type, String resourceId) {
+        if (type == TYPE_SPACE) {
+            try {
+                Space space = spaceMapper.findActiveById(Integer.valueOf(resourceId));
+                return accessService.access(currentUser, space).isVisit();
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+        }
+        Document document = documentMapper.findActiveById(resourceId);
+        if (document == null) {
+            return false;
+        }
+        Space space = spaceMapper.findActiveById(document.getSpaceId());
+        Access access = accessService.access(currentUser, space);
+        return access.isVisit();
     }
 
     public JsonResponse<Void> cancel(Integer currentUserId, Integer collectionId, String redirect) {

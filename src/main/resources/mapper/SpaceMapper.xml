@@ -20,19 +20,34 @@
     </select>
 
     <!-- 3. 分页+关键词查询（权限过滤：公开 or 私有但我是成员） -->
-    <select id="pageByKeyword" resultType="org.tinycloud.mmwiki.domain.Space">
+    <select id="pageByKeywordAndUser" resultType="org.tinycloud.mmwiki.domain.Space">
         SELECT s.*
         FROM mw_space s
         LEFT JOIN mw_space_user su ON s.space_id = su.space_id
         AND su.user_id = #{userId}
         WHERE s.is_delete = 0
-        AND ( s.visit_level = 'public' OR su.space_user_id IS NOT NULL)
+        AND (#{root} = true OR s.visit_level = 'public' OR su.space_user_id IS NOT NULL)
         <if test="keyword != null and !keyword.isEmpty()">
             AND (s.name LIKE CONCAT('%', #{keyword}, '%')
             OR s.description LIKE CONCAT('%', #{keyword}, '%'))
         </if>
         GROUP BY s.space_id
         ORDER BY s.space_id DESC
+    </select>
+
+    <!-- 分页查询当前用户收藏且仍可访问的空间 -->
+    <select id="pageCollectedByUser" resultType="org.tinycloud.mmwiki.domain.Space">
+        SELECT s.*,
+               c.collection_id
+        FROM mw_collection c
+                 INNER JOIN mw_space s ON s.space_id = c.resource_id
+                 LEFT JOIN mw_space_user su ON s.space_id = su.space_id
+            AND su.user_id = #{userId}
+        WHERE c.user_id = #{userId}
+          AND c.type = 2
+          AND s.is_delete = 0
+          AND (#{root} = true OR s.visit_level = 'public' OR su.space_user_id IS NOT NULL)
+        ORDER BY c.collection_id DESC
     </select>
 
     <!-- 4. 查询所有有效空间 -->
@@ -44,12 +59,38 @@
     </select>
 
     <!-- 5. 根据标签查询 -->
+    <!-- 查询当前用户可访问空间的标签字符串列表 -->
+    <select id="findVisibleTags" resultType="string">
+        SELECT DISTINCT s.tags
+        FROM mw_space s
+                 LEFT JOIN mw_space_user su ON s.space_id = su.space_id
+            AND su.user_id = #{userId}
+        WHERE s.is_delete = 0
+          AND s.tags IS NOT NULL
+          AND s.tags &lt;&gt; ''
+          AND (#{root} = true OR s.visit_level = 'public' OR su.space_user_id IS NOT NULL)
+        ORDER BY s.tags ASC
+    </select>
+
     <select id="findByTag" resultType="org.tinycloud.mmwiki.domain.Space">
         select *
         from mw_space
         where tags like concat('%', #{tag}, '%')
           and is_delete = 0
         order by space_id desc
+    </select>
+
+    <!-- 按标签分页查询当前用户可访问的空间 -->
+    <select id="pageByTagAndUser" resultType="org.tinycloud.mmwiki.domain.Space">
+        SELECT s.*
+        FROM mw_space s
+                 LEFT JOIN mw_space_user su ON s.space_id = su.space_id
+            AND su.user_id = #{userId}
+        WHERE s.is_delete = 0
+          AND s.tags LIKE CONCAT('%', #{tag}, '%')
+          AND (#{root} = true OR s.visit_level = 'public' OR su.space_user_id IS NOT NULL)
+        GROUP BY s.space_id
+        ORDER BY s.space_id DESC
     </select>
 
     <!-- 6. 根据ID列表查询 -->

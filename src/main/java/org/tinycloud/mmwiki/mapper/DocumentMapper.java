@@ -40,6 +40,35 @@ public interface DocumentMapper {
     })
     List<Document> findActiveByIds(@Param("documentIds") List<String> documentIds);
 
+    @Select({
+            "<script>",
+            "select distinct d.document_id, d.parent_id, d.space_id, d.name, d.type, d.path, d.sequence, d.create_user_id, d.edit_user_id, d.create_time, d.update_time",
+            "from mw_document d",
+            "left join mw_space s on s.space_id = d.space_id",
+            "left join mw_space_user su on su.space_id = d.space_id and su.user_id = #{userId}",
+            "where d.is_delete = 0",
+            "and s.is_delete = 0",
+            "and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)",
+            "<choose>",
+            "<when test='documentIds != null and documentIds.size() > 0'>",
+            "and d.document_id in",
+            "<foreach collection='documentIds' item='id' open='(' separator=',' close=')'>",
+            "#{id}",
+            "</foreach>",
+            "</when>",
+            "<otherwise>",
+            "and 1 = 0",
+            "</otherwise>",
+            "</choose>",
+            "order by d.sequence asc, d.create_time asc",
+            "</script>"
+    })
+    List<Document> findVisibleByIds(
+            @Param("userId") Integer userId,
+            @Param("root") boolean root,
+            @Param("documentIds") List<String> documentIds
+    );
+
     @Select("""
         select document_id, parent_id, space_id, name, type, path, sequence, create_user_id, edit_user_id, create_time, update_time
         from mw_document
@@ -199,10 +228,15 @@ public interface DocumentMapper {
         left join mw_space_user su on su.space_id = d.space_id and su.user_id = #{userId}
         where d.is_delete = 0
           and d.name like concat('%', #{keyword}, '%')
-          and (s.visit_level = 'public' or su.space_user_id is not null)
+              and s.is_delete = 0
+              and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)
         order by d.update_time desc
         """)
-    List<Document> findVisibleByNameLike(@Param("userId") Integer userId, @Param("keyword") String keyword);
+    List<Document> findVisibleByNameLike(
+            @Param("userId") Integer userId,
+            @Param("root") boolean root,
+            @Param("keyword") String keyword
+    );
 
     @Select("""
         select count(*)

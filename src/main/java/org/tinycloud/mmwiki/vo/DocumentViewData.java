@@ -60,6 +60,11 @@ public class DocumentViewData {
     private Integer collectionId;
 
     /**
+     * followId.
+     */
+    private Integer followId;
+
+    /**
      * editor.
      */
     private boolean editor;
@@ -82,6 +87,7 @@ public class DocumentViewData {
             User editUser,
             String pageContent,
             Integer collectionId,
+            Integer followId,
             boolean editor,
             boolean manager
     ) {
@@ -94,6 +100,7 @@ public class DocumentViewData {
         this.editUser = editUser;
         this.pageContent = pageContent;
         this.collectionId = collectionId;
+        this.followId = followId;
         this.editor = editor;
         this.manager = manager;
     }
@@ -168,6 +175,14 @@ public class DocumentViewData {
 
     public void setCollectionId(Integer collectionId) {
         this.collectionId = collectionId;
+    }
+
+    public Integer getFollowId() {
+        return followId;
+    }
+
+    public void setFollowId(Integer followId) {
+        this.followId = followId;
     }
 
     public boolean isEditor() {

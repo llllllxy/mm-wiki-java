@@ -36,7 +36,6 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class SpaceService {
     private static final Pattern INVALID_SPACE_NAME = Pattern.compile("[\\\\/:*?\"<>|]");
-    private static final int SPACE_MANAGER_PRIVILEGE = 2;
 
     @Autowired
     private SpaceMapper spaceMapper;
@@ -63,20 +62,20 @@ public class SpaceService {
         if (space == null) {
             throw new IllegalStateException("空间不存在！");
         }
-        decorate(List.of(space));
+        space.setCreateDateText(TimeUtils.format(space.getCreateTime()));
         return space;
     }
 
     /**
      * 统计当前可用的空间标签。
      */
-    public Set<String> listTags() {
+    public Set<String> listTags(CurrentUser currentUser) {
         Set<String> tags = new LinkedHashSet<>();
-        for (Space space : spaceMapper.findAllActive()) {
-            if (space.getTags() == null || space.getTags().isBlank()) {
+        for (String tagText : spaceMapper.findVisibleTags(currentUser.getUserId(), isRoot(currentUser))) {
+            if (tagText == null || tagText.isBlank()) {
                 continue;
             }
-            for (String tag : space.getTags().split(",")) {
+            for (String tag : tagText.split(",")) {
                 String clean = tag.trim();
                 if (!clean.isEmpty()) {
                     tags.add(clean);
@@ -86,46 +85,52 @@ public class SpaceService {
         return tags;
     }
 
+    /**
+     * 分页查询当前用户可访问的空间列表，并标记空间收藏状态。
+     *
+     * @param currentUser 当前登录用户
+     * @param keyword     空间名称或描述关键字
+     * @param pageNum     当前页码
+     * @param pageSize    每页数量
+     * @return 空间分页数据
+     */
     public PageModel<Space> listSpacesPage(CurrentUser currentUser, String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
         PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> {
-                    spaceMapper.pageByKeyword(currentUser.getUserId(), search);
+                    spaceMapper.pageByKeywordAndUser(currentUser.getUserId(), isRoot(currentUser), search);
                 });
         List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
-        decorate(spaces);
+        spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
         return PageModel.from(pageInfo);
     }
 
     /**
      * 加载当前用户收藏的空间列表。
      */
-    public SpaceCollectionPage listCollectedSpaces(CurrentUser currentUser) {
-        List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionService.TYPE_SPACE);
-        if (collections.isEmpty()) {
-            return new SpaceCollectionPage(List.of(), 0);
-        }
-        List<Integer> ids = collections.stream().map(entry -> Integer.valueOf(entry.getResourceId())).toList();
-        List<Space> spaces = spaceMapper.findActiveByIds(ids);
-        Map<Integer, Integer> collectionBySpace = collections.stream()
-                .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId));
+    public PageModel<Space> listCollectedSpaces(CurrentUser currentUser, int pageNum, int pageSize) {
+        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> spaceMapper.pageCollectedByUser(currentUser.getUserId(), isRoot(currentUser)));
+        List<Space> spaces = pageInfo.getList();
         for (Space space : spaces) {
             space.setCollection(true);
-            space.setCollectionId(collectionBySpace.get(space.getSpaceId()));
         }
-        decorate(spaces);
-        return new SpaceCollectionPage(spaces, spaces.size());
+        spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
+        return PageModel.from(pageInfo);
     }
 
     /**
      * 按标签筛选当前用户可访问的空间。
      */
-    public SpaceCollectionPage searchByTag(CurrentUser currentUser, String tag) {
-        List<Space> spaces = spaceMapper.findByTag(tag == null ? "" : tag.trim());
+    public PageModel<Space> searchByTag(CurrentUser currentUser, String tag, int pageNum, int pageSize) {
+        String cleanTag = tag == null ? "" : tag.trim();
+        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> spaceMapper.pageByTagAndUser(currentUser.getUserId(), isRoot(currentUser), cleanTag));
+        List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
-        decorate(spaces);
-        return new SpaceCollectionPage(spaces, spaces.size());
+        spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
+        return PageModel.from(pageInfo);
     }
 
 
@@ -136,6 +141,14 @@ public class SpaceService {
         return getMemberPageInfo(currentUser, spaceId, "/space/member?space_id=" + spaceId);
     }
 
+    /**
+     * 加载空间成员页面基础数据，并根据当前用户权限决定是否返回可添加用户列表。
+     *
+     * @param currentUser 当前登录用户
+     * @param spaceId     空间ID
+     * @param basePath    成员页面基础路径
+     * @return 成员页面基础数据
+     */
     public MemberPage getMemberPageInfo(CurrentUser currentUser, Integer spaceId, String basePath) {
         Space space = requireSpace(spaceId);
         Access access = currentUser == null ? new Access(true, false, false) : null;
@@ -155,14 +168,22 @@ public class SpaceService {
         return new MemberPage(manager, otherUsers);
     }
 
+    /**
+     * 分页查询空间成员列表。
+     *
+     * @param currentUser 当前登录用户
+     * @param spaceId     空间ID
+     * @param pageNum     当前页码
+     * @param pageSize    每页数量
+     * @return 空间成员分页数据
+     */
     public PageModel<MemberView> listMembersPage(CurrentUser currentUser, Integer spaceId, int pageNum, int pageSize) {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
             throw new IllegalStateException("您没有权限访问该空间成员列表。");
         }
-        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
+        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
         List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
         Map<Integer, User> users = userIds.isEmpty() ? new HashMap<>() : userService.findActiveByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getUserId, item -> item));
@@ -205,14 +226,15 @@ public class SpaceService {
         defaultDocument.setUpdateTime(now);
         documentMapper.insert(defaultDocument);
         documentFileService.createEmptyPage(documentFileService.getDefaultPageFileBySpaceName(space.getName()));
-        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), SPACE_MANAGER_PRIVILEGE);
+        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), AccessService.SPACE_MANAGER);
         return JsonResponse.success("添加空间成功", "/system/space/list");
     }
 
-    @Transactional
+
     /**
      * 更新空间基础信息与访问级别。
      */
+    @Transactional
     public JsonResponse<Void> updateSpace(CurrentUser currentUser, Space space) throws IOException {
         if (space == null || space.getSpaceId() == null) {
             return JsonResponse.error("空间不存在！");
@@ -220,6 +242,10 @@ public class SpaceService {
         Space existing = spaceMapper.findActiveById(space.getSpaceId());
         if (existing == null) {
             return JsonResponse.error("空间不存在！");
+        }
+        Access access = accessService.access(currentUser, existing);
+        if (!access.isManager()) {
+            return JsonResponse.error("您没有权限修改该空间。");
         }
         JsonResponse<Void> validation = validateSpace(space, space.getSpaceId());
         if (validation != null) {
@@ -246,14 +272,19 @@ public class SpaceService {
         return JsonResponse.success("修改空间成功", "/system/space/list");
     }
 
-    @Transactional
+
     /**
      * 删除空间并清理对应的文档资源。
      */
+    @Transactional
     public JsonResponse<Void> deleteSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
             return JsonResponse.error("空间不存在！");
+        }
+        Access access = accessService.access(currentUser, space);
+        if (!access.isManager()) {
+            return JsonResponse.error("您没有权限删除该空间。");
         }
         List<Document> documents = documentMapper.findActiveBySpaceId(spaceId);
         if (documents.size() > 1) {
@@ -280,8 +311,12 @@ public class SpaceService {
     /**
      * 打包下载空间下的文档资源。
      */
-    public SpaceDownload downloadSpace(Integer spaceId) throws IOException {
+    public SpaceDownload downloadSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = requireSpace(spaceId);
+        Access access = accessService.access(currentUser, space);
+        if (!access.isVisit()) {
+            throw new IllegalStateException("您没有权限导出该空间。");
+        }
         List<Attachment> attachments = attachmentService.findBySpaceId(spaceId);
         byte[] payload = zipSpace(space, attachments);
         return new SpaceDownload(space.getName() + ".zip", new ByteArrayResource(payload));
@@ -330,6 +365,12 @@ public class SpaceService {
         spaceUserService.updatePrivilege(spaceUserId, privilege);
     }
 
+    /**
+     * 给空间列表设置当前用户的收藏状态和收藏ID。
+     *
+     * @param currentUser 当前登录用户
+     * @param spaces      待处理的空间列表
+     */
     private void markCollections(CurrentUser currentUser, List<Space> spaces) {
         List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionService.TYPE_SPACE);
         Map<Integer, Integer> collectionBySpace = collections.stream()
@@ -343,16 +384,26 @@ public class SpaceService {
         }
     }
 
-    private void decorate(List<Space> spaces) {
-        for (Space space : spaces) {
-            if (space.getCreateTime() != null) {
-                space.setCreateDateText(TimeUtils.format(space.getCreateTime()));
-            } else {
-                space.setCreateDateText("");
-            }
-        }
+
+    /**
+     * 判断当前用户是否为 root 角色。超级管理员
+     *
+     * @param currentUser 当前登录用户
+     * @return true 表示 root 用户，false 表示普通用户或未登录用户
+     */
+    private boolean isRoot(CurrentUser currentUser) {
+        return currentUser != null
+                && currentUser.getRoleId() != null
+                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 
+    /**
+     * 校验空间基础信息，并规范化可空字段和开关字段。
+     *
+     * @param space     待校验的空间对象
+     * @param currentId 当前空间ID，新增时为空，编辑时用于排除自身重名
+     * @return 校验失败时返回错误响应，校验通过时返回 null
+     */
     private JsonResponse<Void> validateSpace(Space space, Integer currentId) {
         if (space == null) {
             return JsonResponse.error("空间信息不能为空！");
@@ -382,6 +433,14 @@ public class SpaceService {
         return null;
     }
 
+    /**
+     * 将空间下的 Markdown 文档目录和附件打包成 ZIP 字节数组。
+     *
+     * @param space       待导出的空间
+     * @param attachments 空间下的附件列表
+     * @return ZIP 文件字节数组
+     * @throws IOException 文件读取或 ZIP 写入失败时抛出
+     */
     private byte[] zipSpace(Space space, List<Attachment> attachments) throws IOException {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); ZipOutputStream zip = new ZipOutputStream(output)) {
             Path markdownDir = documentFileService.resolvePagePath(space.getName());
@@ -405,6 +464,14 @@ public class SpaceService {
         }
     }
 
+    /**
+     * 递归将文件或目录写入 ZIP 输出流。
+     *
+     * @param zip    ZIP 输出流
+     * @param source 当前待写入的文件或目录
+     * @param base   计算 ZIP 内相对路径的基准目录
+     * @throws IOException 文件读取或 ZIP 写入失败时抛出
+     */
     private void addPathToZip(ZipOutputStream zip, Path source, Path base) throws IOException {
         if (Files.isDirectory(source)) {
             try (var stream = Files.list(source)) {
@@ -420,6 +487,12 @@ public class SpaceService {
         zip.closeEntry();
     }
 
+    /**
+     * 去除字符串首尾空白，空值统一转换为空字符串。
+     *
+     * @param value 原始字符串
+     * @return 去除首尾空白后的字符串
+     */
     private String trim(String value) {
         return value == null ? "" : value.trim();
     }

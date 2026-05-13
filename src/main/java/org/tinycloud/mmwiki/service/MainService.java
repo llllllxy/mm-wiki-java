@@ -20,6 +20,7 @@ import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LinkMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
+import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
@@ -46,8 +47,8 @@ public class MainService {
     @Autowired
     private ConfigService configService;
 
-    public List<Document> loadCollectedDocuments(Integer userId) {
-        List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(userId, COLLECTION_TYPE_DOC);
+    public List<Document> loadCollectedDocuments(CurrentUser currentUser) {
+        List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(currentUser.getUserId(), COLLECTION_TYPE_DOC);
         if (collections.isEmpty()) {
             return List.of();
         }
@@ -55,7 +56,7 @@ public class MainService {
         for (CollectionEntry collection : collections) {
             documentIds.add(collection.getResourceId());
         }
-        return documentMapper.findActiveByIds(documentIds);
+        return documentMapper.findVisibleByIds(currentUser.getUserId(), isRoot(currentUser), documentIds);
     }
 
     public MainDefaultView loadDefaultView() {
@@ -67,19 +68,27 @@ public class MainService {
         return new MainDefaultView(panelTitle, panelDescription, links, contacts);
     }
 
-    public PageModel<LogDocumentView> recentDocumentPage(Integer userId, int pageNum, int pageSize) {
+    public PageModel<LogDocumentView> recentDocumentPage(CurrentUser currentUser, int pageNum, int pageSize) {
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(userId));
+                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(currentUser.getUserId(), isRoot(currentUser)));
         for (LogDocumentView logDocument : pageInfo.getList()) {
             logDocument.setCreateTimeText(TimeUtils.format(logDocument.getCreateTime()));
         }
         return PageModel.from(pageInfo);
     }
 
-    public SearchView searchDocuments(Integer userId, String keyword, String searchType) {
+    public SearchView searchDocuments(CurrentUser currentUser, String keyword, String searchType) {
         String cleanKeyword = keyword == null ? "" : keyword.trim();
         String cleanSearchType = "title";
-        List<Document> documents = cleanKeyword.isEmpty() ? List.of() : documentMapper.findVisibleByNameLike(userId, cleanKeyword);
+        List<Document> documents = cleanKeyword.isEmpty()
+                ? List.of()
+                : documentMapper.findVisibleByNameLike(currentUser.getUserId(), isRoot(currentUser), cleanKeyword);
         return new SearchView(cleanSearchType, cleanKeyword, documents, documents.size());
+    }
+
+    private boolean isRoot(CurrentUser currentUser) {
+        return currentUser != null
+                && currentUser.getRoleId() != null
+                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 }

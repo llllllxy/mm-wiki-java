@@ -68,13 +68,13 @@ public class UserDirectoryService {
         return new FollowUserListPage(users, users.size());
     }
 
-    public UserProfileView loadProfile(Integer userId) {
+    public UserProfileView loadProfile(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
             throw new IllegalStateException("用户不存在。");
         }
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByUserId(userId));
+                .doSelectPageInfo(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), isRoot(currentUser), ""));
         List<LogDocumentView> activities = pageInfo.getList();
         return new UserProfileView(user, activities, activities.size());
     }
@@ -104,14 +104,16 @@ public class UserDirectoryService {
         return new UserFollowView(user, followedUsers, fansUsers, followedUsers.size(), fansUsers.size(), loginUserId);
     }
 
-    public FollowDocView loadFollowDocs(Integer userId) {
+    public FollowDocView loadFollowDocs(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
             throw new IllegalStateException("用户不存在。");
         }
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        List<Document> documents = docIds.isEmpty() ? List.of() : documentMapper.findActiveByIds(docIds);
+        List<Document> documents = docIds.isEmpty()
+                ? List.of()
+                : documentMapper.findVisibleByIds(currentUser.getUserId(), isRoot(currentUser), docIds);
         Map<String, Follow> followIndex = follows.stream().collect(java.util.stream.Collectors.toMap(Follow::getObjectId, follow -> follow, (left, right) -> left));
         List<UserFollowedDocument> items = documents.stream()
                 .map(document -> new UserFollowedDocument(document, followIndex.get(document.getDocumentId()).getFollowId()))
@@ -128,5 +130,11 @@ public class UserDirectoryService {
                 user.setFollowId(follow.getFollowId());
             }
         }
+    }
+
+    private boolean isRoot(CurrentUser currentUser) {
+        return currentUser != null
+                && currentUser.getRoleId() != null
+                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 }

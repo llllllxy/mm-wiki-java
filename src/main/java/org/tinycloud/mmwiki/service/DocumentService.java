@@ -119,6 +119,7 @@ public class DocumentService {
 
         Map<Integer, User> users = loadUsers(document.getCreateUserId(), document.getEditUserId());
         CollectionEntry collection = collectionService.findByUserTypeAndResourceId(currentUser.getUserId(), CollectionService.TYPE_DOC, documentId);
+        Follow follow = followService.findByUserTypeAndObjectId(currentUser.getUserId(), FollowService.TYPE_DOC, documentId);
 
         return new DocumentViewData(
                 space,
@@ -130,6 +131,7 @@ public class DocumentService {
                 users.get(document.getEditUserId()),
                 pageContent,
                 collection == null ? 0 : collection.getCollectionId(),
+                follow == null ? 0 : follow.getFollowId(),
                 access.isEditor(),
                 access.isManager()
         );
@@ -274,6 +276,9 @@ public class DocumentService {
         }
 
         Document parentDocument = requireDocument(parentId);
+        if (!Objects.equals(parentDocument.getSpaceId(), spaceId)) {
+            return JsonResponse.error("父文档不属于当前空间。");
+        }
         if (parentDocument.getType() == null || parentDocument.getType() != DocumentFileService.DOCUMENT_TYPE_DIR) {
             return JsonResponse.error("父文档不是目录。");
         }

@@ -33,7 +33,7 @@ public class CollectionController extends ControllerSupport {
         HttpServletRequest request
     ) {
         CurrentUser currentUser = currentUser();
-        return collectionService.add(currentUser.getUserId(), type, resourceId, request.getHeader("Referer"));
+        return collectionService.add(currentUser, type, resourceId, request.getHeader("Referer"));
     }
 
     @PostMapping("/cancel")

@@ -33,7 +33,8 @@ public interface LogDocumentMapper {
         from mw_log_document ld
         left join mw_user u on u.user_id = ld.user_id
         left join mw_document d on d.document_id = ld.document_id
-        where exists (
+            where #{root} = true
+            or exists (
             select 1
             from mw_space s
             where s.space_id = ld.space_id
@@ -47,7 +48,39 @@ public interface LogDocumentMapper {
         )
         order by ld.log_document_id desc
         """)
-    List<LogDocumentView> pageVisibleByUserId(@Param("userId") Integer userId);
+    List<LogDocumentView> pageVisibleByUserId(@Param("userId") Integer userId, @Param("root") boolean root);
+
+    @Select({
+            "<script>",
+            "select ld.log_document_id,",
+            "       ld.document_id,",
+            "       ld.space_id,",
+            "       ld.user_id,",
+            "       ld.action,",
+            "       ld.comment,",
+            "       ld.create_time,",
+            "       d.name as document_name,",
+            "       d.type as document_type",
+            "from mw_log_document ld",
+            "left join mw_document d on d.document_id = ld.document_id",
+            "left join mw_space s on s.space_id = ld.space_id",
+            "left join mw_space_user su on su.space_id = ld.space_id and su.user_id = #{viewerUserId}",
+            "where ld.user_id = #{profileUserId}",
+            "and d.is_delete = 0",
+            "and s.is_delete = 0",
+            "and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)",
+            "<if test='keyword != null and keyword != \"\"'>",
+            "and (ld.comment like concat('%', #{keyword}, '%') or d.name like concat('%', #{keyword}, '%'))",
+            "</if>",
+            "order by ld.log_document_id desc",
+            "</script>"
+    })
+    List<LogDocumentView> pageByUserIdVisibleToViewer(
+            @Param("profileUserId") Integer profileUserId,
+            @Param("viewerUserId") Integer viewerUserId,
+            @Param("root") boolean root,
+            @Param("keyword") String keyword
+    );
 
     @Select("""
         select ld.log_document_id,

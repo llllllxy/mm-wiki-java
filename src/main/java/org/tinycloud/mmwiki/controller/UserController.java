@@ -74,7 +74,7 @@ public class UserController extends ControllerSupport {
         if (currentUser.getUserId().equals(userId)) {
             return "redirect:/system/main/index";
         }
-        UserProfileView view = userDirectoryService.loadProfile(userId);
+        UserProfileView view = userDirectoryService.loadProfile(userId, currentUser);
         model.addAttribute("user", view.getUser());
         model.addAttribute("logDocuments", view.getLogDocuments());
         model.addAttribute("count", view.getCount());
@@ -96,7 +96,7 @@ public class UserController extends ControllerSupport {
 
     @GetMapping("/user/followPage")
     public String followPage(@RequestParam("user_id") Integer userId, Model model) {
-        FollowDocView view = userDirectoryService.loadFollowDocs(userId);
+        FollowDocView view = userDirectoryService.loadFollowDocs(userId, currentUser());
         model.addAttribute("user", view.getUser());
         model.addAttribute("pages", view.getPages());
         model.addAttribute("count", view.getCount());

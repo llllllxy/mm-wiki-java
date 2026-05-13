@@ -28,11 +28,7 @@ public class MemberView {
     public MemberView() {
     }
 
-    public MemberView(
-            User user,
-            Integer privilege,
-            Integer spaceUserId
-    ) {
+    public MemberView(User user, Integer privilege, Integer spaceUserId) {
         this.user = user;
         this.privilege = privilege;
         this.spaceUserId = spaceUserId;

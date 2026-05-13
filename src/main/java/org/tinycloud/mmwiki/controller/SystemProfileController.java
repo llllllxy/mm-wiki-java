@@ -95,7 +95,7 @@ public class SystemProfileController extends ControllerSupport {
     @PostMapping("/system/profile/followDoc")
     @ResponseBody
     public JsonResponse<PageModel<ProfileFollowedDocument>> followDocData(@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
-        return JsonResponse.success("查询成功", systemProfileService.loadFollowDocPage(currentUser().getUserId(), pageNum, pageSize));
+        return JsonResponse.success("查询成功", systemProfileService.loadFollowDocPage(currentUser(), pageNum, pageSize));
     }
 
     @GetMapping("/system/profile/activity")

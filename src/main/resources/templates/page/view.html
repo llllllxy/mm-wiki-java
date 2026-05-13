@@ -86,6 +86,14 @@
                                th:data-url="@{/collection/cancel(collection_id=${collection_id})}"
                                onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
                                     class="glyphicon glyphicon-star"></i>&nbsp;取消</a>
+                            <a th:if="${follow_id == 0}" type="button" class="btn btn-default"
+                               th:data-url="@{/follow/add(type=1,object_id=${document.documentId})}"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                    class="glyphicon glyphicon-heart-empty"></i>&nbsp;关注</a>
+                            <a th:if="${follow_id != 0}" type="button" class="btn btn-default"
+                               th:data-url="@{/follow/cancel(follow_id=${follow_id})}"
+                               onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
+                                    class="glyphicon glyphicon-heart"></i>&nbsp;取消关注</a>
                             <a th:if="${space != null and space.isShare == 1}" type="button" class="btn btn-default"
                                name="share" th:href="@{/page/display(document_id=${document.documentId})}"
                                target="_blank"><i class="glyphicon glyphicon-share-alt"></i>&nbsp;分享</a>

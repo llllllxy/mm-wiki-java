@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.mapper;
 
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import org.tinycloud.mmwiki.domain.Space;
@@ -37,7 +38,16 @@ public interface SpaceMapper {
      * @param keyword 查询关键词（名称/描述模糊匹配）
      * @return 空间列表
      */
-    List<Space> pageByKeyword(@Param("userId") Integer userId, @Param("keyword") String keyword);
+    List<Space> pageByKeywordAndUser(@Param("userId") Integer userId, @Param("root") boolean root, @Param("keyword") String keyword);
+
+    /**
+     * 分页查询当前用户收藏且仍可访问的空间列表。
+     *
+     * @param userId 当前用户ID
+     * @param root   是否为root用户
+     * @return 空间列表
+     */
+    List<Space> pageCollectedByUser(@Param("userId") Integer userId, @Param("root") boolean root);
 
     /**
      * 查询所有未删除的空间
@@ -47,12 +57,31 @@ public interface SpaceMapper {
     List<Space> findAllActive();
 
     /**
+     * 查询当前用户可访问空间的标签字符串列表。
+     *
+     * @param userId 当前用户ID
+     * @param root   是否为root用户
+     * @return 标签字符串列表
+     */
+    List<String> findVisibleTags(@Param("userId") Integer userId, @Param("root") boolean root);
+
+    /**
      * 根据标签模糊查询空间
      *
      * @param tag 标签
      * @return 空间列表
      */
     List<Space> findByTag(@Param("tag") String tag);
+
+    /**
+     * 按标签分页查询当前用户可访问的空间列表。
+     *
+     * @param userId 当前用户ID
+     * @param root   是否为root用户
+     * @param tag    标签关键字
+     * @return 空间列表
+     */
+    List<Space> pageByTagAndUser(@Param("userId") Integer userId, @Param("root") boolean root, @Param("tag") String tag);
 
     /**
      * 根据空间ID集合批量查询未删除空间

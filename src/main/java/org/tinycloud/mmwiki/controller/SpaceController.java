@@ -3,7 +3,6 @@ package org.tinycloud.mmwiki.controller;
 import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.vo.MemberPage;
 import org.tinycloud.mmwiki.vo.MemberView;
-import org.tinycloud.mmwiki.vo.SpaceCollectionPage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,7 +40,7 @@ public class SpaceController extends ControllerSupport {
     @GetMapping("/space/index")
     public String index(Model model) {
         nav(model, "space");
-        model.addAttribute("spaceTags", spaceService.listTags());
+        model.addAttribute("spaceTags", spaceService.listTags(currentUser()));
         return "space/index";
     }
 
@@ -64,20 +63,29 @@ public class SpaceController extends ControllerSupport {
     @GetMapping("/space/collection")
     public String collection(Model model) {
         nav(model, "space");
-        SpaceCollectionPage view = spaceService.listCollectedSpaces(currentUser());
-        model.addAttribute("spaces", view.getSpaces());
-        model.addAttribute("count", view.getCount());
         return "space/collection";
+    }
+
+    @PostMapping("/space/collection")
+    @ResponseBody
+    public JsonResponse<PageModel<Space>> collectionData(@RequestParam(defaultValue = "1") int pageNum,
+                                                         @RequestParam(defaultValue = "20") int pageSize) {
+        return JsonResponse.success("查询成功", spaceService.listCollectedSpaces(currentUser(), pageNum, pageSize));
     }
 
     @GetMapping("/space/search")
     public String search(@RequestParam("tag") String tag, Model model) {
         nav(model, "space");
-        SpaceCollectionPage view = spaceService.searchByTag(currentUser(), tag);
         model.addAttribute("tag", tag);
-        model.addAttribute("spaces", view.getSpaces());
-        model.addAttribute("count", view.getCount());
         return "space/search";
+    }
+
+    @PostMapping("/space/search")
+    @ResponseBody
+    public JsonResponse<PageModel<Space>> searchData(@RequestParam("tag") String tag,
+                                                     @RequestParam(defaultValue = "1") int pageNum,
+                                                     @RequestParam(defaultValue = "20") int pageSize) {
+        return JsonResponse.success("查询成功", spaceService.searchByTag(currentUser(), tag, pageNum, pageSize));
     }
 
     @GetMapping("/space/document")

@@ -36,7 +36,7 @@ public class MainController extends ControllerSupport {
     public String index(Model model) {
         nav(model, "main");
         CurrentUser currentUser = currentUser();
-        List<Document> documents = mainService.loadCollectedDocuments(currentUser.getUserId());
+        List<Document> documents = mainService.loadCollectedDocuments(currentUser);
         model.addAttribute("documents", documents);
         model.addAttribute("count", documents.size());
         return "main/index";
@@ -59,7 +59,7 @@ public class MainController extends ControllerSupport {
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
-        return JsonResponse.success("查询成功", mainService.recentDocumentPage(currentUser().getUserId(), pageNum, pageSize));
+        return JsonResponse.success("查询成功", mainService.recentDocumentPage(currentUser(), pageNum, pageSize));
     }
 
     @GetMapping("/main/about")
@@ -75,7 +75,7 @@ public class MainController extends ControllerSupport {
         Model model
     ) {
         CurrentUser currentUser = currentUser();
-        SearchView view = mainService.searchDocuments(currentUser.getUserId(), keyword, searchType);
+        SearchView view = mainService.searchDocuments(currentUser, keyword, searchType);
         model.addAttribute("search_type", view.getSearchType());
         model.addAttribute("keyword", view.getKeyword());
         model.addAttribute("documents", view.getDocuments());
