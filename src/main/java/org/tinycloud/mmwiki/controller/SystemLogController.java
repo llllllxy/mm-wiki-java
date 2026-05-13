@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
@@ -56,7 +57,7 @@ public class SystemLogController extends ControllerSupport {
     public String info(@RequestParam("log_id") Long logId, Model model) {
         LogEntry log = logService.findLog(logId);
         if (log == null) {
-            throw new IllegalStateException("日志不存在");
+            throw new SystemException("日志不存在");
         }
         model.addAttribute("log", log);
         return "system/log/info";

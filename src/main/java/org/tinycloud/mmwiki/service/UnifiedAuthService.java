@@ -27,6 +27,7 @@ import javax.naming.directory.SearchResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.JsonUtils;
 
 /**
@@ -74,18 +75,18 @@ public class UnifiedAuthService {
                 .build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (!StringUtils.hasText(response.body())) {
-            throw new IllegalStateException("登录认证失败, httpCode=" + response.statusCode());
+            throw new SystemException("登录认证失败, httpCode=" + response.statusCode());
         }
 
         HttpAuthResponse authResponse = JsonUtils.readValue(response.body(), HttpAuthResponse.class);
         if (authResponse == null) {
-            throw new IllegalStateException("登录认证失败");
+            throw new SystemException("登录认证失败");
         }
         if (StringUtils.hasText(authResponse.getMessage())) {
-            throw new IllegalStateException("登录认证失败, message=" + authResponse.getMessage());
+            throw new SystemException("登录认证失败, message=" + authResponse.getMessage());
         }
         if (authResponse.getData() == null) {
-            throw new IllegalStateException("登录认证失败");
+            throw new SystemException("登录认证失败");
         }
         return authResponse.getData();
     }

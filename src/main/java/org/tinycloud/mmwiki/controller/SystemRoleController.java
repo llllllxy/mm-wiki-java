@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.PrivilegeGroups;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class SystemRoleController extends ControllerSupport {
     public String edit(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null || roleId == RoleService.ROOT_ROLE_ID) {
-            throw new IllegalStateException("角色不存在或不可修改");
+            throw new SystemException("角色不存在或不可修改");
         }
         model.addAttribute("role", role);
         return "system/role/form";
@@ -81,7 +82,7 @@ public class SystemRoleController extends ControllerSupport {
     public String user(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
-            throw new IllegalStateException("角色不存在");
+            throw new SystemException("角色不存在");
         }
         model.addAttribute("role", role);
         model.addAttribute("roleId", roleId);
@@ -102,7 +103,7 @@ public class SystemRoleController extends ControllerSupport {
     public String privilege(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
-            throw new IllegalStateException("角色不存在");
+            throw new SystemException("角色不存在");
         }
         PrivilegeGroups groups = privilegeService.groups();
         List<Integer> granted = roleId == RoleService.ROOT_ROLE_ID

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.IpUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.AuthInterceptor;
@@ -55,23 +56,23 @@ public class AuthService {
         String cleanPassword = password == null ? "" : password.trim();
 
         if (!StringUtils.hasText(cleanUsername)) {
-            return JsonResponse.error("系统用户名不能为空！");
+            throw new SystemException("系统用户名不能为空！");
         }
         if (cleanUsername.contains("_")) {
-            return JsonResponse.error("系统用户名不合法！");
+            throw new SystemException("系统用户名不合法！");
         }
         if (!StringUtils.hasText(cleanPassword)) {
-            return JsonResponse.error("密码不能为空！");
+            throw new SystemException("密码不能为空！");
         }
 
         User user = userService.findActiveByUsername(cleanUsername);
         if (user == null || user.getIsForbidden() == 1) {
-            return JsonResponse.error("用户名或密码错误!");
+            throw new SystemException("用户名或密码错误!");
         }
 
         String encodedPassword = userService.encodePassword(cleanPassword);
         if (!encodedPassword.equals(user.getPassword())) {
-            return JsonResponse.error("用户名或密码错误!");
+            throw new SystemException("用户名或密码错误!");
         }
 
         int now = Math.toIntExact(Instant.now().getEpochSecond());
@@ -89,20 +90,20 @@ public class AuthService {
     public JsonResponse<Void> authLogin(String username, String password,
                                         HttpServletRequest request, HttpServletResponse response) {
         if (!isSsoOpen()) {
-            return JsonResponse.error("系统未开启统一登录功能！");
+            throw new SystemException("系统未开启统一登录功能！");
         }
         LoginAuth loginAuth = loginAuthService.findUsed();
         if (loginAuth == null) {
-            return JsonResponse.error("统一登录认证配置不可用！");
+            throw new SystemException("统一登录认证配置不可用！");
         }
 
         String cleanUsername = username == null ? "" : username.trim();
         String cleanPassword = password == null ? "" : password.trim();
         if (!StringUtils.hasText(cleanUsername)) {
-            return JsonResponse.error("统一登录用户名不能为空！");
+            throw new SystemException("统一登录用户名不能为空！");
         }
         if (!StringUtils.hasText(cleanPassword)) {
-            return JsonResponse.error("统一登录密码不能为空！");
+            throw new SystemException("统一登录密码不能为空！");
         }
 
         AuthLoginProfile profile;
@@ -110,10 +111,10 @@ public class AuthService {
             profile = unifiedAuthService.authenticate(loginAuth, cleanUsername, cleanPassword);
         } catch (Exception ex) {
             log.error("统一登录失败：{}", ex.getMessage(), ex);
-            return JsonResponse.error("统一登录失败！");
+            throw new SystemException("统一登录失败！");
         }
         if (profile == null) {
-            return JsonResponse.error("统一登录失败！");
+            throw new SystemException("统一登录失败！");
         }
 
         int loginTime = Math.toIntExact(Instant.now().getEpochSecond());
@@ -137,7 +138,7 @@ public class AuthService {
 
         User refreshed = userService.saveOrUpdateAuthUser(user);
         if (refreshed == null) {
-            return JsonResponse.error("登录失败!");
+            throw new SystemException("登录失败!");
         }
         CurrentUser currentUser = CurrentUser.from(refreshed);
         request.getSession().setAttribute(AuthInterceptor.SESSION_AUTHOR, currentUser);

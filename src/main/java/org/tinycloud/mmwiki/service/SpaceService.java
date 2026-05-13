@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.*;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -60,7 +61,7 @@ public class SpaceService {
     public Space requireSpace(Integer spaceId) {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
-            throw new IllegalStateException("空间不存在！");
+            throw new SystemException("空间不存在！");
         }
         space.setCreateDateText(TimeUtils.format(space.getCreateTime()));
         return space;
@@ -155,7 +156,7 @@ public class SpaceService {
         if (currentUser != null) {
             access = accessService.access(currentUser, space);
             if (!access.isVisit()) {
-                throw new IllegalStateException("您没有权限访问该空间成员列表。");
+                throw new SystemException("您没有权限访问该空间成员列表。");
             }
         }
 
@@ -181,7 +182,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限访问该空间成员列表。");
+            throw new SystemException("您没有权限访问该空间成员列表。");
         }
         PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
         List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
@@ -237,15 +238,15 @@ public class SpaceService {
     @Transactional
     public JsonResponse<Void> updateSpace(CurrentUser currentUser, Space space) throws IOException {
         if (space == null || space.getSpaceId() == null) {
-            return JsonResponse.error("空间不存在！");
+            throw new SystemException("空间不存在！");
         }
         Space existing = spaceMapper.findActiveById(space.getSpaceId());
         if (existing == null) {
-            return JsonResponse.error("空间不存在！");
+            throw new SystemException("空间不存在！");
         }
         Access access = accessService.access(currentUser, existing);
         if (!access.isManager()) {
-            return JsonResponse.error("您没有权限修改该空间。");
+            throw new SystemException("您没有权限修改该空间。");
         }
         JsonResponse<Void> validation = validateSpace(space, space.getSpaceId());
         if (validation != null) {
@@ -280,18 +281,18 @@ public class SpaceService {
     public JsonResponse<Void> deleteSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
-            return JsonResponse.error("空间不存在！");
+            throw new SystemException("空间不存在！");
         }
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            return JsonResponse.error("您没有权限删除该空间。");
+            throw new SystemException("您没有权限删除该空间。");
         }
         List<Document> documents = documentMapper.findActiveBySpaceId(spaceId);
         if (documents.size() > 1) {
-            return JsonResponse.error("不能删除空间，请先删除该空间下文档。");
+            throw new SystemException("不能删除空间，请先删除该空间下文档。");
         }
         if (documents.size() == 1 && !Objects.equals(documents.get(0).getName(), space.getName())) {
-            return JsonResponse.error("不能删除空间，请先删除该空间下文档。");
+            throw new SystemException("不能删除空间，请先删除该空间下文档。");
         }
         if (documents.size() == 1) {
             Document defaultDocument = documents.get(0);
@@ -315,7 +316,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限导出该空间。");
+            throw new SystemException("您没有权限导出该空间。");
         }
         List<Attachment> attachments = attachmentService.findBySpaceId(spaceId);
         byte[] payload = zipSpace(space, attachments);
@@ -329,10 +330,10 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new IllegalStateException("您没有权限添加该空间成员。");
+            throw new SystemException("您没有权限添加该空间成员。");
         }
         if (spaceUserService.findBySpaceIdAndUserId(spaceId, userId) != null) {
-            throw new IllegalStateException("该用户已经是空间成员。");
+            throw new SystemException("该用户已经是空间成员。");
         }
         spaceUserService.add(spaceId, userId, privilege);
     }
@@ -344,11 +345,11 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new IllegalStateException("您没有权限移除该空间成员。");
+            throw new SystemException("您没有权限移除该空间成员。");
         }
         SpaceUser membership = spaceUserService.findBySpaceIdAndUserId(spaceId, userId);
         if (membership == null || !spaceUserId.equals(membership.getSpaceUserId())) {
-            throw new IllegalStateException("空间成员不存在。");
+            throw new SystemException("空间成员不存在。");
         }
         spaceUserService.deleteById(spaceUserId);
     }
@@ -360,7 +361,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new IllegalStateException("您没有权限修改该空间成员。");
+            throw new SystemException("您没有权限修改该空间成员。");
         }
         spaceUserService.updatePrivilege(spaceUserId, privilege);
     }
@@ -406,7 +407,7 @@ public class SpaceService {
      */
     private JsonResponse<Void> validateSpace(Space space, Integer currentId) {
         if (space == null) {
-            return JsonResponse.error("空间信息不能为空！");
+            throw new SystemException("空间信息不能为空！");
         }
         space.setName(trim(space.getName()));
         space.setDescription(trim(space.getDescription()));
@@ -416,19 +417,19 @@ public class SpaceService {
             space.setVisitLevel("public");
         }
         if (!"public".equals(space.getVisitLevel()) && !"private".equals(space.getVisitLevel())) {
-            return JsonResponse.error("访问级别不正确！");
+            throw new SystemException("访问级别不正确！");
         }
         space.setIsShare(Objects.equals(space.getIsShare(), 1) ? 1 : 0);
         space.setIsExport(Objects.equals(space.getIsExport(), 1) ? 1 : 0);
         if (!StringUtils.hasText(space.getName())) {
-            return JsonResponse.error("空间名称不能为空！");
+            throw new SystemException("空间名称不能为空！");
         }
         if (INVALID_SPACE_NAME.matcher(space.getName()).find()) {
-            return JsonResponse.error("空间名称格式不正确！");
+            throw new SystemException("空间名称格式不正确！");
         }
         long duplicate = currentId == null ? spaceMapper.countByName(space.getName()) : spaceMapper.countByNameAndNotId(currentId, space.getName());
         if (duplicate > 0) {
-            return JsonResponse.error("空间名已经存在！");
+            throw new SystemException("空间名已经存在！");
         }
         return null;
     }

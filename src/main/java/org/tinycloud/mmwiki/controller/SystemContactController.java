@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Contact;
 import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.ContactService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
@@ -41,7 +42,7 @@ public class SystemContactController extends ControllerSupport {
     public String edit(@RequestParam("contact_id") Integer contactId, Model model) {
         Contact contact = contactService.findById(contactId);
         if (contact == null) {
-            throw new IllegalStateException("联系人不存在。");
+            throw new SystemException("联系人不存在。");
         }
         model.addAttribute("contact", contact);
         return "system/contact/form";

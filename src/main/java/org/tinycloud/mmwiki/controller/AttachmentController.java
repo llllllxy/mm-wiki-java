@@ -1,11 +1,14 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.Access;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import org.springframework.core.io.PathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -71,31 +74,29 @@ public class AttachmentController extends ControllerSupport {
 
     @PostMapping("/attachment/upload")
     @ResponseBody
-    public JsonResponse<Void> upload(
-        @RequestParam("document_id") String documentId,
-        @RequestParam("attachment") MultipartFile file
-    ) throws Exception {
+    public JsonResponse<Void> upload(@RequestParam("document_id") String documentId,
+                                     @RequestParam("attachment") MultipartFile file) throws Exception {
         Document document = requireDocument(documentId);
         Access access = requireAccess(document);
         if (!access.isEditor()) {
-            return JsonResponse.error("您没有权限操作该空间文档。");
+            throw new SystemException("您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {
-            return JsonResponse.error("上传附件错误。");
+            throw new SystemException("上传附件错误。");
         }
         Path saveDir = documentFileService.ensureAttachmentDirectory("attachment", String.valueOf(document.getSpaceId()), documentId);
         Path saveFile = saveDir.resolve(file.getOriginalFilename());
         if (Files.exists(saveFile)) {
-            return JsonResponse.error("该附件已经存在。");
+            throw new SystemException("该附件已经存在。");
         }
         file.transferTo(saveFile);
         try {
             attachmentService.save(
                     currentUser().getUserId(),
-                documentId,
-                file.getOriginalFilename(),
-                "attachment/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename(),
-                AttachmentService.SOURCE_ATTACHMENT
+                    documentId,
+                    file.getOriginalFilename(),
+                    "attachment/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename(),
+                    AttachmentService.SOURCE_ATTACHMENT
             );
             return JsonResponse.success("附件上传成功", "/attachment/page?document_id=" + documentId);
         } catch (Exception ex) {
@@ -109,17 +110,17 @@ public class AttachmentController extends ControllerSupport {
     public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
-            return JsonResponse.error("附件不存在。");
+            throw new SystemException("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
         Access access = requireAccess(document);
         if (!access.isManager()) {
-            return JsonResponse.error("您没有权限删除该空间文档附件。");
+            throw new SystemException("您没有权限删除该空间文档附件。");
         }
         attachmentService.deleteById(attachmentId);
         String redirect = attachment.getSource() != null && attachment.getSource() == AttachmentService.SOURCE_IMAGE
-            ? "/attachment/image?document_id=" + document.getDocumentId()
-            : "/attachment/page?document_id=" + document.getDocumentId();
+                ? "/attachment/image?document_id=" + document.getDocumentId()
+                : "/attachment/page?document_id=" + document.getDocumentId();
         return JsonResponse.success("删除成功", redirect);
     }
 
@@ -127,26 +128,26 @@ public class AttachmentController extends ControllerSupport {
     public ResponseEntity<PathResource> download(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
-            throw new IllegalStateException("附件不存在。");
+            throw new SystemException("附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
         Access access = requireAccess(document);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限下载该空间附件。");
+            throw new SystemException("您没有权限下载该空间附件。");
         }
         Path path = documentFileService.resolveAttachmentPath(attachment.getPath());
         PathResource resource = new PathResource(path);
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .contentLength(resource.contentLength())
-            .body(resource);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resource.contentLength())
+                .body(resource);
     }
 
     private Document requireDocument(String documentId) {
         Document document = documentService.findActiveById(documentId);
         if (document == null) {
-            throw new IllegalStateException("文档不存在。");
+            throw new SystemException("文档不存在。");
         }
         return document;
     }
@@ -155,7 +156,7 @@ public class AttachmentController extends ControllerSupport {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser(), space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限访问该空间文档。");
+            throw new SystemException("您没有权限访问该空间文档。");
         }
         return access;
     }

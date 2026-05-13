@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.*;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.JsonUtils;
@@ -104,7 +105,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限访问该空间文档。");
+            throw new SystemException("您没有权限访问该空间文档。");
         }
 
         Document spaceDocument = requireSpaceDefaultDocument(space.getSpaceId());
@@ -140,7 +141,7 @@ public class DocumentService {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
         if (!Objects.equals(space.getIsShare(), 1)) {
-            throw new IllegalStateException("该文档不允许分享。");
+            throw new SystemException("该文档不允许分享。");
         }
         List<Document> parentDocuments = getParentDocuments(document);
         String pageFile = documentFileService.resolvePageFile(document, parentDocuments);
@@ -163,15 +164,15 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限导出该空间文档。");
+            throw new SystemException("您没有权限导出该空间文档。");
         }
         if (!Objects.equals(space.getIsExport(), 1)) {
-            throw new IllegalStateException("该文档不允许导出。");
+            throw new SystemException("该文档不允许导出。");
         }
 
         String exportType = StringUtils.hasText(output) ? output.trim().toLowerCase() : "markdown";
         if (!"markdown".equals(exportType) && !"pdf".equals(exportType)) {
-            throw new IllegalStateException("不支持的导出类型。");
+            throw new SystemException("不支持的导出类型。");
         }
 
         List<Document> parentDocuments = getParentDocuments(document);
@@ -234,7 +235,7 @@ public class DocumentService {
     public DocumentEditData loadEditData(String documentId, CurrentUser currentUser) throws IOException {
         DocumentViewData view = loadDocumentView(documentId, currentUser);
         if (!view.isEditor()) {
-            throw new IllegalStateException("您没有权限修改该空间文档。");
+            throw new SystemException("您没有权限修改该空间文档。");
         }
         return new DocumentEditData(
                 view.getDocument(),
@@ -252,30 +253,30 @@ public class DocumentService {
     public JsonResponse<Void> createDocument(CurrentUser currentUser, Integer spaceId, String parentId, Integer type, String name) throws IOException {
         String cleanName = name == null ? "" : name.trim();
         if (spaceId == null || !StringUtils.hasText(parentId) || cleanName.isBlank()) {
-            return JsonResponse.error("参数错误。");
+            throw new SystemException("参数错误。");
         }
         if (!isValidName(cleanName)) {
-            return JsonResponse.error("文档名称格式不正确。");
+            throw new SystemException("文档名称格式不正确。");
         }
         if (!Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_PAGE) && !Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("文档类型错误。");
+            throw new SystemException("文档类型错误。");
         }
 
         Space space = spaceService.requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            return JsonResponse.error("您没有权限在该空间创建文档。");
+            throw new SystemException("您没有权限在该空间创建文档。");
         }
 
         Document parentDocument = requireDocument(parentId);
         if (!Objects.equals(parentDocument.getSpaceId(), spaceId)) {
-            return JsonResponse.error("父文档不属于当前空间。");
+            throw new SystemException("父文档不属于当前空间。");
         }
         if (parentDocument.getType() == null || parentDocument.getType() != DocumentFileService.DOCUMENT_TYPE_DIR) {
-            return JsonResponse.error("父文档不是目录。");
+            throw new SystemException("父文档不是目录。");
         }
         if (documentMapper.findByNameParentIdAndSpaceId(cleanName, parentId, spaceId, type) != null) {
-            return JsonResponse.error("该文档名称已经存在。");
+            throw new SystemException("该文档名称已经存在。");
         }
 
         LocalDateTime now = TimeUtils.now();
@@ -322,7 +323,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            return JsonResponse.error("您没有权限修改该空间文档。");
+            throw new SystemException("您没有权限修改该空间文档。");
         }
 
         String targetName = StringUtils.hasText(newName) ? newName.trim() : document.getName();
@@ -330,12 +331,12 @@ public class DocumentService {
             targetName = document.getName();
         } else {
             if (!isValidName(targetName)) {
-                return JsonResponse.error("文档名称格式不正确。");
+                throw new SystemException("文档名称格式不正确。");
             }
             if (!targetName.equals(document.getName())) {
                 Document duplicate = documentMapper.findByNameParentIdAndSpaceId(targetName, document.getParentId(), document.getSpaceId(), document.getType());
                 if (duplicate != null) {
-                    return JsonResponse.error("该文档名称已经存在。");
+                    throw new SystemException("该文档名称已经存在。");
                 }
             }
         }
@@ -369,18 +370,18 @@ public class DocumentService {
     @Transactional
     public JsonResponse<Void> moveDocument(CurrentUser currentUser, String documentId, String targetId, String moveType) throws IOException {
         if (!StringUtils.hasText(documentId) || !StringUtils.hasText(targetId)) {
-            return JsonResponse.error("缺少文档参数。");
+            throw new SystemException("缺少文档参数。");
         }
         Document document = requireDocument(documentId);
         Document targetDocument = requireDocument(targetId);
         if (!Objects.equals(document.getSpaceId(), targetDocument.getSpaceId())) {
-            return JsonResponse.error("文档和目标文档不在同一空间。");
+            throw new SystemException("文档和目标文档不在同一空间。");
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            return JsonResponse.error("您没有权限移动该空间文档。");
+            throw new SystemException("您没有权限移动该空间文档。");
         }
 
         LocalDateTime now = TimeUtils.now();
@@ -398,10 +399,10 @@ public class DocumentService {
         }
 
         if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("目录不能移动到其他目录中。");
+            throw new SystemException("目录不能移动到其他目录中。");
         }
         if (!Objects.equals(targetDocument.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
-            return JsonResponse.error("目标文档必须是目录。");
+            throw new SystemException("目标文档必须是目录。");
         }
 
         List<Document> oldParents = getParentDocuments(document);
@@ -432,17 +433,17 @@ public class DocumentService {
     @Transactional
     public JsonResponse<Void> deleteDocument(CurrentUser currentUser, String documentId) throws IOException {
         if (!StringUtils.hasText(documentId)) {
-            return JsonResponse.error("没有选择文档。");
+            throw new SystemException("没有选择文档。");
         }
         Document document = requireDocument(documentId);
         if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR) && !documentMapper.findByParentId(documentId).isEmpty()) {
-            return JsonResponse.error("请先删除或移动目录下所有文档。");
+            throw new SystemException("请先删除或移动目录下所有文档。");
         }
 
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            return JsonResponse.error("您没有权限删除该空间文档。");
+            throw new SystemException("您没有权限删除该空间文档。");
         }
 
         List<Document> parents = getParentDocuments(document);
@@ -463,7 +464,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new IllegalStateException("您没有权限查看该空间修改历史。");
+            throw new SystemException("您没有权限查看该空间修改历史。");
         }
         PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
@@ -494,7 +495,7 @@ public class DocumentService {
     private Document requireDocument(String documentId) {
         Document document = documentMapper.findActiveById(documentId);
         if (document == null) {
-            throw new IllegalStateException("文档不存在。");
+            throw new SystemException("文档不存在。");
         }
         return document;
     }
@@ -502,7 +503,7 @@ public class DocumentService {
     private Document requireSpaceDefaultDocument(Integer spaceId) {
         Document document = documentMapper.findSpaceDefaultDocument(spaceId);
         if (document == null) {
-            throw new IllegalStateException("空间首页文档不存在。");
+            throw new SystemException("空间首页文档不存在。");
         }
         return document;
     }

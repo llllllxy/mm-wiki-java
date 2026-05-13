@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class LoginAuthService {
 
     public JsonResponse<Void> update(LoginAuth loginAuth) {
         if (loginAuth.getLoginAuthId() == null || findById(loginAuth.getLoginAuthId()) == null) {
-            return JsonResponse.error("登录认证不存在。");
+            throw new SystemException("登录认证不存在。");
         }
         JsonResponse<Void> validation = validate(loginAuth, loginAuth.getLoginAuthId());
         if (validation != null) {
@@ -78,7 +79,7 @@ public class LoginAuthService {
     public JsonResponse<Void> markUsed(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
-            return JsonResponse.error("登录认证不存在。");
+            throw new SystemException("登录认证不存在。");
         }
         loginAuthMapper.clearUsed();
         loginAuthMapper.markUsed(loginAuthId);
@@ -88,7 +89,7 @@ public class LoginAuthService {
     public JsonResponse<Void> delete(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
-            return JsonResponse.error("登录认证不存在。");
+            throw new SystemException("登录认证不存在。");
         }
         loginAuthMapper.markDeleted(loginAuthId);
         return JsonResponse.success("删除登录认证成功", "/system/auth/list");
@@ -96,41 +97,41 @@ public class LoginAuthService {
 
     private JsonResponse<Void> validate(LoginAuth loginAuth, Integer currentId) {
         if (loginAuth == null) {
-            return JsonResponse.error("登录认证参数错误。");
+            throw new SystemException("登录认证参数错误。");
         }
         if (!StringUtils.hasText(loginAuth.getName())) {
-            return JsonResponse.error("登录认证名称不能为空。");
+            throw new SystemException("登录认证名称不能为空。");
         }
         if (!StringUtils.hasText(loginAuth.getUsernamePrefix())) {
-            return JsonResponse.error("用户名前缀不能为空。");
+            throw new SystemException("用户名前缀不能为空。");
         }
         if (!loginAuth.getUsernamePrefix().matches("^[A-Za-z0-9]+$")) {
-            return JsonResponse.error("用户名前缀格式不正确。");
+            throw new SystemException("用户名前缀格式不正确。");
         }
         if (!StringUtils.hasText(loginAuth.getUrl())) {
-            return JsonResponse.error("认证 URL 不能为空。");
+            throw new SystemException("认证 URL 不能为空。");
         }
         try {
             URI uri = URI.create(loginAuth.getUrl().trim());
             String scheme = uri.getScheme();
             if (scheme == null || (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)
                 && !"ldap".equalsIgnoreCase(scheme) && !"ldaps".equalsIgnoreCase(scheme))) {
-                return JsonResponse.error("认证 URL 协议不支持。");
+                throw new SystemException("认证 URL 协议不支持。");
             }
         } catch (Exception ex) {
-            return JsonResponse.error("认证 URL 解析错误。");
+            throw new SystemException("认证 URL 解析错误。");
         }
         long duplicateName = currentId == null
             ? loginAuthMapper.countByName(loginAuth.getName().trim())
             : loginAuthMapper.countByNameAndNotId(currentId, loginAuth.getName().trim());
         if (duplicateName > 0) {
-            return JsonResponse.error("登录认证名称已经存在。");
+            throw new SystemException("登录认证名称已经存在。");
         }
         long duplicatePrefix = currentId == null
             ? loginAuthMapper.countByUsernamePrefix(loginAuth.getUsernamePrefix().trim())
             : loginAuthMapper.countByUsernamePrefixAndNotId(currentId, loginAuth.getUsernamePrefix().trim());
         if (duplicatePrefix > 0) {
-            return JsonResponse.error("用户名前缀已经存在。");
+            throw new SystemException("用户名前缀已经存在。");
         }
         loginAuth.setName(loginAuth.getName().trim());
         loginAuth.setUsernamePrefix(loginAuth.getUsernamePrefix().trim());

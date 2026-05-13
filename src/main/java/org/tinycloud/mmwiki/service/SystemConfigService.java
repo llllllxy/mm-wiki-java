@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.ConfigEntry;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.ConfigMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
@@ -56,13 +57,13 @@ public class SystemConfigService {
         String systemName
     ) {
         if (!StringUtils.hasText(systemName)) {
-            return JsonResponse.error("系统名称不能为空。");
+            throw new SystemException("系统名称不能为空。");
         }
         if ("1".equals(normalizeSwitch(sendEmailOpen)) && emailService.findUsed() == null) {
-            return JsonResponse.error("开启邮件通知前必须先启用一个邮件服务器配置。");
+            throw new SystemException("开启邮件通知前必须先启用一个邮件服务器配置。");
         }
         if ("1".equals(normalizeSwitch(ssoOpen)) && loginAuthService.findUsed() == null) {
-            return JsonResponse.error("开启统一登录前必须先启用一个登录认证配置。");
+            throw new SystemException("开启统一登录前必须先启用一个登录认证配置。");
         }
 
         updateIfChanged("main_title", safe(mainTitle));

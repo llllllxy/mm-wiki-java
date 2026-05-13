@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.EnvView;
 
 import java.io.IOException;
@@ -216,7 +217,7 @@ public class InstallService {
     private void checkDb() throws Exception {
         try (Connection connection = connectWithoutDatabase()) {
             if (!connection.isValid(5)) {
-                throw new IllegalStateException("数据库连接不可用");
+                throw new SystemException("数据库连接不可用");
             }
         }
     }

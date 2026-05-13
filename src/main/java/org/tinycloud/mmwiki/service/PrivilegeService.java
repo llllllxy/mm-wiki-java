@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.PrivilegeGroups;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
@@ -57,7 +58,7 @@ public class PrivilegeService {
 
     public JsonResponse<Void> save(Privilege privilege) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下添加权限");
+            throw new SystemException("只允许在开发模式下添加权限");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -72,10 +73,10 @@ public class PrivilegeService {
 
     public JsonResponse<Void> update(Privilege privilege) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下修改权限");
+            throw new SystemException("只允许在开发模式下修改权限");
         }
         if (privilege == null || privilege.getPrivilegeId() == null || findById(privilege.getPrivilegeId()) == null) {
-            return JsonResponse.error("权限不存在");
+            throw new SystemException("权限不存在");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -89,14 +90,14 @@ public class PrivilegeService {
     @Transactional
     public JsonResponse<Void> delete(Integer privilegeId) {
         if (!devMode()) {
-            return JsonResponse.error("只允许在开发模式下删除权限");
+            throw new SystemException("只允许在开发模式下删除权限");
         }
         Privilege privilege = findById(privilegeId);
         if (privilege == null) {
-            return JsonResponse.error("权限不存在");
+            throw new SystemException("权限不存在");
         }
         if (privilegeMapper.countChildren(privilegeId) > 0) {
-            return JsonResponse.error("请先删除该菜单下的权限");
+            throw new SystemException("请先删除该菜单下的权限");
         }
         rolePrivilegeMapper.deleteByPrivilegeId(privilegeId);
         privilegeMapper.deleteById(privilegeId);
@@ -105,14 +106,14 @@ public class PrivilegeService {
 
     private JsonResponse<Void> validate(Privilege privilege) {
         if (privilege == null || !StringUtils.hasText(privilege.getName())) {
-            return JsonResponse.error("权限名称不能为空");
+            throw new SystemException("权限名称不能为空");
         }
         if (!StringUtils.hasText(privilege.getType())) {
-            return JsonResponse.error("没有选择权限类型");
+            throw new SystemException("没有选择权限类型");
         }
         String type = privilege.getType().trim();
         if (!"menu".equals(type) && !"controller".equals(type)) {
-            return JsonResponse.error("权限类型错误");
+            throw new SystemException("权限类型错误");
         }
         privilege.setName(privilege.getName().trim());
         privilege.setType(type);
@@ -122,13 +123,13 @@ public class PrivilegeService {
         privilege.setIsDisplay(privilege.getIsDisplay() == null ? 0 : privilege.getIsDisplay());
         if ("controller".equals(type)) {
             if (privilege.getParentId() == null || privilege.getParentId() <= 0) {
-                return JsonResponse.error("控制器必须选择上级菜单");
+                throw new SystemException("控制器必须选择上级菜单");
             }
             if (!StringUtils.hasText(privilege.getController())) {
-                return JsonResponse.error("控制器名称不能为空");
+                throw new SystemException("控制器名称不能为空");
             }
             if (!StringUtils.hasText(privilege.getAction())) {
-                return JsonResponse.error("方法名称不能为空");
+                throw new SystemException("方法名称不能为空");
             }
             privilege.setController(privilege.getController().trim());
             privilege.setAction(privilege.getAction().trim());

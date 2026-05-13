@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.CollectionMapper;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
@@ -44,17 +45,17 @@ public class CollectionService {
 
     public JsonResponse<Void> add(CurrentUser currentUser, int type, String resourceId, String redirect) {
         if (resourceId == null || resourceId.isBlank()) {
-            return JsonResponse.error("没有选择收藏资源！");
+            throw new SystemException("没有选择收藏资源！");
         }
         if (type != TYPE_DOC && type != TYPE_SPACE) {
-            return JsonResponse.error("收藏类型错误！");
+            throw new SystemException("收藏类型错误！");
         }
         if (!canVisit(currentUser, type, resourceId)) {
-            return JsonResponse.error("您没有权限收藏该资源。");
+            throw new SystemException("您没有权限收藏该资源。");
         }
         CollectionEntry exists = collectionMapper.findByUserTypeAndResourceId(currentUser.getUserId(), type, resourceId);
         if (exists != null) {
-            return JsonResponse.error("您已收藏过，不能重复收藏！");
+            throw new SystemException("您已收藏过，不能重复收藏！");
         }
         CollectionEntry entry = new CollectionEntry();
         entry.setUserId(currentUser.getUserId());
@@ -85,14 +86,14 @@ public class CollectionService {
 
     public JsonResponse<Void> cancel(Integer currentUserId, Integer collectionId, String redirect) {
         if (collectionId == null) {
-            return JsonResponse.error("没有选择收藏资源！");
+            throw new SystemException("没有选择收藏资源！");
         }
         CollectionEntry entry = collectionMapper.findById(collectionId);
         if (entry == null) {
-            return JsonResponse.error("收藏资源不存在！");
+            throw new SystemException("收藏资源不存在！");
         }
         if (!currentUserId.equals(entry.getUserId())) {
-            return JsonResponse.error("您只能取消自己的收藏！");
+            throw new SystemException("您只能取消自己的收藏！");
         }
         collectionMapper.deleteById(collectionId);
         return JsonResponse.success("已取消收藏！", redirect);

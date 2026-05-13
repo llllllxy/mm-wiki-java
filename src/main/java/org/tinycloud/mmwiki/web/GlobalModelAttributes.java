@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.ConfigService;
 import org.tinycloud.mmwiki.service.InstallService;
 import org.tinycloud.mmwiki.util.RequestUtils;
@@ -55,7 +56,11 @@ public class GlobalModelAttributes {
         }
 
         if (RequestUtils.expectsJsonResponse(request)) {
-            return JsonResponse.error(message);
+            if (e instanceof SystemException) {
+                return JsonResponse.error(message, ((SystemException) e).getUrl());
+            } else {
+                return JsonResponse.error(message);
+            }
         }
 
         ModelAndView view = new ModelAndView("error/default");

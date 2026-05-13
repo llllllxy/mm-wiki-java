@@ -11,7 +11,7 @@ import java.util.Map;
 public class JsonResponse<T> {
 
     private static final String DEFAULT_URL = "";
-    private static final int DEFAULT_SLEEP = 2000;
+    private static final int DEFAULT_SLEEP = 1000;
 
     private int code;
     private Object message;

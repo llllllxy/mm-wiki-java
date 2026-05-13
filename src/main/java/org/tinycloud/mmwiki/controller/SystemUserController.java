@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -64,7 +65,7 @@ public class SystemUserController extends ControllerSupport {
     public String info(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new IllegalStateException("用户不存在。");
+            throw new SystemException("用户不存在。");
         }
         model.addAttribute("user", user);
         model.addAttribute("roleName", roleService.roleName(user.getRoleId()));
@@ -90,11 +91,11 @@ public class SystemUserController extends ControllerSupport {
     public String edit(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new IllegalStateException("用户不存在！");
+            throw new SystemException("用户不存在！");
         }
         if (user.getRoleId() != null && user.getRoleId() == RoleService.ROOT_ROLE_ID
                 && currentUser().getRoleId() != RoleService.ROOT_ROLE_ID) {
-            throw new IllegalStateException("没有权限修改超级管理员！");
+            throw new SystemException("没有权限修改超级管理员！");
         }
         model.addAttribute("user", user);
         model.addAttribute("roles", assignableRoles());
@@ -112,14 +113,14 @@ public class SystemUserController extends ControllerSupport {
     @ResponseBody
     public JsonResponse<Void> forbidden(@RequestParam("user_id") Integer userId) {
         if (currentUser().getUserId().equals(userId)) {
-            return JsonResponse.error("不能屏蔽当前登录用户。");
+            throw new SystemException("不能屏蔽当前登录用户。");
         }
         User user = userService.findActiveById(userId);
         if (user == null) {
-            return JsonResponse.error("用户不存在。");
+            throw new SystemException("用户不存在。");
         }
         if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            return JsonResponse.error("不能操作超级管理员。");
+            throw new SystemException("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 1);
         return JsonResponse.success("屏蔽用户成功", "/system/user/list");
@@ -130,10 +131,10 @@ public class SystemUserController extends ControllerSupport {
     public JsonResponse<Void> recover(@RequestParam("user_id") Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            return JsonResponse.error("用户不存在。");
+            throw new SystemException("用户不存在。");
         }
         if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            return JsonResponse.error("不能操作超级管理员。");
+            throw new SystemException("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 0);
         return JsonResponse.success("恢复用户成功", "/system/user/list");

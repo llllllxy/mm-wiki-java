@@ -24,11 +24,9 @@ public class FollowController extends ControllerSupport {
 
     @PostMapping("/follow/add")
     @ResponseBody
-    public JsonResponse<Void> add(
-        @RequestParam("type") Integer type,
-        @RequestParam("object_id") String objectId,
-        HttpServletRequest request
-    ) {
+    public JsonResponse<Void> add(@RequestParam("type") Integer type,
+                                  @RequestParam("object_id") String objectId,
+                                  HttpServletRequest request) {
         String redirect = request.getHeader("Referer");
         return followService.add(currentUser(), type, objectId, redirect == null ? "" : redirect);
     }

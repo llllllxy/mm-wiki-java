@@ -10,6 +10,7 @@ import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.FollowMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
@@ -85,19 +86,19 @@ public class FollowService {
 
     public JsonResponse<Void> add(CurrentUser currentUser, Integer type, String objectId, String redirect) {
         if (objectId == null || objectId.isBlank()) {
-            return JsonResponse.error("没有选择关注对象。");
+            throw new SystemException("没有选择关注对象。");
         }
         if (!TYPE_DOCEquals(type) && !TYPE_USEREquals(type)) {
-            return JsonResponse.error("关注类型错误。");
+            throw new SystemException("关注类型错误。");
         }
         if (TYPE_USEREquals(type) && objectId.equals(String.valueOf(currentUser.getUserId()))) {
-            return JsonResponse.error("不能关注自己。");
+            throw new SystemException("不能关注自己。");
         }
         if (!canFollow(currentUser, type, objectId)) {
-            return JsonResponse.error("您没有权限关注该对象。");
+            throw new SystemException("您没有权限关注该对象。");
         }
         if (followMapper.findByUserTypeAndObjectId(currentUser.getUserId(), type, objectId) != null) {
-            return JsonResponse.error("您已关注过，不能重复关注。");
+            throw new SystemException("您已关注过，不能重复关注。");
         }
         Follow follow = new Follow();
         follow.setUserId(currentUser.getUserId());
@@ -128,14 +129,14 @@ public class FollowService {
 
     public JsonResponse<Void> cancel(Integer currentUserId, Integer followId, String redirect) {
         if (followId == null) {
-            return JsonResponse.error("没有选择关注对象。");
+            throw new SystemException("没有选择关注对象。");
         }
         Follow follow = followMapper.findById(followId);
         if (follow == null) {
-            return JsonResponse.error("关注对象不存在。");
+            throw new SystemException("关注对象不存在。");
         }
         if (!currentUserId.equals(follow.getUserId())) {
-            return JsonResponse.error("您只能取消自己的关注。");
+            throw new SystemException("您只能取消自己的关注。");
         }
         followMapper.deleteById(followId);
         return JsonResponse.success("已取消关注", redirect);

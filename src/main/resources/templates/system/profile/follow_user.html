@@ -44,13 +44,16 @@
                         </thead>
                         <tbody>
                         <tr th:each="item : ${users}">
+                            <!-- _parent为在父框架打开，嵌套 <iframe> 时跳出一层 -->
                             <td><strong><a th:href="@{/user/info(user_id=${item.userId})}" target="_parent" th:text="${item.username}">user</a></strong></td>
                             <td th:text="${item.givenName}">name</td>
                             <td th:text="${item.email}">email</td>
-                            <td class="center"><a
-                                    th:data-url="@{/follow/cancel(follow_id=${item.followId},redirect='/system/profile/followUser')}"
-                                    onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
-                                    class="glyphicon glyphicon-heart"></i></a></td>
+                            <td class="center">
+                                <a th:data-url="@{/follow/cancel(follow_id=${item.followId},redirect='/system/profile/followUser')}"
+                                    onclick="Common.ajaxSubmit(this.getAttribute('data-url'))">
+                                    <i class="glyphicon glyphicon-heart"></i>
+                                </a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>

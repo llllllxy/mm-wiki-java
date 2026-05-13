@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
 import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
@@ -79,16 +80,16 @@ public class SystemProfileService {
                                             String phone, String department,
                                             String position, String location, String im) {
         if (!StringUtils.hasText(givenName)) {
-            return JsonResponse.error("姓名不能为空。");
+            throw new SystemException("姓名不能为空。");
         }
         if (!StringUtils.hasText(email)) {
-            return JsonResponse.error("邮箱不能为空。");
+            throw new SystemException("邮箱不能为空。");
         }
         if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
-            return JsonResponse.error("邮箱格式不正确。");
+            throw new SystemException("邮箱格式不正确。");
         }
         if (!StringUtils.hasText(mobile)) {
-            return JsonResponse.error("手机号不能为空。");
+            throw new SystemException("手机号不能为空。");
         }
 
         userService.updateProfile(userId, givenName.trim(),
@@ -186,15 +187,15 @@ public class SystemProfileService {
      */
     public JsonResponse<Void> savePassword(Integer userId, String password, String passwordNew, String passwordConfirm) {
         if (!StringUtils.hasText(password) || !StringUtils.hasText(passwordNew) || !StringUtils.hasText(passwordConfirm)) {
-            return JsonResponse.error("密码不能为空。");
+            throw new SystemException("密码不能为空。");
         }
         User user = requireUser(userId);
         String currentEncoded = userService.encodePassword(password);
         if (!currentEncoded.equals(user.getPassword())) {
-            return JsonResponse.error("当前密码错误。");
+            throw new SystemException("当前密码错误。");
         }
         if (!passwordNew.equals(passwordConfirm)) {
-            return JsonResponse.error("确认密码和新密码不一致。");
+            throw new SystemException("确认密码和新密码不一致。");
         }
         userService.updatePassword(userId, userService.encodePassword(passwordNew));
         return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
@@ -210,7 +211,7 @@ public class SystemProfileService {
     private User requireUser(Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new IllegalStateException("用户不存在！");
+            throw new SystemException("用户不存在！");
         }
         return user;
     }

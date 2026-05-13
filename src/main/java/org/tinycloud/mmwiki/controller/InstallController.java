@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.EnvView;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +60,10 @@ public class InstallController {
     @ResponseBody
     public JsonResponse<Void> acceptLicense(@RequestParam(value = "license_agree", defaultValue = "0") String agree) {
         if (installService.installed()) {
-            return JsonResponse.error("系统已经安装完成，不能重复安装", "/author/index", 1000);
+            throw new SystemException("系统已经安装完成，不能重复安装", "/author/index");
         }
         if (!"1".equals(agree)) {
-            return JsonResponse.error("请先同意协议后再继续");
+            throw new SystemException("请先同意协议后再继续");
         }
         installService.data().setLicense(InstallData.LICENSE_AGREE);
         return JsonResponse.success("", "/install/env", 300);
@@ -90,7 +91,7 @@ public class InstallController {
     @ResponseBody
     public JsonResponse<Void> acceptEnv() {
         if (installService.data().getEnv() == InstallData.ENV_NOT_ACCESS) {
-            return JsonResponse.error("环境检测未通过");
+            throw new SystemException("环境检测未通过");
         }
         installService.data().setEnv(InstallData.ENV_ACCESS);
         return JsonResponse.success("", "/install/config", 300);
@@ -120,7 +121,7 @@ public class InstallController {
     ) {
         String error = installService.saveSystemConfig(addr, port, documentDir);
         if (!error.isBlank()) {
-            return JsonResponse.error(error);
+            throw new SystemException(error);
         }
         return JsonResponse.success("", "/install/database", 300);
     }
@@ -165,7 +166,7 @@ public class InstallController {
         conf.put("admin_pass", adminPass);
         String error = installService.saveDatabaseConfig(conf);
         if (!error.isBlank()) {
-            return JsonResponse.error(error);
+            throw new SystemException(error);
         }
         return JsonResponse.success("", "/install/ready", 300);
     }
@@ -191,7 +192,7 @@ public class InstallController {
     public JsonResponse<Void> acceptReady() {
         String error = installService.startInstall();
         if (!error.isBlank()) {
-            return JsonResponse.error(error);
+            throw new SystemException(error);
         }
         return JsonResponse.success("", "/install/end", 300);
     }

@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class ContactService {
 
     public JsonResponse<Void> update(Contact contact) {
         if (contact.getContactId() == null || findById(contact.getContactId()) == null) {
-            return JsonResponse.error("联系人不存在。");
+            throw new SystemException("联系人不存在。");
         }
         JsonResponse<Void> validation = validate(contact);
         if (validation != null) {
@@ -66,7 +67,7 @@ public class ContactService {
 
     public JsonResponse<Void> delete(Integer contactId) {
         if (findById(contactId) == null) {
-            return JsonResponse.error("联系人不存在。");
+            throw new SystemException("联系人不存在。");
         }
         contactMapper.deleteById(contactId);
         return JsonResponse.success("删除联系人成功", "/system/contact/list");
@@ -87,19 +88,19 @@ public class ContactService {
 
     private JsonResponse<Void> validate(Contact contact) {
         if (contact == null) {
-            return JsonResponse.error("联系人参数错误。");
+            throw new SystemException("联系人参数错误。");
         }
         if (!StringUtils.hasText(contact.getName())) {
-            return JsonResponse.error("联系人姓名不能为空。");
+            throw new SystemException("联系人姓名不能为空。");
         }
         if (!StringUtils.hasText(contact.getPosition())) {
-            return JsonResponse.error("职位不能为空。");
+            throw new SystemException("职位不能为空。");
         }
         if (!StringUtils.hasText(contact.getMobile())) {
-            return JsonResponse.error("联系电话不能为空。");
+            throw new SystemException("联系电话不能为空。");
         }
         if (!StringUtils.hasText(contact.getEmail()) || !contact.getEmail().contains("@")) {
-            return JsonResponse.error("邮箱格式不正确。");
+            throw new SystemException("邮箱格式不正确。");
         }
         contact.setName(contact.getName().trim());
         contact.setPosition(contact.getPosition().trim());
