@@ -83,7 +83,7 @@
     attachmentObj.on("fileuploaded", function(event, data) {
         if (data.response.code) {
             Layers.successMsg(data.response.message);
-            Common.redirect(data.response.redirect.url);
+            Common.redirect(data.response.redirect);
         }
     });
 </script>

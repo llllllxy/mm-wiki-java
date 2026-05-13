@@ -4,6 +4,57 @@ $(function () {
 });
 
 var Common = {
+    unauthorizedAlerting: false,
+
+    handleError: function (XMLHttpRequest) {
+        if (Common.handleUnauthorized(XMLHttpRequest)) {
+            return;
+        }
+        var message = "错误提示： " + XMLHttpRequest.status + " " + XMLHttpRequest.statusText;
+        if (typeof Layers !== "undefined") {
+            Layers.failedMsg(message);
+        } else {
+            alert(message);
+        }
+    },
+
+    /**
+     * 处理普通 Ajax 请求时的 HTTP 401 未授权响应。
+     *
+     * @param XMLHttpRequest jQuery XHR 对象
+     * @returns {boolean} true 表示已经识别并处理 HTTP 401
+     */
+    handleUnauthorized: function (XMLHttpRequest) {
+        if (!XMLHttpRequest || Number(XMLHttpRequest.status) !== 401) {
+            return false;
+        }
+        if (Common.unauthorizedAlerting) {
+            return true;
+        }
+
+        Common.unauthorizedAlerting = true;
+        var response = XMLHttpRequest.responseJSON || {};
+        var redirectUrl = response.redirect && response.redirect.url ? response.redirect.url : "/author/index";
+
+        if (typeof layer !== "undefined") {
+            layer.confirm("未登录或登录已失效！<br/>是否跳转到登录页面？", {
+                title: "登录状态失效",
+                btn: ["跳转登录", "留在本页"],
+                btnAlign: "c",
+                closeBtn: 0
+            }, function (index) {
+                layer.close(index);
+                window.location.href = redirectUrl;
+            }, function () {
+                Common.unauthorizedAlerting = false;
+            });
+        } else if (confirm("未登录或登录已失效！\n是否跳转到登录页面？")) {
+            window.location.href = redirectUrl;
+        } else {
+            Common.unauthorizedAlerting = false;
+        }
+        return true;
+    },
 
     /**
      * ajax submit
@@ -29,11 +80,11 @@ var Common = {
                     Layers.failedMsg(response.message, function () {
                     });
                 } else {
-                    Layers.successMsg(response.message, Common.redirect(response.redirect.url));
+                    Layers.successMsg(response.message, Common.redirect(response.redirect));
                 }
             },
-            error: function (response) {
-                Layers.failedMsg("server error!")
+            error: function (XMLHttpRequest) {
+                Common.handleError(XMLHttpRequest);
             }
         });
     },
@@ -72,10 +123,10 @@ var Common = {
      * @param redirect
      */
     redirect: function (redirect) {
-        if (redirect) {
+        if (redirect.url) {
             setTimeout(function () {
-                location.href = redirect;
-            }, 2000);
+                location.href = redirect.url;
+            }, redirect.sleep);
         } else {
             setTimeout(function () {
                 location.reload();
