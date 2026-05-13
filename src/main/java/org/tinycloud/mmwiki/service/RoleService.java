@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,14 +106,14 @@ public class RoleService {
 
     public JsonResponse<Void> update(Role role) {
         if (role == null || role.getRoleId() == null) {
-            return JsonResponse.error("角色不存在");
+            throw new SystemException("角色不存在");
         }
         if (role.getRoleId() == ROOT_ROLE_ID) {
-            return JsonResponse.error("超级管理员不能修改");
+            throw new SystemException("超级管理员不能修改");
         }
         Role existing = findActiveById(role.getRoleId());
         if (existing == null) {
-            return JsonResponse.error("角色不存在");
+            throw new SystemException("角色不存在");
         }
         JsonResponse<Void> validation = validate(role, role.getRoleId());
         if (validation != null) {
@@ -127,16 +128,16 @@ public class RoleService {
     public JsonResponse<Void> delete(Integer roleId) {
         Role role = findActiveById(roleId);
         if (role == null) {
-            return JsonResponse.error("角色不存在");
+            throw new SystemException("角色不存在");
         }
         if (roleId == ROOT_ROLE_ID) {
-            return JsonResponse.error("超级管理员不能删除");
+            throw new SystemException("超级管理员不能删除");
         }
         if ((role.getType() == null ? CUSTOM_ROLE_TYPE : role.getType()) == SYSTEM_ROLE_TYPE) {
-            return JsonResponse.error("系统角色不能删除");
+            throw new SystemException("系统角色不能删除");
         }
         if (userMapper.countByRoleId(roleId) > 0) {
-            return JsonResponse.error("不能删除角色，请先移除该角色下用户");
+            throw new SystemException("不能删除角色，请先移除该角色下用户");
         }
         rolePrivilegeMapper.deleteByRoleId(roleId);
         roleMapper.markDeleted(roleId);
@@ -157,10 +158,10 @@ public class RoleService {
     public JsonResponse<Void> grantPrivileges(Integer roleId, List<Integer> privilegeIds) {
         Role role = findActiveById(roleId);
         if (role == null) {
-            return JsonResponse.error("角色不存在");
+            throw new SystemException("角色不存在");
         }
         if (roleId == ROOT_ROLE_ID) {
-            return JsonResponse.error("超级管理员不需要授权");
+            throw new SystemException("超级管理员不需要授权");
         }
         Set<Integer> merged = new LinkedHashSet<>(DEFAULT_PRIVILEGE_IDS);
         if (privilegeIds != null) {
@@ -174,27 +175,27 @@ public class RoleService {
 
     public JsonResponse<Void> resetUserRole(Integer userId) {
         if (userId == null) {
-            return JsonResponse.error("用户不存在");
+            throw new SystemException("用户不存在");
         }
         var user = userMapper.findActiveById(userId);
         if (user == null) {
-            return JsonResponse.error("用户不存在");
+            throw new SystemException("用户不存在");
         }
         if (userId == ROOT_ROLE_ID) {
-            return JsonResponse.error("root 用户不能重置角色");
+            throw new SystemException("root 用户不能重置角色");
         }
         userMapper.updateRoleId(userId, DEFAULT_ROLE_ID);
-        return JsonResponse.success("重置用户角色成功", "/system/role/list");
+        return JsonResponse.success("重置用户角色成功", "/system/role/user?role_id=" + DEFAULT_ROLE_ID);
     }
 
     private JsonResponse<Void> validate(Role role, Integer currentId) {
         if (role == null || !StringUtils.hasText(role.getName())) {
-            return JsonResponse.error("角色名称不能为空");
+            throw new SystemException("角色名称不能为空");
         }
         String name = role.getName().trim();
         long duplicate = currentId == null ? roleMapper.countByName(name) : roleMapper.countByNameAndNotId(currentId, name);
         if (duplicate > 0) {
-            return JsonResponse.error("角色名已经存在");
+            throw new SystemException("角色名已经存在");
         }
         role.setName(name);
         return null;
