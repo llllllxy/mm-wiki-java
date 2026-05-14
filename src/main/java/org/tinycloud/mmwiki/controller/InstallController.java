@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -143,17 +144,15 @@ public class InstallController {
      */
     @PostMapping("/install/database")
     @ResponseBody
-    public JsonResponse<Void> acceptDatabase(
-            @RequestParam("host") String host,
-            @RequestParam("port") String port,
-            @RequestParam("name") String name,
-            @RequestParam("user") String user,
-            @RequestParam("pass") String pass,
-            @RequestParam("conn_max_idle") String connMaxIdle,
-            @RequestParam("conn_max_connection") String connMaxConnection,
-            @RequestParam("admin_name") String adminName,
-            @RequestParam("admin_pass") String adminPass
-    ) {
+    public JsonResponse<Void> acceptDatabase(@RequestParam("host") String host,
+                                             @RequestParam("port") String port,
+                                             @RequestParam("name") String name,
+                                             @RequestParam("user") String user,
+                                             @RequestParam("pass") String pass,
+                                             @RequestParam("conn_max_idle") String connMaxIdle,
+                                             @RequestParam("conn_max_connection") String connMaxConnection,
+                                             @RequestParam("admin_name") String adminName,
+                                             @RequestParam("admin_pass") String adminPass) {
         Map<String, String> conf = new LinkedHashMap<>();
         conf.put("host", host);
         conf.put("port", port);

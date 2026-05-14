@@ -80,7 +80,11 @@ var Common = {
                     Layers.failedMsg(response.message, function () {
                     });
                 } else {
-                    Layers.successMsg(response.message, Common.redirect(response.redirect));
+                    var redirect = response.redirect || {};
+                    var sleep = redirect.sleep !== undefined ? redirect.sleep : 2000;
+                    Layers.successMsg(response.message, sleep, function () {
+                        Common.redirect(redirect);
+                    });
                 }
             },
             error: function (XMLHttpRequest) {
@@ -123,14 +127,11 @@ var Common = {
      * @param redirect
      */
     redirect: function (redirect) {
+        redirect = redirect || {};
         if (redirect.url) {
-            setTimeout(function () {
-                location.href = redirect.url;
-            }, redirect.sleep);
+            location.href = redirect.url;
         } else {
-            setTimeout(function () {
-                location.reload();
-            }, 2000);
+            location.reload();
         }
     },
 

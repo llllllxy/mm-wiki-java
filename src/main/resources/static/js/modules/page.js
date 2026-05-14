@@ -14,44 +14,25 @@ var Page = {
         isAutoFollow = String(isAutoFollow || "0");
 
         /**
-         * 成功信息条
-         * @param message
-         * @param data
-         */
-        function successBox(message, data) {
-            Layers.successMsg(message)
-        }
-
-        /**
-         * 失败信息条
-         * @param message
-         * @param data
-         */
-        function failed(message, data) {
-            Layers.failedMsg(message)
-        }
-
-        /**
          * request success
          * @param result
          */
         function response(result) {
             //console.log(result)
+            var redirect = result.redirect || {};
+            var sleepTime = redirect.sleep !== undefined ? redirect.sleep : 2000;
+            var redirectCallback = redirect.url ? function () {
+                parent.location.href = redirect.url;
+            } : undefined;
             if (result.code == 0) {
-                failed(result.message, result.data);
+                Layers.failedMsg(result.message, sleepTime, redirectCallback);
             }
             if (result.code == 1) {
                 // remove storage
                 var documentId = $("input[name='document_id']").val();
                 var storageId = "mm_wiki_doc_" + documentId;
                 Storage.remove(storageId);
-                successBox(result.message, result.data);
-            }
-            if (result.redirect.url) {
-                var sleepTime = result.redirect.sleep || 3000;
-                setTimeout(function () {
-                    parent.location.href = result.redirect.url;
-                }, sleepTime);
+                Layers.successMsg(result.message, sleepTime, redirectCallback);
             }
         }
 

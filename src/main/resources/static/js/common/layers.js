@@ -31,16 +31,33 @@ var Layers = {
         })
     },
 
-    failedMsg: function (info, callback) {
+    failedMsg: function (info, time, callback) {
+        if (typeof time === "function") {
+            callback = time;
+            time = undefined;
+        }
         var content = '<i class="fa fa-frown-o"></i> ';
         content += info;
-        layer.msg(content, callback);
+        if (time === undefined || time === null) {
+            layer.msg(content, callback);
+        } else {
+            layer.msg(content, {time: time}, callback);
+        }
     },
 
-    successMsg: function (info, callback) {
+    successMsg: function (info, time, callback) {
+        if (typeof time === "function") {
+            callback = time;
+            time = undefined;
+        }
         var content = '<i class="fa fa-smile-o"></i> ';
         content += info;
-        layer.msg(content, callback);
+        // layer.msg(content, callback) 默认 time = 3000ms，也就是 3 秒后关闭，然后触发 end/callback
+        if (time === undefined || time === null) {
+            layer.msg(content, callback);
+        } else {
+            layer.msg(content, {time: time}, callback);
+        }
     },
 
     /**
