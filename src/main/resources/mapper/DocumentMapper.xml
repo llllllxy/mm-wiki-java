@@ -4,7 +4,17 @@
 <mapper namespace="org.tinycloud.mmwiki.mapper.DocumentMapper">
 
     <select id="findActiveByIds" resultType="org.tinycloud.mmwiki.domain.Document">
-        select document_id, parent_id, space_id, name, type, path, sequence, create_user_id, edit_user_id, create_time,
+        select
+        document_id,
+        parent_id,
+        space_id,
+        name,
+        type,
+        path,
+        sequence,
+        create_user_id,
+        edit_user_id,
+        create_time,
         update_time
         from mw_document
         where is_delete = 0

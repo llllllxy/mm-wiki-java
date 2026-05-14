@@ -3,6 +3,7 @@ package org.tinycloud.mmwiki.mapper;
 import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Document;
@@ -18,11 +19,7 @@ public interface DocumentMapper {
 
     List<Document> findActiveByIds(@Param("documentIds") List<String> documentIds);
 
-    List<Document> findVisibleByIds(
-            @Param("userId") Integer userId,
-            @Param("root") boolean root,
-            @Param("documentIds") List<String> documentIds
-    );
+    List<Document> findVisibleByIds(@Param("userId") Integer userId, @Param("root") boolean root, @Param("documentIds") List<String> documentIds);
 
     Document findActiveById(@Param("documentId") String documentId);
 
@@ -36,12 +33,8 @@ public interface DocumentMapper {
 
     List<Document> findByParentId(@Param("parentId") String parentId);
 
-    Document findByNameParentIdAndSpaceId(
-        @Param("name") String name,
-        @Param("parentId") String parentId,
-        @Param("spaceId") Integer spaceId,
-        @Param("type") Integer type
-    );
+    Document findByNameParentIdAndSpaceId(@Param("name") String name, @Param("parentId") String parentId,
+                                          @Param("spaceId") Integer spaceId, @Param("type") Integer type);
 
     Integer findMaxSequence(@Param("parentId") String parentId, @Param("spaceId") Integer spaceId);
 
@@ -53,22 +46,14 @@ public interface DocumentMapper {
 
     int updateParentPathEditor(Document document);
 
-    int bumpSequenceBySpaceIdFrom(
-        @Param("spaceId") Integer spaceId,
-        @Param("startSequence") Integer startSequence,
-        @Param("delta") Integer delta,
-        @Param("updateTime") LocalDateTime updateTime
-    );
+    int bumpSequenceBySpaceIdFrom(@Param("spaceId") Integer spaceId, @Param("startSequence") Integer startSequence,
+                                  @Param("delta") Integer delta, @Param("updateTime") LocalDateTime updateTime);
 
     int updateSequence(Document document);
 
     int markDeleted(Document document);
 
-    List<Document> findVisibleByNameLike(
-            @Param("userId") Integer userId,
-            @Param("root") boolean root,
-            @Param("keyword") String keyword
-    );
+    List<Document> findVisibleByNameLike(@Param("userId") Integer userId, @Param("root") boolean root, @Param("keyword") String keyword);
 
     long countActive();
 
