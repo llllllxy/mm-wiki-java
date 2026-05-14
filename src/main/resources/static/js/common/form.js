@@ -1,6 +1,5 @@
 /**
  * Form.js 表单提交类
- * 依赖 jquery.form.js
  */
 
 var Form = {
@@ -54,7 +53,7 @@ var Form = {
             }
         }
 
-        function beforeSubmit(formData, jqForm, options) {
+        function beforeSubmit(formData, jqForm) {
             // 只加密显式标记的密码字段，避免通用表单误伤邮箱、LDAP、安装配置等明文密钥。
             for (var i = 0; i < formData.length; i++) {
                 var field = jqForm.find(":input").filter(function () {
@@ -64,16 +63,22 @@ var Form = {
                     formData[i].value = hex_sha256(formData[i].value);
                 }
             }
-            return true;  // 返回true表示继续提交表单，返回false表示取消提交
         }
 
-        var options = {
-            dataType: 'json',
-            beforeSubmit: beforeSubmit,
-            success: response
-        };
+        var $form = $(element);
+        var formData = $form.serializeArray();
+        beforeSubmit(formData, $form);
 
-        $(element).ajaxSubmit(options);
+        $.ajax({
+            type: $form.attr("method") || "post",
+            url: $form.attr("action"),
+            data: formData,
+            dataType: 'json',
+            success: response,
+            error: function (XMLHttpRequest) {
+                Common.handleError(XMLHttpRequest);
+            }
+        });
 
         return false;
     }

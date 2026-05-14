@@ -14,7 +14,6 @@
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-switch/css/bootstrap-switch.min.css}">
     <link th:href="@{/static/css/common.css}" rel="stylesheet">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
-    <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery.form.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/popover/js/jquery.webui-popover.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap-switch/js/bootstrap-switch.min.js}"></script>
@@ -116,19 +115,12 @@
             codeFold : true,
             placeholder: "欢迎使用 MM-Wiki，请使用 Markdown 规范编写",
             //syncScrolling : false,
-            // 保存 HTML 到 Textarea
-            saveHTMLToTextarea: false,
+            saveHTMLToTextarea: false, // 保存 HTML 到 Textarea
             searchReplace: true,
-            // 关闭实时预览
-            //watch : false,
-            // 开启 HTML 标签解析，为了安全性，默认不开启
-            // htmlDecode : "style,script,iframe|on*,alert",
-            // 开启 HTML 标签解析，为了安全性，默认不开启
-            // htmlDecode : "style,script,iframe,sub,sup,embed,img|on*",
-            //关闭工具栏
-            //toolbar  : false,
-            // 关闭预览 HTML 的代码块高亮，默认开启
-            //previewCodeHighlight : false,
+            //watch : false, // 关闭实时预览
+            // htmlDecode : "style,script,iframe|on*,alert", // 开启 HTML 标签解析，为了安全性，默认不开启
+            //toolbar  : false,  // 关闭工具栏
+            //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
             emoji : false,
             taskList : true,
             tocm: true, // Using [TOCM]
@@ -144,7 +136,7 @@
             imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
             imageUploadURL: "/image/upload?document_id=" + encodeURIComponent(documentId),
             onload : function() {
-                //Vincent [46603415@qq.com] 新增图片粘贴上传功能 Start
+                // 新增图片粘贴上传功能 Start
                 $("#document_page_editor").on("paste", function (e) {
                     var clipboardData = (e.originalEvent && e.originalEvent.clipboardData) || window.clipboardData;
                     if (!(clipboardData && clipboardData.items)) {
@@ -163,31 +155,29 @@
                         }
 
                         var time = Date.now();
-                        var fileName = imageFile.name || ("clipboard-" + time + "." + (imageFile.type.split("/")[1] || "png"));
-                        var uploadName = time + "-" + fileName;
-                        var uploadFile = imageFile;
-                        try {
-                            uploadFile = new File([imageFile], uploadName, {type: imageFile.type});
-                        } catch (ignore) {
-                        }
+                        var fileName = imageFile.name || ("clipboard." + (imageFile.type.split("/")[1] || "png"));
 
                         var formData = new FormData();
-                        formData.append("editormd-image-file", uploadFile);
+                        formData.append("editormd-image-file", imageFile, fileName);
 
-                        var xhr = new XMLHttpRequest();
-                        xhr.onload = function () {
-                            var data = JSON.parse(xhr.responseText || "{}");
-                            if (data.success === 1) {
-                                editor.insertValue("![image](" + data.url + ")\r\n");
-                            } else {
-                                Layers.failedMsg(data.message || "图片上传失败");
+                        $.ajax({
+                            type: "POST",
+                            url: "/image/upload?document_id=" + encodeURIComponent(documentId) + "&guid=" + time,
+                            data: formData,
+                            dataType: "json",
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                if (data.success === 1) {
+                                    editor.insertValue("![image](" + data.url + ")\r\n");
+                                } else {
+                                    Layers.failedMsg(data.message || "图片上传失败");
+                                }
+                            },
+                            error: function () {
+                                Layers.failedMsg("图片上传失败");
                             }
-                        };
-                        xhr.onerror = function () {
-                            Layers.failedMsg("图片上传失败");
-                        };
-                        xhr.open("POST", "/image/upload?document_id=" + encodeURIComponent(documentId) + "&guid=" + time, true);
-                        xhr.send(formData);
+                        });
 
                         e.preventDefault();
                         return false;

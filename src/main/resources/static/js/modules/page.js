@@ -75,12 +75,21 @@ var Page = {
                     layer.tips("最多50个字符！", $("textarea[name='edit_comment']"))
                 } else {
                     layer.close(index);
-                    var options = {
-                        dataType: 'json',
+                    var $form = $(element);
+                    var formData = $form.serializeArray();
+                    formData.push({name: "comment", value: commentText});
+                    formData.push({name: "is_notice_user", value: isNoticeUser});
+                    formData.push({name: "is_follow_doc", value: isFollowDoc});
+                    $.ajax({
+                        type: $form.attr("method") || "post",
+                        url: $form.attr("action"),
+                        data: formData,
+                        dataType: "json",
                         success: response,
-                        data: {'comment': commentText, 'is_notice_user': isNoticeUser, 'is_follow_doc': isFollowDoc}
-                    };
-                    $(element).ajaxSubmit(options);
+                        error: function (XMLHttpRequest) {
+                            Common.handleError(XMLHttpRequest);
+                        }
+                    });
                 }
                 // if (commentText && commentText.length > 0) {
                 //
@@ -107,7 +116,7 @@ var Page = {
         //             success: response,
         //             data: {'comment': comment}
         //         };
-        //         $(element).ajaxSubmit(options);
+        //         $.ajax(options);
         //     }else {
         //         elem.focus()
         //     }

@@ -3,10 +3,11 @@ package org.tinycloud.mmwiki.controller;
 import org.tinycloud.mmwiki.vo.Access;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
+import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,10 +46,8 @@ public class ImageController extends ControllerSupport {
 
     @PostMapping("/image/upload")
     @ResponseBody
-    public EditorImageResponse upload(
-            @RequestParam("document_id") String documentId,
-            @RequestParam("editormd-image-file") MultipartFile file
-    ) throws Exception {
+    public EditorImageResponse upload(@RequestParam("document_id") String documentId,
+                                      @RequestParam("editormd-image-file") MultipartFile file) throws Exception {
         Document document = documentService.findActiveById(documentId);
         if (document == null) {
             return EditorImageResponse.error("文档不存在。");
@@ -62,18 +61,32 @@ public class ImageController extends ControllerSupport {
             return EditorImageResponse.error("上传图片错误。");
         }
         Path saveDir = documentFileService.ensureAttachmentDirectory("images", String.valueOf(document.getSpaceId()), documentId);
-        Path saveFile = saveDir.resolve(file.getOriginalFilename());
+        String originalFileName = file.getOriginalFilename();
+        String storedFileName = UUID.randomUUID().toString().replace("-", "") + getExtension(originalFileName);
+        Path saveFile = saveDir.resolve(storedFileName);
         if (Files.exists(saveFile)) {
             return EditorImageResponse.error("该图片已经上传过。");
         }
         file.transferTo(saveFile);
         try {
-            String relativePath = "images/" + document.getSpaceId() + "/" + documentId + "/" + file.getOriginalFilename();
-            attachmentService.save(currentUser().getUserId(), documentId, file.getOriginalFilename(), relativePath, AttachmentService.SOURCE_IMAGE);
-            return EditorImageResponse.success("上传成功", "/" + relativePath);
+            String relativePath = "images/" + document.getSpaceId() + "/" + documentId + "/" + storedFileName;
+            String markdownUrl = "/" + relativePath;
+            attachmentService.save(currentUser().getUserId(), documentId, originalFileName, relativePath, AttachmentService.SOURCE_IMAGE);
+            return EditorImageResponse.success("上传成功", markdownUrl);
         } catch (Exception ex) {
             Files.deleteIfExists(saveFile);
             throw ex;
         }
+    }
+
+    private String getExtension(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int index = fileName.lastIndexOf('.');
+        if (index < 0 || index == fileName.length() - 1) {
+            return "";
+        }
+        return fileName.substring(index).toLowerCase(Locale.ROOT);
     }
 }

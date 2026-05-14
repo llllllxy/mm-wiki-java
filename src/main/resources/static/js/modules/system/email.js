@@ -47,13 +47,18 @@ var Email = {
             $("body,html").animate({scrollTop:0},300);
         }
 
-        var options = {
-            dataType: 'json',
-            url: url,
-            success: response
-        };
+        var $form = $(element);
 
-        $(element).ajaxSubmit(options);
+        $.ajax({
+            type: $form.attr("method") || "post",
+            url: url,
+            data: $form.serializeArray(),
+            dataType: 'json',
+            success: response,
+            error: function (XMLHttpRequest) {
+                Common.handleError(XMLHttpRequest);
+            }
+        });
         return false;
     }
 };

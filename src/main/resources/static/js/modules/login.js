@@ -38,19 +38,26 @@ var Login = {
             }
         }
 
-        function beforeSubmit(formData, jqForm, options) {
-            // 对要提交的数据进行修改
-            formData[0].value = username;
-            formData[1].value = hex_sha256(password);
-            return true;  // 返回true表示继续提交表单，返回false表示取消提交
+        var $form = $(element);
+        var formData = $form.serializeArray();
+        for (var i = 0; i < formData.length; i++) {
+            if (formData[i].name == "username") {
+                formData[i].value = username;
+            }
+            if (formData[i].name == "password") {
+                formData[i].value = hex_sha256(password);
+            }
         }
 
-        var options = {
+        $.ajax({
+            type: $form.attr("method") || "post",
+            url: $form.attr("action"),
+            data: formData,
             dataType: 'json',
-            beforeSubmit: beforeSubmit,
-            success: response
-        };
-
-        $(element).ajaxSubmit(options);
+            success: response,
+            error: function (XMLHttpRequest) {
+                Common.handleError(XMLHttpRequest);
+            }
+        });
     }
 };
