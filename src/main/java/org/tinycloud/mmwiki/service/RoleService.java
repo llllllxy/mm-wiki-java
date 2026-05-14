@@ -2,27 +2,23 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.exception.SystemException;
-import org.tinycloud.mmwiki.util.TimeUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.Role;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.RoleMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.UserMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.tinycloud.mmwiki.config.GlobalConstant.*;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -33,11 +29,6 @@ import org.tinycloud.mmwiki.web.PageModel;
 @Service
 public class RoleService {
 
-    public static final int ROOT_ROLE_ID = 1;
-    public static final int DEFAULT_ROLE_ID = 3;
-    public static final int SYSTEM_ROLE_TYPE = 1;
-    public static final int CUSTOM_ROLE_TYPE = 0;
-    public static final List<Integer> DEFAULT_PRIVILEGE_IDS = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
     @Autowired
     private RoleMapper roleMapper;

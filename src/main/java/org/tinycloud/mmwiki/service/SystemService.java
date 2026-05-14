@@ -1,18 +1,16 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.web.CurrentUser;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -54,7 +52,7 @@ public class SystemService {
 
     public List<MenuGroup> loadMenuGroups(CurrentUser currentUser) {
         List<Privilege> displayed = privilegeMapper.findDisplayed();
-        boolean unrestricted = currentUser != null && currentUser.getRoleId() != null && currentUser.getRoleId() == RoleService.ROOT_ROLE_ID;
+        boolean unrestricted = currentUser != null && currentUser.getRoleId() != null && currentUser.getRoleId() == ROOT_ROLE_ID;
         Set<Integer> allowedIds = unrestricted ? Set.of() : allowedPrivilegeIds(currentUser);
         List<Privilege> available = displayed.stream()
             .filter(item -> unrestricted || allowedIds.contains(item.getPrivilegeId()))

@@ -1,11 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -13,9 +8,16 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.util.HashUtils;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
-import org.tinycloud.mmwiki.util.TimeUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.tinycloud.mmwiki.config.GlobalConstant.DEFAULT_ROLE_ID;
+import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -104,7 +106,7 @@ public class UserService {
     public User saveOrUpdateAuthUser(User user) {
         User existing = findActiveByUsername(user.getUsername());
         if (existing == null) {
-            user.setRoleId(RoleService.DEFAULT_ROLE_ID);
+            user.setRoleId(DEFAULT_ROLE_ID);
             userMapper.insertAuthUser(user);
         } else {
             userMapper.updateAuthUserByUsername(user);
@@ -180,18 +182,18 @@ public class UserService {
         if (existing == null) {
             throw new SystemException("用户不存在！");
         }
-        if (isRootRole(existing.getRoleId()) && !isRoot(operator)) {
+        if (AccessService.isRootRole(existing.getRoleId()) && !AccessService.isRoot(operator)) {
             throw new SystemException("没有权限修改超级管理员！");
         }
-        if (isRootRole(existing.getRoleId())) {
-            user.setRoleId(RoleService.ROOT_ROLE_ID);
+        if (AccessService.isRootRole(existing.getRoleId())) {
+            user.setRoleId(ROOT_ROLE_ID);
         }
         JsonResponse<Void> validation = validateSystemUser(user, false, operator);
         if (validation != null) {
             return validation;
         }
         user.setUpdateTime(TimeUtils.now());
-        if (StringUtils.hasText(user.getPassword()) && isRoot(operator)) {
+        if (StringUtils.hasText(user.getPassword()) && AccessService.isRoot(operator)) {
             user.setPassword(encodePassword(user.getPassword().trim()));
             userMapper.updateSystemUserWithPassword(user);
         } else {
@@ -251,19 +253,12 @@ public class UserService {
         if (roleService.findActiveById(user.getRoleId()) == null) {
             throw new SystemException("角色不存在！");
         }
-        if (isRootRole(user.getRoleId()) && !isRoot(operator)) {
+        if (AccessService.isRootRole(user.getRoleId()) && !AccessService.isRoot(operator)) {
             throw new SystemException("没有权限分配超级管理员角色！");
         }
         return null;
     }
 
-    private boolean isRoot(CurrentUser currentUser) {
-        return currentUser != null && isRootRole(currentUser.getRoleId());
-    }
-
-    private boolean isRootRole(Integer roleId) {
-        return roleId != null && roleId == RoleService.ROOT_ROLE_ID;
-    }
 
     private String trim(String value) {
         return value == null ? "" : value.trim();

@@ -99,7 +99,9 @@ public class GlobalModelAttributes {
      * @return HTTP 状态码
      */
     private HttpStatus resolveStatus(RuntimeException e) {
-        if (e instanceof IllegalArgumentException) {
+        if (e instanceof IllegalArgumentException
+                || e instanceof IllegalStateException
+                || e instanceof SystemException) {
             return HttpStatus.BAD_REQUEST;
         }
         String message = e.getMessage();
@@ -108,12 +110,6 @@ public class GlobalModelAttributes {
         }
         if (message.contains("没有权限") || message.contains("不允许")) {
             return HttpStatus.FORBIDDEN;
-        }
-        if (message.contains("不存在") || message.contains("未找到")) {
-            return HttpStatus.NOT_FOUND;
-        }
-        if (e instanceof IllegalStateException) {
-            return HttpStatus.BAD_REQUEST;
         }
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }

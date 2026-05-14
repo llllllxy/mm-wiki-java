@@ -1,11 +1,11 @@
 package org.tinycloud.mmwiki.service;
 
-import org.tinycloud.mmwiki.vo.Access;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.config.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
+import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.web.CurrentUser;
 
 /**
@@ -16,20 +16,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
  */
 @Service
 public class AccessService {
-    /**
-     * root 角色ID，root 用户默认拥有所有空间的访问、编辑和管理权限。
-     */
-    public static final int ROLE_ROOT_ID = 1;
 
-    /**
-     * 空间编辑者权限值，可访问并编辑空间文档，但不能管理空间成员。
-     */
-    public static final int SPACE_EDITOR = 1;
-
-    /**
-     * 空间管理员权限值，可访问、编辑空间文档，并管理空间成员。
-     */
-    public static final int SPACE_MANAGER = 2;
 
     /**
      * 空间成员服务，用于查询用户在指定空间下的成员身份和权限等级。
@@ -48,7 +35,7 @@ public class AccessService {
         if (currentUser == null || space == null) {
             return new Access(false, false, false);
         }
-        if (currentUser.getRoleId() != null && currentUser.getRoleId() == ROLE_ROOT_ID) {
+        if (currentUser.getRoleId() != null && currentUser.getRoleId() == GlobalConstant.ROLE_ROOT_ID) {
             return new Access(true, true, true);
         }
 
@@ -60,12 +47,33 @@ public class AccessService {
             return new Access(true, false, false);
         }
 
-        if (membership.getPrivilege() != null && membership.getPrivilege() == SPACE_MANAGER) {
+        if (membership.getPrivilege() != null && membership.getPrivilege() == GlobalConstant.SPACE_MANAGER) {
             return new Access(true, true, true);
         }
-        if (membership.getPrivilege() != null && membership.getPrivilege() == SPACE_EDITOR) {
+        if (membership.getPrivilege() != null && membership.getPrivilege() == GlobalConstant.SPACE_EDITOR) {
             return new Access(true, true, false);
         }
         return new Access(true, false, false);
+    }
+
+
+    /**
+     * 判断当前用户是否为 root超级管理员用户
+     *
+     * @param currentUser 当前登录用户
+     * @return true 表示 root 用户，false 表示普通用户或未登录用户
+     */
+    public static boolean isRoot(CurrentUser currentUser) {
+        return currentUser != null && isRootRole(currentUser.getRoleId());
+    }
+
+    /**
+     * 判断指定角色是否为 root 超级管理员角色
+     *
+     * @param roleId 角色ID
+     * @return true 角色为 root 角色，false 角色非 root 角色
+     */
+    public static boolean isRootRole(Integer roleId) {
+        return roleId != null && roleId == GlobalConstant.ROLE_ROOT_ID;
     }
 }

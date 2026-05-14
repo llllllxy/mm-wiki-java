@@ -2,25 +2,21 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.exception.SystemException;
-import org.tinycloud.mmwiki.vo.FollowDocView;
-import org.tinycloud.mmwiki.vo.FollowUserListPage;
-import org.tinycloud.mmwiki.vo.UserFollowView;
-import org.tinycloud.mmwiki.vo.UserFollowedDocument;
-import org.tinycloud.mmwiki.vo.UserProfileView;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.domain.User;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
+import org.tinycloud.mmwiki.vo.*;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -75,7 +71,7 @@ public class UserDirectoryService {
             throw new SystemException("用户不存在。");
         }
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), isRoot(currentUser), ""));
+                .doSelectPageInfo(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), AccessService.isRoot(currentUser), ""));
         List<LogDocumentView> activities = pageInfo.getList();
         return new UserProfileView(user, activities, activities.size());
     }
@@ -114,7 +110,7 @@ public class UserDirectoryService {
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         List<Document> documents = docIds.isEmpty()
                 ? List.of()
-                : documentMapper.findVisibleByIds(currentUser.getUserId(), isRoot(currentUser), docIds);
+                : documentMapper.findVisibleByIds(currentUser.getUserId(), AccessService.isRoot(currentUser), docIds);
         Map<String, Follow> followIndex = follows.stream().collect(java.util.stream.Collectors.toMap(Follow::getObjectId, follow -> follow, (left, right) -> left));
         List<UserFollowedDocument> items = documents.stream()
                 .map(document -> new UserFollowedDocument(document, followIndex.get(document.getDocumentId()).getFollowId()))
@@ -131,11 +127,5 @@ public class UserDirectoryService {
                 user.setFollowId(follow.getFollowId());
             }
         }
-    }
-
-    private boolean isRoot(CurrentUser currentUser) {
-        return currentUser != null
-                && currentUser.getRoleId() != null
-                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 }

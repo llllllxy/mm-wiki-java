@@ -7,12 +7,16 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.config.GlobalConstant;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
-import org.tinycloud.mmwiki.vo.*;
+import org.tinycloud.mmwiki.vo.Access;
+import org.tinycloud.mmwiki.vo.MemberPage;
+import org.tinycloud.mmwiki.vo.MemberView;
+import org.tinycloud.mmwiki.vo.SpaceDownload;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
@@ -72,7 +76,7 @@ public class SpaceService {
      */
     public Set<String> listTags(CurrentUser currentUser) {
         Set<String> tags = new LinkedHashSet<>();
-        for (String tagText : spaceMapper.findVisibleTags(currentUser.getUserId(), isRoot(currentUser))) {
+        for (String tagText : spaceMapper.findVisibleTags(currentUser.getUserId(), AccessService.isRoot(currentUser))) {
             if (tagText == null || tagText.isBlank()) {
                 continue;
             }
@@ -99,7 +103,7 @@ public class SpaceService {
         String search = keyword == null ? "" : keyword.trim();
         PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> {
-                    spaceMapper.pageByKeywordAndUser(currentUser.getUserId(), isRoot(currentUser), search);
+                    spaceMapper.pageByKeywordAndUser(currentUser.getUserId(), AccessService.isRoot(currentUser), search);
                 });
         List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
@@ -112,7 +116,7 @@ public class SpaceService {
      */
     public PageModel<Space> listCollectedSpaces(CurrentUser currentUser, int pageNum, int pageSize) {
         PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> spaceMapper.pageCollectedByUser(currentUser.getUserId(), isRoot(currentUser)));
+                .doSelectPageInfo(() -> spaceMapper.pageCollectedByUser(currentUser.getUserId(), AccessService.isRoot(currentUser)));
         List<Space> spaces = pageInfo.getList();
         for (Space space : spaces) {
             space.setCollection(true);
@@ -127,7 +131,7 @@ public class SpaceService {
     public PageModel<Space> searchByTag(CurrentUser currentUser, String tag, int pageNum, int pageSize) {
         String cleanTag = tag == null ? "" : tag.trim();
         PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> spaceMapper.pageByTagAndUser(currentUser.getUserId(), isRoot(currentUser), cleanTag));
+                .doSelectPageInfo(() -> spaceMapper.pageByTagAndUser(currentUser.getUserId(), AccessService.isRoot(currentUser), cleanTag));
         List<Space> spaces = pageInfo.getList();
         markCollections(currentUser, spaces);
         spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
@@ -227,7 +231,7 @@ public class SpaceService {
         defaultDocument.setUpdateTime(now);
         documentMapper.insert(defaultDocument);
         documentFileService.createEmptyPage(documentFileService.getDefaultPageFileBySpaceName(space.getName()));
-        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), AccessService.SPACE_MANAGER);
+        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), GlobalConstant.SPACE_MANAGER);
         return JsonResponse.success("添加空间成功", "/system/space/list");
     }
 
@@ -385,18 +389,6 @@ public class SpaceService {
         }
     }
 
-
-    /**
-     * 判断当前用户是否为 root 角色。超级管理员
-     *
-     * @param currentUser 当前登录用户
-     * @return true 表示 root 用户，false 表示普通用户或未登录用户
-     */
-    private boolean isRoot(CurrentUser currentUser) {
-        return currentUser != null
-                && currentUser.getRoleId() != null
-                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
-    }
 
     /**
      * 校验空间基础信息，并规范化可空字段和开关字段。

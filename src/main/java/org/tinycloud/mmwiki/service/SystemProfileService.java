@@ -2,13 +2,24 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.domain.Document;
+import org.tinycloud.mmwiki.domain.Follow;
+import org.tinycloud.mmwiki.domain.LogDocumentView;
+import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
+import org.tinycloud.mmwiki.mapper.DocumentMapper;
+import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
+import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
 import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
 import org.tinycloud.mmwiki.vo.ProfileInfoView;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.tinycloud.mmwiki.web.CurrentUser;
+import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,19 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.tinycloud.mmwiki.domain.Document;
-import org.tinycloud.mmwiki.domain.Follow;
-import org.tinycloud.mmwiki.domain.LogDocumentView;
-import org.tinycloud.mmwiki.domain.User;
-import org.tinycloud.mmwiki.mapper.DocumentMapper;
-import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
-import org.tinycloud.mmwiki.util.TimeUtils;
-import org.tinycloud.mmwiki.web.CurrentUser;
-import org.tinycloud.mmwiki.web.JsonResponse;
-import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -140,16 +138,16 @@ public class SystemProfileService {
     /**
      * 加载当前用户关注的文档列表。
      *
-     * @param userId   用户ID
-     * @param pageNum  页码
-     * @param pageSize 每页数量
+     * @param currentUser 会话用户
+     * @param pageNum     页码
+     * @param pageSize    每页数量
      * @return 分页数据
      */
     public PageModel<ProfileFollowedDocument> loadFollowDocPage(CurrentUser currentUser, int pageNum, int pageSize) {
         User user = this.requireUser(currentUser.getUserId());
         List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        Map<String, Document> docs = documentMapper.findVisibleByIds(currentUser.getUserId(), isRoot(currentUser), docIds).stream()
+        Map<String, Document> docs = documentMapper.findVisibleByIds(currentUser.getUserId(), AccessService.isRoot(currentUser), docIds).stream()
                 .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
 
         List<ProfileFollowedDocument> items = new ArrayList<>();
@@ -219,11 +217,5 @@ public class SystemProfileService {
 
     private String trim(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    private boolean isRoot(CurrentUser currentUser) {
-        return currentUser != null
-                && currentUser.getRoleId() != null
-                && currentUser.getRoleId() == AccessService.ROLE_ROOT_ID;
     }
 }

@@ -3,17 +3,13 @@ package org.tinycloud.mmwiki.controller;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.config.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -23,6 +19,8 @@ import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.util.List;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -93,13 +91,13 @@ public class SystemUserController extends ControllerSupport {
         if (user == null) {
             throw new SystemException("用户不存在！");
         }
-        if (user.getRoleId() != null && user.getRoleId() == RoleService.ROOT_ROLE_ID
-                && currentUser().getRoleId() != RoleService.ROOT_ROLE_ID) {
+        if (user.getRoleId() != null && user.getRoleId() == GlobalConstant.ROOT_ROLE_ID
+                && currentUser().getRoleId() != GlobalConstant.ROOT_ROLE_ID) {
             throw new SystemException("没有权限修改超级管理员！");
         }
         model.addAttribute("user", user);
         model.addAttribute("roles", assignableRoles());
-        model.addAttribute("canChangePassword", currentUser().getRoleId() == RoleService.ROOT_ROLE_ID);
+        model.addAttribute("canChangePassword", currentUser().getRoleId() == GlobalConstant.ROOT_ROLE_ID);
         return "system/user/edit";
     }
 
@@ -119,7 +117,7 @@ public class SystemUserController extends ControllerSupport {
         if (user == null) {
             throw new SystemException("用户不存在。");
         }
-        if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
+        if (GlobalConstant.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
             throw new SystemException("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 1);
@@ -133,7 +131,7 @@ public class SystemUserController extends ControllerSupport {
         if (user == null) {
             throw new SystemException("用户不存在。");
         }
-        if (RoleService.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
+        if (GlobalConstant.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
             throw new SystemException("不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 0);
@@ -141,11 +139,11 @@ public class SystemUserController extends ControllerSupport {
     }
 
     private List<Role> assignableRoles() {
-        boolean root = currentUser().getRoleId() != null && currentUser().getRoleId() == RoleService.ROOT_ROLE_ID;
+        boolean root = currentUser().getRoleId() != null && currentUser().getRoleId() == GlobalConstant.ROOT_ROLE_ID;
         List<Role> roles = roleService.findAllActive();
         if (root) {
             return roles;
         }
-        return roles.stream().filter(role -> role.getRoleId() != RoleService.ROOT_ROLE_ID).toList();
+        return roles.stream().filter(role -> role.getRoleId() != GlobalConstant.ROOT_ROLE_ID).toList();
     }
 }

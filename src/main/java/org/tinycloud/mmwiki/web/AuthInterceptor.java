@@ -3,14 +3,6 @@ package org.tinycloud.mmwiki.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -21,11 +13,19 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.LogMapper;
 import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
-import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.IpUtils;
 import org.tinycloud.mmwiki.util.JsonUtils;
 import org.tinycloud.mmwiki.util.RequestUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki Web 层支持组件。
@@ -121,7 +121,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if ("main".equals(controller) && ("index".equals(action) || "default".equals(action))) {
             return true;
         }
-        if (currentUser.getRoleId() != null && currentUser.getRoleId() == RoleService.ROOT_ROLE_ID) {
+        if (currentUser.getRoleId() != null && currentUser.getRoleId() == ROOT_ROLE_ID) {
             return true;
         }
         Privilege privilege = privilegeMapper.findControllerPrivilege(controller, action);

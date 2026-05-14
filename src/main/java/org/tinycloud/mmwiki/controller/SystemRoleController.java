@@ -2,24 +2,26 @@ package org.tinycloud.mmwiki.controller;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.tinycloud.mmwiki.exception.SystemException;
-import org.tinycloud.mmwiki.vo.PrivilegeGroups;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.config.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Role;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.PrivilegeService;
 import org.tinycloud.mmwiki.service.RoleService;
 import org.tinycloud.mmwiki.service.UserService;
+import org.tinycloud.mmwiki.vo.PrivilegeGroups;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
+
+import java.util.List;
+
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -59,7 +61,7 @@ public class SystemRoleController extends ControllerSupport {
     @GetMapping("/system/role/edit")
     public String edit(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
-        if (role == null || roleId == RoleService.ROOT_ROLE_ID) {
+        if (role == null || roleId == GlobalConstant.ROOT_ROLE_ID) {
             throw new SystemException("角色不存在或不可修改");
         }
         model.addAttribute("role", role);
@@ -106,10 +108,10 @@ public class SystemRoleController extends ControllerSupport {
             throw new SystemException("角色不存在");
         }
         PrivilegeGroups groups = privilegeService.groups();
-        List<Integer> granted = roleId == RoleService.ROOT_ROLE_ID
+        List<Integer> granted = roleId == GlobalConstant.ROOT_ROLE_ID
                 ? groups.getMenus().stream().map(item -> item.getPrivilegeId()).toList()
             : roleService.rolePrivilegeIds(roleId);
-        if (roleId == RoleService.ROOT_ROLE_ID) {
+        if (roleId == GlobalConstant.ROOT_ROLE_ID) {
             granted = java.util.stream.Stream
                     .concat(groups.getMenus().stream(), groups.getControllers().stream())
                 .map(item -> item.getPrivilegeId())
@@ -119,7 +121,7 @@ public class SystemRoleController extends ControllerSupport {
         model.addAttribute("menus", groups.getMenus());
         model.addAttribute("controllers", groups.getControllers());
         model.addAttribute("rolePrivileges", granted);
-        model.addAttribute("disabledPrivilegeIds", RoleService.DEFAULT_PRIVILEGE_IDS);
+        model.addAttribute("disabledPrivilegeIds", GlobalConstant.DEFAULT_PRIVILEGE_IDS);
         return "system/role/privilege";
     }
 

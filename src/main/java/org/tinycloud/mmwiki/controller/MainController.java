@@ -1,24 +1,23 @@
 package org.tinycloud.mmwiki.controller;
 
-import org.tinycloud.mmwiki.vo.MainDefaultView;
-import org.tinycloud.mmwiki.vo.SearchView;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.service.MainService;
+import org.tinycloud.mmwiki.vo.MainDefaultView;
+import org.tinycloud.mmwiki.vo.SearchView;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 /**
  * MM-Wiki 页面与接口控制器。
@@ -69,11 +68,9 @@ public class MainController extends ControllerSupport {
     }
 
     @GetMapping("/main/search")
-    public String search(
-        @RequestParam(defaultValue = "") String keyword,
-        @RequestParam(name = "search_type", defaultValue = "title") String searchType,
-        Model model
-    ) {
+    public String search(@RequestParam(defaultValue = "") String keyword,
+                         @RequestParam(name = "search_type", defaultValue = "title") String searchType,
+                         Model model) {
         CurrentUser currentUser = currentUser();
         SearchView view = mainService.searchDocuments(currentUser, keyword, searchType);
         model.addAttribute("search_type", view.getSearchType());
