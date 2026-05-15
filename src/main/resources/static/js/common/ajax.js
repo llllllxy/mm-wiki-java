@@ -1,136 +1,129 @@
 /**
- * Ajax 请求封装。
+ * 封装AJAX，设置AJAX的全局默认选项，
+ * 当AJAX请求会话过期时，跳转到登录页面
  */
-var AjaxUtil = {
-    // 防止多个 Ajax 请求同时触发 HTTP 401 时重复弹出多个登录失效弹框。
-    unauthorizedAlerting: false,
+var _ajax = $.ajax;
 
-    get: function (options) {
-        return AjaxUtil.request(options, "GET");
-    },
-
-    post: function (options) {
-        return AjaxUtil.request(options, "POST");
-    },
-
-    upload: function (options) {
-        if (!options || !options.url) {
-            alert("请求错误，url不可为空!");
-            return false;
-        }
-        options.type = "POST";
-        options.timeout = options.timeout !== undefined ? options.timeout : 5000;
-        options.async = options.async !== undefined ? options.async : true;
-        options.cache = options.cache !== undefined ? options.cache : false;
-        options.dataType = options.dataType || "json";
-        options.contentType = options.contentType !== undefined ? options.contentType : false;
-        options.processData = options.processData !== undefined ? options.processData : false;
-        options.data = options.data || new FormData();
-
-        return $.ajax(options.url, {
-            type: options.type,
-            timeout: options.timeout,
-            async: options.async,
-            cache: options.cache,
-            dataType: options.dataType,
-            processData: options.processData,
-            data: options.data,
-            contentType: options.contentType,
-            success: function (data, textStatus, jqXHR) {
-                if (typeof options.success === "function") {
-                    options.success(data, textStatus, jqXHR);
-                }
-            },
-            error: function (XMLHttpRequest) {
-                AjaxUtil.handleError(options, XMLHttpRequest);
-            }
-        });
-    },
-
-    request: function (options, method) {
-        if (!options || !options.url) {
-            alert("请求错误，url不可为空!");
-            return false;
-        }
-        options.type = method;
-        options.timeout = options.timeout !== undefined ? options.timeout : 5000;
-        options.async = options.async !== undefined ? options.async : true;
-        options.cache = options.cache !== undefined ? options.cache : false;
-        options.dataType = options.dataType || "json";
-        options.contentType = options.contentType || "application/x-www-form-urlencoded;charset=UTF-8";
-        options.data = options.data || "";
-
-        return $.ajax(options.url, {
-            type: options.type,
-            timeout: options.timeout,
-            async: options.async,
-            cache: options.cache,
-            dataType: options.dataType,
-            data: options.data,
-            contentType: options.contentType,
-            success: function (data, textStatus, jqXHR) {
-                if (typeof options.success === "function") {
-                    options.success(data, textStatus, jqXHR);
-                }
-            },
-            error: function (XMLHttpRequest) {
-                AjaxUtil.handleError(options, XMLHttpRequest);
-            }
-        });
-    },
-
-    handleError: function (options, XMLHttpRequest) {
-        if (AjaxUtil.handleUnauthorized(XMLHttpRequest)) {
-            return;
-        }
-
-        var message = "错误提示： " + XMLHttpRequest.status + " " + XMLHttpRequest.statusText;
-        if (typeof options.error === "function") {
-            options.error(message);
-            return;
-        }
-        if (typeof Layers !== "undefined") {
-            Layers.failedMsg(message);
-        } else {
-            alert(message);
-        }
-    },
-
-    /**
-     * 处理普通 Ajax 请求时的 HTTP 401 未授权响应。
-     *
-     * @param XMLHttpRequest jQuery XHR 对象
-     * @returns {boolean} true 表示已经识别并处理 HTTP 401
-     */
-    handleUnauthorized: function (XMLHttpRequest) {
-        if (!XMLHttpRequest || Number(XMLHttpRequest.status) !== 401) {
-            return false;
-        }
-        if (AjaxUtil.unauthorizedAlerting) {
-            return true;
-        }
-
-        AjaxUtil.unauthorizedAlerting = true;
-        var response = XMLHttpRequest.responseJSON || {};
-        var redirectUrl = response.redirect && response.redirect.url ? response.redirect.url : "/author/index";
-
-        if (typeof layer !== "undefined") {
-            layer.confirm("未登录或登录已失效！<br/>是否跳转到登录页面？", {
-                title: "登录状态失效",
-                btn: ["跳转登录", "留在本页"],
-                btnAlign: "c",
-                closeBtn: 0
-            }, function (index) {
-                layer.close(index);
-                window.location.href = redirectUrl;
-            }, function () {
-                AjaxUtil.unauthorizedAlerting = false;
-            });
-        } else if (confirm("未登录或登录已失效！\n是否跳转到登录页面？")) {
-            window.location.href = redirectUrl;
-        } else {
-            AjaxUtil.unauthorizedAlerting = false;
-        }
-        return true;
-    }
+var ajaxDefaults = {
+    timeout: 20000,
+    async: true,
+    cache: false,
+    dataType: "json"
 };
+
+$.ajax = function (opt) {
+    opt = $.extend({}, ajaxDefaults, opt || {});
+
+    var fn = {
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+        },
+        success: function (data, textStatus) {
+        },
+        beforeSend: function (XHR) {
+        },
+        complete: function (XHR, TS) {
+        }
+    };
+    if (opt.error) {
+        fn.error = opt.error;
+    }
+    if (opt.success) {
+        fn.success = opt.success;
+    }
+    if (opt.beforeSend) {
+        fn.beforeSend = opt.beforeSend;
+    }
+    if (opt.complete) {
+        fn.complete = opt.complete;
+    }
+    //扩展增强处理
+    var _opt = $.extend({}, opt, {
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            handleErrorMsg(XMLHttpRequest);
+            // 错误方法增强处理
+            fn.error(XMLHttpRequest, textStatus, errorThrown);
+        },
+        // 只有 HTTP 状态码为 200（包括 200-299 范围内）的 Ajax 请求才会触发 success 回调函数，其他状态码将触发 error 回调函数
+        success: function (res, textStatus) {
+            if (isUnauthorizedResponse(res)) {
+                handleUnauthorized(res);
+            } else {
+                // 成功回调方法增强处理
+                fn.success(res, textStatus);
+            }
+        },
+        beforeSend: function (XHR) {
+            XHR.setRequestHeader("Powered-By", 'MM-WIKI');
+            // 提交前回调方法
+            fn.beforeSend(XHR);
+        },
+        complete: function (XHR, TS) {
+            // 完成后回调方法
+            fn.complete(XHR, TS);
+        }
+    });
+    return _ajax(_opt);
+};
+
+/**
+ * 判断业务响应是否为未登录或登录失效。
+ *
+ * @param response 后端返回的 JSON 对象
+ * @returns {boolean} true 表示需要提示重新登录
+ */
+function isUnauthorizedResponse(response) {
+    return response
+        && response.code !== 1
+        && response.redirect
+        && response.redirect.url === "/author/index";
+}
+
+/**
+ * 处理普通 Ajax 请求未登录或登录失效响应。
+ *
+ * @param response 后端返回的 JSON 对象
+ */
+function handleUnauthorized(response) {
+    var redirectUrl = response.redirect && response.redirect.url ? response.redirect.url : "/author/index";
+
+    if (typeof layer !== "undefined") {
+        layer.alert('会话已过期，请重新登录', function (index) {
+            layer.close(index);
+            redirectTopWindow(redirectUrl);
+        });
+    } else if (confirm("未登录或登录已失效！\n是否跳转到登录页面？")) {
+        redirectTopWindow(redirectUrl);
+    } else {
+        console.log("未登录或登录已失效！");
+    }
+}
+
+/**
+ * 跳转到登录页。
+ *
+ * iframe 内页面会优先让顶层窗口跳转，避免只在 iframe 内展示登录页。
+ *
+ * @param url 登录页地址
+ */
+function redirectTopWindow(url) {
+    if (window.top && window.top !== window) {
+        window.top.location.href = url;
+    } else {
+        window.location.href = url;
+    }
+}
+
+
+function handleErrorMsg(XMLHttpRequest) {
+    if (XMLHttpRequest && Number(XMLHttpRequest.status) === 401) {
+        handleUnauthorized(XMLHttpRequest.responseJSON || {});
+        return;
+    }
+    var message = "错误提示： " + XMLHttpRequest.status + " " + XMLHttpRequest.statusText;
+    if (typeof layer !== "undefined") {
+        var content = '<i class="fa fa-frown-o"></i> ';
+        layer.msg(content + message);
+    } else {
+        alert(message);
+    }
+}

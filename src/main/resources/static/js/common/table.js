@@ -124,15 +124,8 @@ function initTable(options) {
         },
         // 后端响应解析方法；页面不传时使用项目默认 JsonResponse + PageModel 解析逻辑。
         responseHandler: options.responseHandler || defaultTableResponseHandler,
-        // 数据加载失败后的回调；HTTP 401 表示未登录或登录已失效。
+        // 数据加载失败后的回调；网络错误、超时等统一由 ajax.js 处理，这里只透传页面自定义回调。
         onLoadError: function (status, jqXHR) {
-            if (!handleTableUnauthorized(status, jqXHR)) {
-                if (typeof Layers !== "undefined") {
-                    Layers.failedMsg("数据加载失败");
-                } else {
-                    alert("数据加载失败");
-                }
-            }
             if (typeof options.onLoadError === "function") {
                 options.onLoadError(status, jqXHR);
             }
@@ -199,10 +192,12 @@ function defaultTableResponseHandler(res) {
     if (!res) {
         return {rows: [], total: 0};
     }
-    // 非成功响应或缺少 data 时，弹出错误信息并返回空表格。
+    // 非成功响应或缺少 data 时，只处理普通业务错误；会话失效等全局错误由 ajax.js 拦截。
     if (res.code !== 1 || !res.data) {
         if (typeof Layers !== "undefined") {
             Layers.failedMsg(res.message || "数据加载失败");
+        } else {
+            alert(res.message || "数据加载失败");
         }
         return {rows: [], total: 0};
     }
@@ -212,48 +207,6 @@ function defaultTableResponseHandler(res) {
         rows: res.data.records || res.data.rows || [],
         total: res.data.totalCount || res.data.total || 0
     };
-}
-
-// 防止多个表格同时触发 HTTP 401 时重复弹出多个登录失效弹框。
-var tableUnauthorizedAlerting = false;
-
-/**
- * 处理 bootstrap-table 查询时的 HTTP 401 未授权响应。
- *
- * @param status HTTP 状态码
- * @param jqXHR jQuery XHR 对象
- * @returns {boolean} true 表示已经识别并处理 HTTP 401
- */
-function handleTableUnauthorized(status, jqXHR) {
-    if (Number(status) !== 401) {
-        return false;
-    }
-    if (tableUnauthorizedAlerting) {
-        return true;
-    }
-
-    tableUnauthorizedAlerting = true;
-    var response = jqXHR && jqXHR.responseJSON ? jqXHR.responseJSON : {};
-    var redirectUrl = response.redirect && response.redirect.url ? response.redirect.url : "/author/index";
-
-    if (typeof layer !== "undefined") {
-        layer.confirm("未登录或登录已失效！<br/>是否跳转到登录页面？", {
-            title: "登录状态失效",
-            btn: ["跳转登录", "留在本页"],
-            btnAlign: "c",
-            closeBtn: 0
-        }, function (index) {
-            layer.close(index);
-            window.location.href = redirectUrl;
-        }, function () {
-            tableUnauthorizedAlerting = false;
-        });
-    } else if (confirm("未登录或登录已失效！\n是否跳转到登录页面？")) {
-        window.location.href = redirectUrl;
-    } else {
-        tableUnauthorizedAlerting = false;
-    }
-    return true;
 }
 
 /**

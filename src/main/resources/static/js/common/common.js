@@ -1,60 +1,9 @@
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
-    // $("[data-toggle='web-popover']").webuiPopover({animation: 'pop',autoHide:3000});
+    // $("[data-toggle='web-popover']").webuiPopover({animation: 'pop', autoHide: 3000});
 });
 
 var Common = {
-    unauthorizedAlerting: false,
-
-    handleError: function (XMLHttpRequest) {
-        if (Common.handleUnauthorized(XMLHttpRequest)) {
-            return;
-        }
-        var message = "错误提示： " + XMLHttpRequest.status + " " + XMLHttpRequest.statusText;
-        if (typeof Layers !== "undefined") {
-            Layers.failedMsg(message);
-        } else {
-            alert(message);
-        }
-    },
-
-    /**
-     * 处理普通 Ajax 请求时的 HTTP 401 未授权响应。
-     *
-     * @param XMLHttpRequest jQuery XHR 对象
-     * @returns {boolean} true 表示已经识别并处理 HTTP 401
-     */
-    handleUnauthorized: function (XMLHttpRequest) {
-        if (!XMLHttpRequest || Number(XMLHttpRequest.status) !== 401) {
-            return false;
-        }
-        if (Common.unauthorizedAlerting) {
-            return true;
-        }
-
-        Common.unauthorizedAlerting = true;
-        var response = XMLHttpRequest.responseJSON || {};
-        var redirectUrl = response.redirect && response.redirect.url ? response.redirect.url : "/author/index";
-
-        if (typeof layer !== "undefined") {
-            layer.confirm("未登录或登录已失效！<br/>是否跳转到登录页面？", {
-                title: "登录状态失效",
-                btn: ["跳转登录", "留在本页"],
-                btnAlign: "c",
-                closeBtn: 0
-            }, function (index) {
-                layer.close(index);
-                window.location.href = redirectUrl;
-            }, function () {
-                Common.unauthorizedAlerting = false;
-            });
-        } else if (confirm("未登录或登录已失效！\n是否跳转到登录页面？")) {
-            window.location.href = redirectUrl;
-        } else {
-            Common.unauthorizedAlerting = false;
-        }
-        return true;
-    },
 
     /**
      * ajax submit
@@ -86,9 +35,6 @@ var Common = {
                         Common.redirect(redirect);
                     });
                 }
-            },
-            error: function (XMLHttpRequest) {
-                Common.handleError(XMLHttpRequest);
             }
         });
     },
@@ -117,7 +63,9 @@ var Common = {
                 success(response);
             },
             error: function (response) {
-                err(response);
+                if (typeof err === "function") {
+                    err(response);
+                }
             }
         });
     },
@@ -144,7 +92,7 @@ var Common = {
         $(element).html('');
         $(element).removeClass();
         $(element).addClass('alert alert-success');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">×</a>');
+        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
         $(element).append('<strong><i class="glyphicon glyphicon-ok-circle"></i> 操作成功：</strong>');
         $(element).append(message);
         $(element).show();
@@ -159,7 +107,7 @@ var Common = {
         $(element).html('');
         $(element).removeClass('hide');
         $(element).addClass('alert alert-danger');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">×</a>');
+        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
         $(element).append('<strong><i class="glyphicon glyphicon-remove-circle"></i> 操作失败：</strong>');
         $(element).append(message);
         $(element).show();
@@ -174,7 +122,7 @@ var Common = {
         $(element).html('');
         $(element).removeClass();
         $(element).addClass('alert alert-warning');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">×</a>');
+        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
         $(element).append('<strong><i class="glyphicon glyphicon-volume-up"></i> 警告：</strong>');
         $(element).append(message);
         $(element).show();
@@ -186,29 +134,27 @@ var Common = {
      * @returns {{s: (string|*), d: (string|*), h: (string|*), m: (string|*)}}
      */
     secondsFormat: function (s) {
-        var day = Math.floor(s / (24 * 3600)); // Math.floor()向下取整
+        var day = Math.floor(s / (24 * 3600));
         var hour = Math.floor((s - day * 24 * 3600) / 3600);
         var minute = Math.floor((s - day * 24 * 3600 - hour * 3600) / 60);
         var second = s - day * 24 * 3600 - hour * 3600 - minute * 60;
 
         function formatStr(t) {
             if (parseInt(t) <= 0) {
-                return "00"
+                return "00";
             }
             if (0 < parseInt(t) && parseInt(t) < 10) {
-                return "0" + t.toString()
+                return "0" + t.toString();
             }
-            return t
+            return t;
         }
 
-        var timeRes = {
+        return {
             d: formatStr(day),
             h: formatStr(hour),
             m: formatStr(minute),
             s: formatStr(second)
         };
-
-        return timeRes
     },
 
     /**
@@ -226,10 +172,6 @@ var Common = {
         var bIsAndroid = sUserAgent.match(/android/i) == "android";
         var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
         var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
-        if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
-            return true;
-        } else {
-            return false;
-        }
+        return !!(bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM);
     }
 };

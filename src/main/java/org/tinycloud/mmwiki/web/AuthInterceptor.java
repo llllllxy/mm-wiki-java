@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.tinycloud.mmwiki.config.GlobalConstant;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
@@ -25,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki Web 层支持组件。
@@ -99,7 +99,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private boolean handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (RequestUtils.expectsJsonResponse(request)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("未登录或登录已失效！", "/author/index")));
@@ -121,7 +121,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if ("main".equals(controller) && ("index".equals(action) || "default".equals(action))) {
             return true;
         }
-        if (currentUser.getRoleId() != null && currentUser.getRoleId() == ROOT_ROLE_ID) {
+        if (currentUser.getRoleId() != null && currentUser.getRoleId() == GlobalConstant.ROOT_ROLE_ID) {
             return true;
         }
         Privilege privilege = privilegeMapper.findControllerPrivilege(controller, action);
@@ -137,13 +137,13 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private boolean handleForbidden(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (RequestUtils.expectsJsonResponse(request)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("抱歉，您没有权限操作！", "/system/main/index")));
+            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("抱歉，您没有权限操作！", "/error/403")));
             return false;
         }
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "您没有权限访问该页面！");
+        response.sendRedirect("/error/403");
         return false;
     }
 

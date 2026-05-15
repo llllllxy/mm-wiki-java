@@ -85,10 +85,7 @@ var Page = {
                         url: $form.attr("action"),
                         data: formData,
                         dataType: "json",
-                        success: response,
-                        error: function (XMLHttpRequest) {
-                            Common.handleError(XMLHttpRequest);
-                        }
+                        success: response
                     });
                 }
                 // if (commentText && commentText.length > 0) {

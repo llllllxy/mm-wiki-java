@@ -54,10 +54,7 @@ var Login = {
             url: $form.attr("action"),
             data: formData,
             dataType: 'json',
-            success: response,
-            error: function (XMLHttpRequest) {
-                Common.handleError(XMLHttpRequest);
-            }
+            success: response
         });
     }
 };

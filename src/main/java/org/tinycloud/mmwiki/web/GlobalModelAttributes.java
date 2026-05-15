@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -56,15 +57,14 @@ public class GlobalModelAttributes {
         }
 
         if (RequestUtils.expectsJsonResponse(request)) {
-            if (e instanceof SystemException) {
-                return JsonResponse.error(message, ((SystemException) e).getUrl());
-            } else {
-                return JsonResponse.error(message);
-            }
+            JsonResponse<?> response = e instanceof SystemException
+                    ? JsonResponse.error(message, ((SystemException) e).getUrl())
+                    : JsonResponse.error(message);
+            return ResponseEntity.ok(response);
         }
 
         ModelAndView view = new ModelAndView("error/default");
-        view.setStatus(status);
+        view.setStatus(HttpStatus.OK);
         view.addObject("status", status.value());
         view.addObject("message", message);
         view.addObject("homeUrl", "/");

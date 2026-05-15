@@ -54,10 +54,7 @@ var Email = {
             url: url,
             data: $form.serializeArray(),
             dataType: 'json',
-            success: response,
-            error: function (XMLHttpRequest) {
-                Common.handleError(XMLHttpRequest);
-            }
+            success: response
         });
         return false;
     }

@@ -79,4 +79,10 @@ public class MainController extends ControllerSupport {
         model.addAttribute("count", view.getCount());
         return "main/search";
     }
+
+    @GetMapping("/error/403")
+    public String error403(Model model) {
+        nav(model, "main");
+        return "error/403";
+    }
 }

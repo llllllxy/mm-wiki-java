@@ -63,6 +63,6 @@ public final class PasswordUtils {
     }
 
     public static void main(String[] args) {
-        System.out.println(sha256("123456"));
+        System.out.println(sha384("f80286088c61829e4ce3da800d2fd6853a3890a3088139454cd3b6c4c6b37867"));
     }
 }
