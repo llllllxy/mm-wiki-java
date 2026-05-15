@@ -5,14 +5,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * 哈希算法工具类。
+ * 密码哈希算法工具类。
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
-public final class HashUtils {
+public final class PasswordUtils {
+    private static final String SALT = "AP6GV5cGmanzku#VFS8$rb6US7T7cjYQ";
 
-    private HashUtils() {
+
+    private PasswordUtils() {
     }
 
     /**
@@ -21,17 +23,21 @@ public final class HashUtils {
      * @param text 待计算的文本
      * @return MD5值
      */
-    public static String md5(String text) {
-        return digest("MD5", text);
+    public static String sha384(String text) {
+        return digest("SHA-384", text);
     }
 
     /**
-     * 计算SHA-256值。
+     * 计算SHA-256值。这里是为了模仿前端的加密
      *
      * @param text 待计算的文本
      * @return SHA-256值
      */
     public static String sha256(String text) {
+        if (text == null) {
+            return null;
+        }
+        text = SALT + text;
         return digest("SHA-256", text);
     }
 

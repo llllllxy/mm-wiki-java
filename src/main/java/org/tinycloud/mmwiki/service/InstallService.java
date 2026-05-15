@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.InstallData;
-import org.tinycloud.mmwiki.util.HashUtils;
+import org.tinycloud.mmwiki.util.PasswordUtils;
 import org.tinycloud.mmwiki.util.JsonUtils;
 
 /**
@@ -233,7 +233,7 @@ public class InstallService {
         LocalDateTime now = LocalDateTime.now();
         try (Connection connection = connectToDatabase(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, data.getDatabaseConf().get("admin_name"));
-            statement.setString(2, HashUtils.md5(HashUtils.sha256(data.getDatabaseConf().get("admin_pass"))));
+            statement.setString(2, PasswordUtils.sha384(PasswordUtils.sha256(data.getDatabaseConf().get("admin_pass"))));
             statement.setString(3, data.getDatabaseConf().get("admin_name"));
             statement.setInt(4, 1);
             statement.setObject(5, now);

@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.UserMapper;
-import org.tinycloud.mmwiki.util.HashUtils;
+import org.tinycloud.mmwiki.util.PasswordUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
@@ -203,10 +203,10 @@ public class UserService {
     }
 
     /**
-     * 按照旧版 MM-Wiki 规则生成密码摘要。
+     * 按照sha384规则生成密码摘要。
      */
     public String encodePassword(String password) {
-        return HashUtils.md5(password);
+        return PasswordUtils.sha384(password);
     }
 
     private JsonResponse<Void> validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {

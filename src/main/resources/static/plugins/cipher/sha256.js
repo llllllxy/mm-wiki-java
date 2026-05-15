@@ -15,19 +15,24 @@
 var hexcase = 0;  /* hex output format. 0 - lowercase; 1 - uppercase        */
 var b64pad = ""; /* base-64 pad character. "=" for strict RFC compliance   */
 
+var salt = "AP6GV5cGmanzku#VFS8$rb6US7T7cjYQ";
+
 /*
  * These are the functions you'll usually want to call
  * They take string arguments and return either hex or base-64 encoded strings
  */
 function hex_sha256(s) {
+    s = salt + s;
     return rstr2hex(rstr_sha256(str2rstr_utf8(s)));
 }
 
 function b64_sha256(s) {
+    s = salt + s;
     return rstr2b64(rstr_sha256(str2rstr_utf8(s)));
 }
 
 function any_sha256(s, e) {
+    s = salt + s;
     return rstr2any(rstr_sha256(str2rstr_utf8(s)), e);
 }
 
@@ -41,14 +46,6 @@ function b64_hmac_sha256(k, d) {
 
 function any_hmac_sha256(k, d, e) {
     return rstr2any(rstr_hmac_sha256(str2rstr_utf8(k), str2rstr_utf8(d)), e);
-}
-
-/*
- * Perform a simple self-test to see if the VM is working
- */
-function sha256_vm_test() {
-    return hex_sha256("abc").toLowerCase() ==
-        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
 }
 
 /*
