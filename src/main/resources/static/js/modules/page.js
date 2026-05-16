@@ -24,7 +24,7 @@ var Page = {
             var redirectCallback = redirect.url ? function () {
                 parent.location.href = redirect.url;
             } : undefined;
-            if (result.code == 0) {
+            if (result.code !== 1) {
                 Layers.failedMsg(result.message, sleepTime, redirectCallback);
             }
             if (result.code == 1) {

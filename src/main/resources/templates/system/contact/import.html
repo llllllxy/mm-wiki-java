@@ -98,7 +98,7 @@
     function importContact(title, url, data) {
         Layers.confirmCallback(title, function () {
             Common.ajaxSubmitCallback(url, data, function (response) {
-                if (response.code === 0) {
+                if (response.code !== 1) {
                     Layers.failedMsg(response.message, function () {});
                     return;
                 }

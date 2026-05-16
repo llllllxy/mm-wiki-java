@@ -22,7 +22,7 @@ var Login = {
         }
 
         function response(result) {
-            if (result.code == 0) {
+            if (result.code !== 1) {
                 passwordEle.val(password);
                 layer.tips(result.message, submitEle);
             }

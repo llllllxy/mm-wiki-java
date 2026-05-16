@@ -18,4 +18,4 @@ spring:
       initialize-schema: never
 
 mmwiki:
-  document-root-dir: ./data
+  document-root-dir: D:\home

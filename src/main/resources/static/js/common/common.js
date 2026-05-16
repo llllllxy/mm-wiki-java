@@ -25,7 +25,7 @@ var Common = {
             data: jsonData,
             dataType: "json",
             success: function (response) {
-                if (response.code == 0) {
+                if (response.code !== 1) {
                     Layers.failedMsg(response.message, function () {
                     });
                 } else {

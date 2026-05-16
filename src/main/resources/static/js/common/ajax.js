@@ -11,8 +11,6 @@ var ajaxDefaults = {
     dataType: "json"
 };
 
-var AJAX_CODE_UNAUTHORIZED = 401;
-
 $.ajax = function (opt) {
     opt = $.extend({}, ajaxDefaults, opt || {});
 
@@ -47,7 +45,7 @@ $.ajax = function (opt) {
         },
         // 只有 HTTP 状态码为 200（包括 200-299 范围内）的 Ajax 请求才会触发 success 回调函数，其他状态码将触发 error 回调函数
         success: function (res, textStatus) {
-            if (Number(res && res.code) === AJAX_CODE_UNAUTHORIZED) {
+            if (res && res.code === 401) {
                 handleUnauthorized(res);
             } else {
                 // 成功回调方法增强处理

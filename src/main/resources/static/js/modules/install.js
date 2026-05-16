@@ -18,7 +18,7 @@ var Install = {
             data: {'arr': ''},
             dataType: "json",
             success: function (response) {
-                if (response.code == 0) {
+                if (response.code !== 1) {
                     console.log(response.message);
                     return false
                 }
@@ -70,7 +70,7 @@ var Install = {
          * @param result
          */
         function response(result) {
-            if (result.code == 0) {
+            if (result.code !== 1) {
                 layer.tips(result.message, element, {tips: 3});
             }
             if (result.code == 1 && result.redirect.url) {

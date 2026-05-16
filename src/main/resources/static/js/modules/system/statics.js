@@ -12,7 +12,7 @@ var Statics = {
 			data : {'arr':''},
 			dataType: "json",
 			success : function(response) {
-				if(response.code == 0) {
+                if (response.code !== 1) {
 					console.log(response.message);
 					return false
 				}
@@ -58,7 +58,7 @@ var Statics = {
             data : {'arr':''},
             dataType: "json",
             success : function(response) {
-                if(response.code == 0) {
+                if (response.code !== 1) {
                     console.log(response.message);
                     return false
                 }
@@ -85,7 +85,7 @@ var Statics = {
             data : {'arr':''},
             dataType: "json",
             success : function(response) {
-                if(response.code == 0) {
+                if (response.code !== 1) {
                     console.log(response.message);
                     return false
                 }
@@ -116,7 +116,7 @@ var Statics = {
 			data : {'arr':''},
 			dataType: "json",
 			success : function(response) {
-				if(response.code == 0) {
+                if (response.code !== 1) {
 					console.log(response.message);
 					return false
 				}

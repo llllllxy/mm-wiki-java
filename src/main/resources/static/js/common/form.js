@@ -34,7 +34,7 @@ var Form = {
         }
 
         function response(result) {
-            if (result.code == 0) {
+            if (result.code !== 1) {
                 failed(result.message, result.data);
             }
             if (result.code == 1) {

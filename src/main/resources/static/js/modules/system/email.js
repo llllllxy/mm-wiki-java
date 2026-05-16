@@ -38,7 +38,7 @@ var Email = {
          */
         function response(result) {
             //console.log(result)
-            if (result.code == 0) {
+            if (result.code !== 1) {
                 failed(result.message, result.data);
             }
             if (result.code == 1) {
