@@ -103,7 +103,7 @@ public class InstallService {
                 dirRow("db/data.sql", "存在且可读", resourceReadable("db/data.sql")),
                 dirRow("templates", "存在且不为空", resourceReadable("templates/install/index.html")),
                 dirRow("static", "存在且不为空", resourceReadable("static/js/modules/install.js")),
-                dirRow("config/application.yaml", "安装后可写", canWriteConfigDirectory())
+                dirRow("config/application.yml", "安装后可写", canWriteConfigDirectory())
         );
         for (Map<String, Object> row : dirData) {
             if (!Boolean.TRUE.equals(row.get("ok"))) {
@@ -394,7 +394,7 @@ public class InstallService {
                 yamlValue(properties.getCopyright()),
                 yamlValue(data.getSystemConf().get("document_dir").replace("\\", "/"))
         );
-        Files.writeString(configDir.resolve("application.yaml"), yaml, StandardCharsets.UTF_8);
+        Files.writeString(configDir.resolve("application.yml"), yaml, StandardCharsets.UTF_8);
     }
 
     private void createLockFile() throws IOException {
@@ -411,7 +411,7 @@ public class InstallService {
         Map<String, String> result = new LinkedHashMap<>();
         result.put("cmd", "java -jar mmwiki-0.0.1-SNAPSHOT.jar");
         result.put("url", "http://127.0.0.1:" + data.getSystemConf().get("port"));
-        result.put("config", configDir.resolve("application.yaml").toString());
+        result.put("config", configDir.resolve("application.yml").toString());
         data.setResult(JsonUtils.writeValueAsString(result));
         data.setStatus(InstallData.INSTALL_END);
         data.setIsSuccess(InstallData.INSTALL_SUCCESS);
