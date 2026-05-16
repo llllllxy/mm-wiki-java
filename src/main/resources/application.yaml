@@ -52,8 +52,24 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
 
 logging:
+  level:
+    root: info
   file:
-    name: logs/mm-wiki.log
+    name: /opt/logs/mm-wiki.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - [%method,%line] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - [%method,%line] - %msg%n"
+    level: "%5p"
+    dateformat: "yyyy-MM-dd HH:mm:ss.SSS"
+    correlation: ""
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/mm-wiki.%d{yyyy-MM-dd}.%i.log.gz
+      max-file-size: 10MB
+      max-history: 7
+      total-size-cap: 1GB
+      clean-history-on-start: false
+
 
 mybatis:
   type-aliases-package: org.tinycloud.mmwiki.domain
@@ -80,7 +96,7 @@ mmwiki:
   version: v0.2.1
   copyright: 2026 TinyCloud
   system-name-fallback: Markdown Mini Wiki
-  document-root-dir: ./data
+  document-root-dir: D:\home
   pdf:
     # 可选：PDF 导出中文字体路径。支持文件路径或 classpath:/fonts/pdf/xxx.ttf。
     # 当前仅使用 ttf 格式，避免部分 otf/ttc 字体在 PDFBox 下解析异常。
