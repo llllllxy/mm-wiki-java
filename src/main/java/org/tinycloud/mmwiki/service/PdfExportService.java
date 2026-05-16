@@ -229,7 +229,7 @@ public class PdfExportService {
                             background: #f5f7fa;
                             border-radius: 3px;
                             color: #c7254e;
-                            font-family: 'Courier New', monospace;
+                            font-family: 'MMWikiCJK', 'Courier New', monospace;
                             padding: 2px 4px;
                         }
                         pre {
