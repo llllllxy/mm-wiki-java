@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.EmailServer;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.EmailService;
@@ -61,7 +62,7 @@ public class SystemEmailController extends ControllerSupport {
     public String edit(@RequestParam("emailId") Integer emailId, Model model) {
         EmailServer email = emailService.findById(emailId);
         if (email == null) {
-            throw new SystemException("邮件服务器不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "邮件服务器不存在。");
         }
         model.addAttribute("email", email);
         return "system/email/form";

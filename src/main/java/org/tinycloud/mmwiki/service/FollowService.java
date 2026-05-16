@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.Space;
@@ -95,7 +96,7 @@ public class FollowService {
             throw new SystemException("不能关注自己。");
         }
         if (!canFollow(currentUser, type, objectId)) {
-            throw new SystemException("您没有权限关注该对象。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限关注该对象。");
         }
         if (followMapper.findByUserTypeAndObjectId(currentUser.getUserId(), type, objectId) != null) {
             throw new SystemException("您已关注过，不能重复关注。");
@@ -133,10 +134,10 @@ public class FollowService {
         }
         Follow follow = followMapper.findById(followId);
         if (follow == null) {
-            throw new SystemException("关注对象不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "关注对象不存在。");
         }
         if (!currentUserId.equals(follow.getUserId())) {
-            throw new SystemException("您只能取消自己的关注。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您只能取消自己的关注。");
         }
         followMapper.deleteById(followId);
         return JsonResponse.success("已取消关注", redirect);

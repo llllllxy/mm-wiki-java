@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
@@ -54,7 +55,7 @@ public class ContactService {
 
     public JsonResponse<Void> update(Contact contact) {
         if (contact.getContactId() == null || findById(contact.getContactId()) == null) {
-            throw new SystemException("联系人不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "联系人不存在。");
         }
         JsonResponse<Void> validation = validate(contact);
         if (validation != null) {
@@ -67,7 +68,7 @@ public class ContactService {
 
     public JsonResponse<Void> delete(Integer contactId) {
         if (findById(contactId) == null) {
-            throw new SystemException("联系人不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "联系人不存在。");
         }
         contactMapper.deleteById(contactId);
         return JsonResponse.success("删除联系人成功", "/system/contact/list");

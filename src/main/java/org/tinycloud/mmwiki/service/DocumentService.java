@@ -9,6 +9,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
@@ -105,7 +106,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限访问该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间文档。");
         }
 
         Document spaceDocument = requireSpaceDefaultDocument(space.getSpaceId());
@@ -141,7 +142,7 @@ public class DocumentService {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
         if (!Objects.equals(space.getIsShare(), 1)) {
-            throw new SystemException("该文档不允许分享。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "该文档不允许分享。");
         }
         List<Document> parentDocuments = getParentDocuments(document);
         String pageFile = documentFileService.resolvePageFile(document, parentDocuments);
@@ -164,10 +165,10 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限导出该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限导出该空间文档。");
         }
         if (!Objects.equals(space.getIsExport(), 1)) {
-            throw new SystemException("该文档不允许导出。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "该文档不允许导出。");
         }
 
         String exportType = StringUtils.hasText(output) ? output.trim().toLowerCase() : "markdown";
@@ -235,7 +236,7 @@ public class DocumentService {
     public DocumentEditData loadEditData(String documentId, CurrentUser currentUser) throws IOException {
         DocumentViewData view = loadDocumentView(documentId, currentUser);
         if (!view.isEditor()) {
-            throw new SystemException("您没有权限修改该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限修改该空间文档。");
         }
         return new DocumentEditData(
                 view.getDocument(),
@@ -265,7 +266,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            throw new SystemException("您没有权限在该空间创建文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限在该空间创建文档。");
         }
 
         Document parentDocument = requireDocument(parentId);
@@ -323,7 +324,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            throw new SystemException("您没有权限修改该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限修改该空间文档。");
         }
 
         String targetName = StringUtils.hasText(newName) ? newName.trim() : document.getName();
@@ -381,7 +382,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isEditor()) {
-            throw new SystemException("您没有权限移动该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限移动该空间文档。");
         }
 
         LocalDateTime now = TimeUtils.now();
@@ -443,7 +444,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限删除该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限删除该空间文档。");
         }
 
         List<Document> parents = getParentDocuments(document);
@@ -464,7 +465,7 @@ public class DocumentService {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限查看该空间修改历史。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限查看该空间修改历史。");
         }
         PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(pageNum, pageSize)
                 .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
@@ -495,7 +496,7 @@ public class DocumentService {
     private Document requireDocument(String documentId) {
         Document document = documentMapper.findActiveById(documentId);
         if (document == null) {
-            throw new SystemException("文档不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "文档不存在。");
         }
         return document;
     }
@@ -503,7 +504,7 @@ public class DocumentService {
     private Document requireSpaceDefaultDocument(Integer spaceId) {
         Document document = documentMapper.findSpaceDefaultDocument(spaceId);
         if (document == null) {
-            throw new SystemException("空间首页文档不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间首页文档不存在。");
         }
         return document;
     }

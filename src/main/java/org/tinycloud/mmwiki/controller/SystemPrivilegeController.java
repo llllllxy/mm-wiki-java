@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.PrivilegeGroups;
 
@@ -47,7 +48,7 @@ public class SystemPrivilegeController extends ControllerSupport {
     public String edit(@RequestParam("privilege_id") Integer privilegeId, Model model) {
         Privilege privilege = privilegeService.findById(privilegeId);
         if (privilege == null) {
-            throw new SystemException("权限不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "权限不存在");
         }
         model.addAttribute("privilege", privilege);
         model.addAttribute("menus", privilegeService.groups().getMenus());

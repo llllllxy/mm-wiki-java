@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Contact;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -42,7 +43,7 @@ public class SystemContactController extends ControllerSupport {
     public String edit(@RequestParam("contact_id") Integer contactId, Model model) {
         Contact contact = contactService.findById(contactId);
         if (contact == null) {
-            throw new SystemException("联系人不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "联系人不存在。");
         }
         model.addAttribute("contact", contact);
         return "system/contact/form";

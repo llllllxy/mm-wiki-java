@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -12,6 +13,7 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
+import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
 import org.tinycloud.mmwiki.vo.FollowUserView;
@@ -188,14 +190,14 @@ public class SystemProfileService {
             throw new SystemException("密码不能为空。");
         }
         User user = requireUser(userId);
-        String currentEncoded = userService.encodePassword(password);
-        if (!currentEncoded.equals(user.getPassword())) {
+        boolean isMatch = BCrypt.checkpw(password, user.getPassword());
+        if (!isMatch) {
             throw new SystemException("当前密码错误。");
         }
         if (!passwordNew.equals(passwordConfirm)) {
             throw new SystemException("确认密码和新密码不一致。");
         }
-        userService.updatePassword(userId, userService.encodePassword(passwordNew));
+        userService.updatePassword(userId, BCrypt.hashpw(passwordNew, BCrypt.gensalt()));
         return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
     }
 
@@ -209,7 +211,7 @@ public class SystemProfileService {
     private User requireUser(Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在！");
         }
         return user;
     }

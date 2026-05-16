@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
@@ -65,7 +66,7 @@ public class LoginAuthService {
 
     public JsonResponse<Void> update(LoginAuth loginAuth) {
         if (loginAuth.getLoginAuthId() == null || findById(loginAuth.getLoginAuthId()) == null) {
-            throw new SystemException("登录认证不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "登录认证不存在。");
         }
         JsonResponse<Void> validation = validate(loginAuth, loginAuth.getLoginAuthId());
         if (validation != null) {
@@ -79,7 +80,7 @@ public class LoginAuthService {
     public JsonResponse<Void> markUsed(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
-            throw new SystemException("登录认证不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "登录认证不存在。");
         }
         loginAuthMapper.clearUsed();
         loginAuthMapper.markUsed(loginAuthId);
@@ -89,7 +90,7 @@ public class LoginAuthService {
     public JsonResponse<Void> delete(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
-            throw new SystemException("登录认证不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "登录认证不存在。");
         }
         loginAuthMapper.markDeleted(loginAuthId);
         return JsonResponse.success("删除登录认证成功", "/system/auth/list");

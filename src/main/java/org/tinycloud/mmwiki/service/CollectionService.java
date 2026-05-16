@@ -3,6 +3,7 @@ package org.tinycloud.mmwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -51,7 +52,7 @@ public class CollectionService {
             throw new SystemException("收藏类型错误！");
         }
         if (!canVisit(currentUser, type, resourceId)) {
-            throw new SystemException("您没有权限收藏该资源。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限收藏该资源。");
         }
         CollectionEntry exists = collectionMapper.findByUserTypeAndResourceId(currentUser.getUserId(), type, resourceId);
         if (exists != null) {
@@ -90,10 +91,10 @@ public class CollectionService {
         }
         CollectionEntry entry = collectionMapper.findById(collectionId);
         if (entry == null) {
-            throw new SystemException("收藏资源不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "收藏资源不存在！");
         }
         if (!currentUserId.equals(entry.getUserId())) {
-            throw new SystemException("您只能取消自己的收藏！");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您只能取消自己的收藏！");
         }
         collectionMapper.deleteById(collectionId);
         return JsonResponse.success("已取消收藏！", redirect);

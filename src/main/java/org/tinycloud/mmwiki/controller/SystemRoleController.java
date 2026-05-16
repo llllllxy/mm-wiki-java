@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -61,8 +62,11 @@ public class SystemRoleController extends ControllerSupport {
     @GetMapping("/system/role/edit")
     public String edit(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
-        if (role == null || roleId == GlobalConstant.ROOT_ROLE_ID) {
-            throw new SystemException("角色不存在或不可修改");
+        if (role == null) {
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
+        }
+        if (roleId == GlobalConstant.ROOT_ROLE_ID) {
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "超级管理员不能修改");
         }
         model.addAttribute("role", role);
         return "system/role/form";
@@ -84,7 +88,7 @@ public class SystemRoleController extends ControllerSupport {
     public String user(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         model.addAttribute("role", role);
         model.addAttribute("roleId", roleId);
@@ -105,7 +109,7 @@ public class SystemRoleController extends ControllerSupport {
     public String privilege(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         PrivilegeGroups groups = privilegeService.groups();
         List<Integer> granted = roleId == GlobalConstant.ROOT_ROLE_ID

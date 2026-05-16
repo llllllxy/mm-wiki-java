@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.RoleMapper;
@@ -97,14 +98,14 @@ public class RoleService {
 
     public JsonResponse<Void> update(Role role) {
         if (role == null || role.getRoleId() == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         if (role.getRoleId() == ROOT_ROLE_ID) {
-            throw new SystemException("超级管理员不能修改");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "超级管理员不能修改");
         }
         Role existing = findActiveById(role.getRoleId());
         if (existing == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         JsonResponse<Void> validation = validate(role, role.getRoleId());
         if (validation != null) {
@@ -119,13 +120,13 @@ public class RoleService {
     public JsonResponse<Void> delete(Integer roleId) {
         Role role = findActiveById(roleId);
         if (role == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         if (roleId == ROOT_ROLE_ID) {
-            throw new SystemException("超级管理员不能删除");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "超级管理员不能删除");
         }
         if ((role.getType() == null ? CUSTOM_ROLE_TYPE : role.getType()) == SYSTEM_ROLE_TYPE) {
-            throw new SystemException("系统角色不能删除");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "系统角色不能删除");
         }
         if (userMapper.countByRoleId(roleId) > 0) {
             throw new SystemException("不能删除角色，请先移除该角色下用户");
@@ -149,10 +150,10 @@ public class RoleService {
     public JsonResponse<Void> grantPrivileges(Integer roleId, List<Integer> privilegeIds) {
         Role role = findActiveById(roleId);
         if (role == null) {
-            throw new SystemException("角色不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
         }
         if (roleId == ROOT_ROLE_ID) {
-            throw new SystemException("超级管理员不需要授权");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "超级管理员不需要授权");
         }
         Set<Integer> merged = new LinkedHashSet<>(DEFAULT_PRIVILEGE_IDS);
         if (privilegeIds != null) {
@@ -166,14 +167,14 @@ public class RoleService {
 
     public JsonResponse<Void> resetUserRole(Integer userId) {
         if (userId == null) {
-            throw new SystemException("用户不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在");
         }
         var user = userMapper.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在");
         }
         if (userId == ROOT_ROLE_ID) {
-            throw new SystemException("root 用户不能重置角色");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "root 用户不能重置角色");
         }
         userMapper.updateRoleId(userId, DEFAULT_ROLE_ID);
         return JsonResponse.success("重置用户角色成功", "/system/role/user?role_id=" + DEFAULT_ROLE_ID);

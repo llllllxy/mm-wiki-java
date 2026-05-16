@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
 import org.tinycloud.mmwiki.exception.SystemException;
+import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.vo.EnvView;
 
 import java.io.IOException;
@@ -233,7 +234,7 @@ public class InstallService {
         LocalDateTime now = LocalDateTime.now();
         try (Connection connection = connectToDatabase(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, data.getDatabaseConf().get("admin_name"));
-            statement.setString(2, PasswordUtils.sha384(PasswordUtils.sha256(data.getDatabaseConf().get("admin_pass"))));
+            statement.setString(2, BCrypt.hashpw(PasswordUtils.sha256(data.getDatabaseConf().get("admin_pass")), BCrypt.gensalt()));
             statement.setString(3, data.getDatabaseConf().get("admin_name"));
             statement.setInt(4, 1);
             statement.setObject(5, now);

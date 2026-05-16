@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.EmailUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
@@ -116,7 +117,7 @@ public class EmailService {
      */
     public JsonResponse<Void> update(EmailServer emailServer) {
         if (emailServer.getEmailId() == null || findById(emailServer.getEmailId()) == null) {
-            throw new SystemException("邮件服务器不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "邮件服务器不存在。");
         }
         JsonResponse<Void> validation = validate(emailServer, emailServer.getEmailId());
         if (validation != null) {
@@ -134,7 +135,7 @@ public class EmailService {
     public JsonResponse<Void> markUsed(Integer emailId) {
         EmailServer email = findById(emailId);
         if (email == null) {
-            throw new SystemException("邮件服务器不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "邮件服务器不存在。");
         }
         emailMapper.clearUsed();
         emailMapper.markUsed(emailId);
@@ -147,7 +148,7 @@ public class EmailService {
     public JsonResponse<Void> delete(Integer emailId) {
         EmailServer email = findById(emailId);
         if (email == null) {
-            throw new SystemException("邮件服务器不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "邮件服务器不存在。");
         }
         emailMapper.deleteById(emailId);
         return JsonResponse.success("删除邮件服务器成功", "/system/email/list");

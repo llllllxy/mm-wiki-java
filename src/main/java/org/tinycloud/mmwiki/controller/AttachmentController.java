@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
 import org.tinycloud.mmwiki.exception.SystemException;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.vo.Access;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class AttachmentController extends ControllerSupport {
         Document document = requireDocument(documentId);
         Access access = requireAccess(document);
         if (!access.isEditor()) {
-            throw new SystemException("您没有权限操作该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {
             throw new SystemException("上传附件错误。");
@@ -110,12 +111,12 @@ public class AttachmentController extends ControllerSupport {
     public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
-            throw new SystemException("附件不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
         Access access = requireAccess(document);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限删除该空间文档附件。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限删除该空间文档附件。");
         }
         attachmentService.deleteById(attachmentId);
         String redirect = attachment.getSource() != null && attachment.getSource() == AttachmentService.SOURCE_IMAGE
@@ -128,12 +129,12 @@ public class AttachmentController extends ControllerSupport {
     public ResponseEntity<PathResource> download(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
         Attachment attachment = attachmentService.findById(attachmentId);
         if (attachment == null) {
-            throw new SystemException("附件不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "附件不存在。");
         }
         Document document = requireDocument(attachment.getDocumentId());
         Access access = requireAccess(document);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限下载该空间附件。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限下载该空间附件。");
         }
         Path path = documentFileService.resolveAttachmentPath(attachment.getPath());
         PathResource resource = new PathResource(path);
@@ -147,7 +148,7 @@ public class AttachmentController extends ControllerSupport {
     private Document requireDocument(String documentId) {
         Document document = documentService.findActiveById(documentId);
         if (document == null) {
-            throw new SystemException("文档不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "文档不存在。");
         }
         return document;
     }
@@ -156,7 +157,7 @@ public class AttachmentController extends ControllerSupport {
         Space space = spaceService.requireSpace(document.getSpaceId());
         Access access = accessService.access(currentUser(), space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限访问该空间文档。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间文档。");
         }
         return access;
     }

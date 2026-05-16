@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Link;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.LinkMapper;
@@ -57,7 +58,7 @@ public class LinkService {
 
     public JsonResponse<Void> update(Link link) {
         if (link.getLinkId() == null || findById(link.getLinkId()) == null) {
-            throw new SystemException("链接不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "链接不存在。");
         }
         JsonResponse<Void> validation = validate(link, link.getLinkId());
         if (validation != null) {
@@ -70,7 +71,7 @@ public class LinkService {
 
     public JsonResponse<Void> delete(Integer linkId) {
         if (findById(linkId) == null) {
-            throw new SystemException("链接不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "链接不存在。");
         }
         linkMapper.deleteById(linkId);
         return JsonResponse.success("删除链接成功", "/system/link/list");

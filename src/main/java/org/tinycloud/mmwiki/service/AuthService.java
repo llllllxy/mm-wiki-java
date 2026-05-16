@@ -13,8 +13,8 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
+import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.util.IpUtils;
-import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.AuthInterceptor;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
@@ -70,8 +70,8 @@ public class AuthService {
             throw new SystemException("用户名或密码错误!");
         }
 
-        String encodedPassword = userService.encodePassword(cleanPassword);
-        if (!encodedPassword.equals(user.getPassword())) {
+        boolean isMatch = BCrypt.checkpw(cleanPassword, user.getPassword());
+        if (!isMatch) {
             throw new SystemException("用户名或密码错误!");
         }
 
@@ -123,7 +123,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(realUsername);
         user.setGivenName(value(profile.getGivenName()));
-        user.setPassword(userService.encodePassword(cleanPassword));
+        user.setPassword(BCrypt.hashpw(cleanPassword, BCrypt.gensalt()));
         user.setEmail(value(profile.getEmail()));
         user.setMobile(value(profile.getMobile()));
         user.setPhone(value(profile.getPhone()));

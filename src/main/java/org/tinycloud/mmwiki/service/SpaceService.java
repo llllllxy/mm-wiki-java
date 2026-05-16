@@ -7,6 +7,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -65,7 +66,7 @@ public class SpaceService {
     public Space requireSpace(Integer spaceId) {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
-            throw new SystemException("空间不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间不存在！");
         }
         space.setCreateDateText(TimeUtils.format(space.getCreateTime()));
         return space;
@@ -160,7 +161,7 @@ public class SpaceService {
         if (currentUser != null) {
             access = accessService.access(currentUser, space);
             if (!access.isVisit()) {
-                throw new SystemException("您没有权限访问该空间成员列表。");
+                throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间成员列表。");
             }
         }
 
@@ -186,7 +187,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限访问该空间成员列表。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间成员列表。");
         }
         PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
         List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
@@ -242,15 +243,15 @@ public class SpaceService {
     @Transactional
     public JsonResponse<Void> updateSpace(CurrentUser currentUser, Space space) throws IOException {
         if (space == null || space.getSpaceId() == null) {
-            throw new SystemException("空间不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间不存在！");
         }
         Space existing = spaceMapper.findActiveById(space.getSpaceId());
         if (existing == null) {
-            throw new SystemException("空间不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间不存在！");
         }
         Access access = accessService.access(currentUser, existing);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限修改该空间。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限修改该空间。");
         }
         JsonResponse<Void> validation = validateSpace(space, space.getSpaceId());
         if (validation != null) {
@@ -285,11 +286,11 @@ public class SpaceService {
     public JsonResponse<Void> deleteSpace(CurrentUser currentUser, Integer spaceId) throws IOException {
         Space space = spaceMapper.findActiveById(spaceId);
         if (space == null) {
-            throw new SystemException("空间不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间不存在！");
         }
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限删除该空间。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限删除该空间。");
         }
         List<Document> documents = documentMapper.findActiveBySpaceId(spaceId);
         if (documents.size() > 1) {
@@ -320,7 +321,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            throw new SystemException("您没有权限导出该空间。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限导出该空间。");
         }
         List<Attachment> attachments = attachmentService.findBySpaceId(spaceId);
         byte[] payload = zipSpace(space, attachments);
@@ -334,7 +335,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限添加该空间成员。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限添加该空间成员。");
         }
         if (spaceUserService.findBySpaceIdAndUserId(spaceId, userId) != null) {
             throw new SystemException("该用户已经是空间成员。");
@@ -349,11 +350,11 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限移除该空间成员。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限移除该空间成员。");
         }
         SpaceUser membership = spaceUserService.findBySpaceIdAndUserId(spaceId, userId);
         if (membership == null || !spaceUserId.equals(membership.getSpaceUserId())) {
-            throw new SystemException("空间成员不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "空间成员不存在。");
         }
         spaceUserService.deleteById(spaceUserId);
     }
@@ -365,7 +366,7 @@ public class SpaceService {
         Space space = requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isManager()) {
-            throw new SystemException("您没有权限修改该空间成员。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限修改该空间成员。");
         }
         spaceUserService.updatePrivilege(spaceUserId, privilege);
     }

@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.PrivilegeGroups;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -58,7 +59,7 @@ public class PrivilegeService {
 
     public JsonResponse<Void> save(Privilege privilege) {
         if (!devMode()) {
-            throw new SystemException("只允许在开发模式下添加权限");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "只允许在开发模式下添加权限");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -73,10 +74,10 @@ public class PrivilegeService {
 
     public JsonResponse<Void> update(Privilege privilege) {
         if (!devMode()) {
-            throw new SystemException("只允许在开发模式下修改权限");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "只允许在开发模式下修改权限");
         }
         if (privilege == null || privilege.getPrivilegeId() == null || findById(privilege.getPrivilegeId()) == null) {
-            throw new SystemException("权限不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "权限不存在");
         }
         JsonResponse<Void> validation = validate(privilege);
         if (validation != null) {
@@ -90,11 +91,11 @@ public class PrivilegeService {
     @Transactional
     public JsonResponse<Void> delete(Integer privilegeId) {
         if (!devMode()) {
-            throw new SystemException("只允许在开发模式下删除权限");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "只允许在开发模式下删除权限");
         }
         Privilege privilege = findById(privilegeId);
         if (privilege == null) {
-            throw new SystemException("权限不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "权限不存在");
         }
         if (privilegeMapper.countChildren(privilegeId) > 0) {
             throw new SystemException("请先删除该菜单下的权限");

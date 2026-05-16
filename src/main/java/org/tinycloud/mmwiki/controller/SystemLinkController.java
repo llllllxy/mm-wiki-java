@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Link;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.LinkService;
@@ -49,7 +50,7 @@ public class SystemLinkController extends ControllerSupport {
     public String edit(@RequestParam("link_id") Integer linkId, Model model) {
         Link link = linkService.findById(linkId);
         if (link == null) {
-            throw new SystemException("链接不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "链接不存在。");
         }
         model.addAttribute("link", link);
         return "system/link/form";

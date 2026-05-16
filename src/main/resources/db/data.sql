@@ -9,7 +9,7 @@
 -- 系统用户（root）, password：123456, 自动安装不需要插入，手动安装时需要插入该数据
 -- --------------------------------------
 -- INSERT INTO `mw_user` (`user_id`, `username`, `password`, `given_name`, `email`,  `mobile`, `role_id`, `is_delete`, `create_time`, `update_time`)
--- VALUES ('1', 'root', 'fa62f87d51338f304a464adbcf8458521f67e9a5e53a8ec7df06cb281305e42c3a5e7c11e5187ec25f6751134634fcea', 'root', 'root@123456.com', '1102222', '1', '0', now(), now());
+-- VALUES ('1', 'root', '$2a$10$zoKy47yar7hjYmShofsEiO2uL5ivNgDLM8WD5OCH8ASFgDwAVNfU2', 'root', 'root@123456.com', '1102222', '1', '0', now(), now());
 
 
 -- --------------------------------------

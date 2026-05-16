@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.LoginAuthService;
@@ -49,7 +50,7 @@ public class SystemAuthController extends ControllerSupport {
     public String edit(@RequestParam("login_auth_id") Integer loginAuthId, Model model) {
         LoginAuth auth = loginAuthService.findById(loginAuthId);
         if (auth == null) {
-            throw new SystemException("登录认证不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "登录认证不存在。");
         }
         model.addAttribute("auth", auth);
         return "system/auth/form";

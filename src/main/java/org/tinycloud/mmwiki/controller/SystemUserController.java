@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.domain.User;
@@ -63,7 +64,7 @@ public class SystemUserController extends ControllerSupport {
     public String info(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
         model.addAttribute("user", user);
         model.addAttribute("roleName", roleService.roleName(user.getRoleId()));
@@ -89,11 +90,11 @@ public class SystemUserController extends ControllerSupport {
     public String edit(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在！");
         }
         if (user.getRoleId() != null && user.getRoleId() == GlobalConstant.ROOT_ROLE_ID
                 && currentUser().getRoleId() != GlobalConstant.ROOT_ROLE_ID) {
-            throw new SystemException("没有权限修改超级管理员！");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "没有权限修改超级管理员！");
         }
         model.addAttribute("user", user);
         model.addAttribute("roles", assignableRoles());
@@ -111,14 +112,14 @@ public class SystemUserController extends ControllerSupport {
     @ResponseBody
     public JsonResponse<Void> forbidden(@RequestParam("user_id") Integer userId) {
         if (currentUser().getUserId().equals(userId)) {
-            throw new SystemException("不能屏蔽当前登录用户。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "不能屏蔽当前登录用户。");
         }
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
         if (GlobalConstant.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            throw new SystemException("不能操作超级管理员。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 1);
         return JsonResponse.success("屏蔽用户成功", "/system/user/list");
@@ -129,10 +130,10 @@ public class SystemUserController extends ControllerSupport {
     public JsonResponse<Void> recover(@RequestParam("user_id") Integer userId) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
         if (GlobalConstant.ROOT_ROLE_ID == (user.getRoleId() == null ? 0 : user.getRoleId())) {
-            throw new SystemException("不能操作超级管理员。");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 0);
         return JsonResponse.success("恢复用户成功", "/system/user/list");

@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -68,7 +69,7 @@ public class UserDirectoryService {
     public UserProfileView loadProfile(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
         PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
                 .doSelectPageInfo(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), AccessService.isRoot(currentUser), ""));
@@ -79,7 +80,7 @@ public class UserDirectoryService {
     public UserFollowView loadUserFollowView(Integer profileUserId, Integer loginUserId) {
         User user = userService.findActiveById(profileUserId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
 
         List<Follow> follows = followService.findByUserIdAndType(profileUserId, FollowService.TYPE_USER);
@@ -104,7 +105,7 @@ public class UserDirectoryService {
     public FollowDocView loadFollowDocs(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
-            throw new SystemException("用户不存在。");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();

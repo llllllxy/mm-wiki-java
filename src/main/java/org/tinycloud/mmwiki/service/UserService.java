@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.UserMapper;
+import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.util.PasswordUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
@@ -164,7 +166,7 @@ public class UserService {
             throw new SystemException("用户名已经存在！");
         }
         LocalDateTime now = LocalDateTime.now();
-        user.setPassword(encodePassword(user.getPassword()));
+        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
         user.setCreateTime(now);
         user.setUpdateTime(now);
         userMapper.insert(user);
@@ -176,14 +178,14 @@ public class UserService {
      */
     public JsonResponse<Void> updateSystemUser(User user, CurrentUser operator) {
         if (user == null || user.getUserId() == null) {
-            throw new SystemException("用户不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在！");
         }
         User existing = findActiveById(user.getUserId());
         if (existing == null) {
-            throw new SystemException("用户不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在！");
         }
         if (AccessService.isRootRole(existing.getRoleId()) && !AccessService.isRoot(operator)) {
-            throw new SystemException("没有权限修改超级管理员！");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "没有权限修改超级管理员！");
         }
         if (AccessService.isRootRole(existing.getRoleId())) {
             user.setRoleId(ROOT_ROLE_ID);
@@ -192,21 +194,14 @@ public class UserService {
         if (validation != null) {
             return validation;
         }
-        user.setUpdateTime(TimeUtils.now());
+        user.setUpdateTime(LocalDateTime.now());
         if (StringUtils.hasText(user.getPassword()) && AccessService.isRoot(operator)) {
-            user.setPassword(encodePassword(user.getPassword().trim()));
+            user.setPassword(BCrypt.hashpw(user.getPassword().trim(), BCrypt.gensalt()));
             userMapper.updateSystemUserWithPassword(user);
         } else {
             userMapper.updateSystemUser(user);
         }
         return JsonResponse.success("修改用户成功", "/system/user/list");
-    }
-
-    /**
-     * 按照sha384规则生成密码摘要。
-     */
-    public String encodePassword(String password) {
-        return PasswordUtils.sha384(password);
     }
 
     private JsonResponse<Void> validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {
@@ -251,10 +246,10 @@ public class UserService {
             throw new SystemException("没有选择角色！");
         }
         if (roleService.findActiveById(user.getRoleId()) == null) {
-            throw new SystemException("角色不存在！");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在！");
         }
         if (AccessService.isRootRole(user.getRoleId()) && !AccessService.isRoot(operator)) {
-            throw new SystemException("没有权限分配超级管理员角色！");
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "没有权限分配超级管理员角色！");
         }
         return null;
     }

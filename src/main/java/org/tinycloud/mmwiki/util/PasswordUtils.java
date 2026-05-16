@@ -17,15 +17,6 @@ public final class PasswordUtils {
     private PasswordUtils() {
     }
 
-    /**
-     * 计算MD5值。
-     *
-     * @param text 待计算的文本
-     * @return MD5值
-     */
-    public static String sha384(String text) {
-        return digest("SHA-384", text);
-    }
 
     /**
      * 计算SHA-256值。这里是为了模仿前端的加密
@@ -60,9 +51,5 @@ public final class PasswordUtils {
         } catch (NoSuchAlgorithmException ex) {
             throw new IllegalStateException("Missing digest algorithm: " + algorithm, ex);
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(sha384("f80286088c61829e4ce3da800d2fd6853a3890a3088139454cd3b6c4c6b37867"));
     }
 }

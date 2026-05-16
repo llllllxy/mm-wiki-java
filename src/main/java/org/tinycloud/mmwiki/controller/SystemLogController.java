@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.exception.SystemException;
@@ -57,7 +58,7 @@ public class SystemLogController extends ControllerSupport {
     public String info(@RequestParam("log_id") Long logId, Model model) {
         LogEntry log = logService.findLog(logId);
         if (log == null) {
-            throw new SystemException("日志不存在");
+            throw new SystemException(ErrorCodeEnum.NOT_FOUND, "日志不存在");
         }
         model.addAttribute("log", log);
         return "system/log/info";
