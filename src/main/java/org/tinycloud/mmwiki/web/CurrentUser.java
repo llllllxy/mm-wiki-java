@@ -17,7 +17,6 @@ public class CurrentUser implements Serializable {
 
     private Integer userId;
     private String username;
-    private String passwordHash;
     private Integer roleId;
     private String givenName;
 
@@ -25,7 +24,6 @@ public class CurrentUser implements Serializable {
         CurrentUser currentUser = new CurrentUser();
         currentUser.setUserId(user.getUserId());
         currentUser.setUsername(user.getUsername());
-        currentUser.setPasswordHash(user.getPassword());
         currentUser.setRoleId(user.getRoleId());
         currentUser.setGivenName(user.getGivenName());
         return currentUser;
@@ -45,14 +43,6 @@ public class CurrentUser implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public Integer getRoleId() {
