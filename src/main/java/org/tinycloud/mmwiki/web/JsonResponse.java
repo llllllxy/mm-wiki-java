@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.web;
 
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+
 import java.util.Map;
 
 /**
@@ -40,7 +42,7 @@ public class JsonResponse<T> {
 
     public static <T> JsonResponse<T> success(Object message, T data, String url, int sleep) {
         JsonResponse<T> response = new JsonResponse<>();
-        response.code = 1;
+        response.code = ErrorCodeEnum.SUCCESS.getCode();
         response.message = message;
         response.data = data;
         response.redirect = Map.of("url", url == null ? "" : url, "sleep", sleep);
@@ -60,8 +62,37 @@ public class JsonResponse<T> {
     }
 
     public static <T> JsonResponse<T> error(Object message, T data, String url, int sleep) {
+        return error(ErrorCodeEnum.FAILURE, message, data, url, sleep);
+    }
+
+    public static <T> JsonResponse<T> error(ErrorCodeEnum errorCode, Object message, String url) {
+        return error(errorCode, message, null, url, DEFAULT_SLEEP);
+    }
+
+    public static <T> JsonResponse<T> error(ErrorCodeEnum errorCode, Object message, String url, int sleep) {
+        return error(errorCode, message, null, url, sleep);
+    }
+
+    public static <T> JsonResponse<T> error(ErrorCodeEnum errorCode, Object message, T data, String url, int sleep) {
+        ErrorCodeEnum resolvedCode = errorCode == null ? ErrorCodeEnum.FAILURE : errorCode;
+        return error(resolvedCode.getCode(), message, data, url, sleep);
+    }
+
+    public static <T> JsonResponse<T> error(int code, Object message) {
+        return error(code, message, null, DEFAULT_URL, DEFAULT_SLEEP);
+    }
+
+    public static <T> JsonResponse<T> error(int code, Object message, String url) {
+        return error(code, message, null, url, DEFAULT_SLEEP);
+    }
+
+    public static <T> JsonResponse<T> error(int code, Object message, String url, int sleep) {
+        return error(code, message, null, url, sleep);
+    }
+
+    public static <T> JsonResponse<T> error(int code, Object message, T data, String url, int sleep) {
         JsonResponse<T> response = new JsonResponse<>();
-        response.code = 0;
+        response.code = code;
         response.message = message;
         response.data = data;
         response.redirect = Map.of("url", url == null ? "" : url, "sleep", sleep);
