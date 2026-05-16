@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.tinycloud.mmwiki.config.GlobalConstant;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Role;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.PrivilegeService;

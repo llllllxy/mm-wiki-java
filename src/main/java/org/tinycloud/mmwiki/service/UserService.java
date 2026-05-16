@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.tinycloud.mmwiki.config.GlobalConstant.DEFAULT_ROLE_ID;
-import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
+import static org.tinycloud.mmwiki.constant.GlobalConstant.DEFAULT_ROLE_ID;
+import static org.tinycloud.mmwiki.constant.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki 业务服务实现。

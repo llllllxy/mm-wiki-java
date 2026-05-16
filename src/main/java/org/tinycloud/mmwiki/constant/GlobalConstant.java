@@ -1,4 +1,4 @@
-package org.tinycloud.mmwiki.config;
+package org.tinycloud.mmwiki.constant;
 
 import java.util.List;
 

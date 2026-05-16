@@ -2,7 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.tinycloud.mmwiki.config.GlobalConstant;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
 import org.tinycloud.mmwiki.vo.Access;

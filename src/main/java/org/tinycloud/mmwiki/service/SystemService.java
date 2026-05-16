@@ -10,7 +10,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.tinycloud.mmwiki.config.GlobalConstant.ROOT_ROLE_ID;
+import static org.tinycloud.mmwiki.constant.GlobalConstant.ROOT_ROLE_ID;
 
 /**
  * MM-Wiki 业务服务实现。

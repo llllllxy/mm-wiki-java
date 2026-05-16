@@ -18,7 +18,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.tinycloud.mmwiki.config.GlobalConstant.*;
+import static org.tinycloud.mmwiki.constant.GlobalConstant.*;
 
 /**
  * MM-Wiki 业务服务实现。
