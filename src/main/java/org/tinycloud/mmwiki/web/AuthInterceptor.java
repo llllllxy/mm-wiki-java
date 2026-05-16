@@ -7,23 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.tinycloud.mmwiki.config.GlobalConstant;
-import org.tinycloud.mmwiki.domain.LogEntry;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
-import org.tinycloud.mmwiki.mapper.LogMapper;
 import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
+import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
-import org.tinycloud.mmwiki.util.IpUtils;
 import org.tinycloud.mmwiki.util.JsonUtils;
 import org.tinycloud.mmwiki.util.RequestUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 
@@ -45,8 +43,17 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Autowired
     private RolePrivilegeMapper rolePrivilegeMapper;
     @Autowired
-    private LogMapper logMapper;
+    private LogService logService;
 
+
+    /**
+     * 请求进入 Controller 前进行登录校验、账号状态刷新和后台权限校验。
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @param handler  处理器对象
+     * @return true 表示继续执行 Controller，false 表示请求已被拦截
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
@@ -71,6 +78,14 @@ public class AuthInterceptor implements HandlerInterceptor {
         return checkSystemAccess(request, response, refreshed);
     }
 
+    /**
+     * 请求完成后异步记录后台系统操作日志。
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @param handler  处理器对象
+     * @param ex       Controller 执行异常，正常完成时为空
+     */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         HttpSession session = request.getSession(false);
@@ -78,38 +93,32 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (currentUser == null || !shouldRecordOperation(request)) {
             return;
         }
-        try {
-            LogEntry logEntry = new LogEntry();
-            logEntry.setLevel(ex == null ? 6 : 3);
-            logEntry.setPath(left(request.getRequestURI(), 100));
-            logEntry.setGet(left(request.getQueryString() == null ? "" : request.getQueryString(), 4096));
-            logEntry.setPost(left(postParameters(request), 4096));
-            logEntry.setMessage(left((ex == null ? "系统操作" : "系统操作异常") + ": " + request.getMethod() + " " + request.getRequestURI(), 255));
-            logEntry.setIp(left(IpUtils.getClientIp(request), 100));
-            logEntry.setUserAgent(left(header(request, "User-Agent"), 255));
-            logEntry.setReferer(left(header(request, "Referer"), 100));
-            logEntry.setUserId(currentUser.getUserId());
-            logEntry.setUsername(currentUser.getUsername());
-            logEntry.setCreateTime(LocalDateTime.now());
-            logMapper.insert(logEntry);
-        } catch (RuntimeException ignored) {
-            // Logging must never break the user-facing request path.
-        }
+        logService.recordSystemOperationAsync(request, currentUser, ex);
     }
 
+    /**
+     * 处理未登录或登录失效请求。
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @return false 表示请求已处理完毕，不再进入 Controller
+     */
     private boolean handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (RequestUtils.expectsJsonResponse(request)) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("未登录或登录已失效！", "/author/index")));
-            return false;
+            return writeJsonError(response, JsonResponse.error(ErrorCodeEnum.UNAUTHORIZED, "未登录或登录已失效！", "/author/index"));
         }
-
         response.sendRedirect("/author/index");
         return false;
     }
 
+    /**
+     * 校验后台系统菜单权限。
+     *
+     * @param request     当前请求
+     * @param response    当前响应
+     * @param currentUser 当前登录用户
+     * @return true 表示有权限继续执行，false 表示请求已被拦截
+     */
     private boolean checkSystemAccess(HttpServletRequest request, HttpServletResponse response, CurrentUser currentUser) throws Exception {
         String path = request.getRequestURI();
         String[] parts = path == null ? new String[0] : path.replaceAll("^/+", "").split("/");
@@ -135,49 +144,45 @@ public class AuthInterceptor implements HandlerInterceptor {
         return handleForbidden(request, response);
     }
 
+    /**
+     * 处理无权限访问后台功能的请求。
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @return false 表示请求已处理完毕，不再进入 Controller
+     */
     private boolean handleForbidden(HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (RequestUtils.expectsJsonResponse(request)) {
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            response.getWriter().write(JsonUtils.writeValueAsString(JsonResponse.error("抱歉，您没有权限操作！", "/error/403")));
-            return false;
+            return writeJsonError(response, JsonResponse.error(ErrorCodeEnum.FORBIDDEN, "抱歉，您没有权限操作！", "/error/403"));
         }
         response.sendRedirect("/error/403");
         return false;
     }
 
+    /**
+     * 判断当前请求是否需要记录系统操作日志。
+     *
+     * @param request 当前请求
+     * @return true 表示需要记录操作日志
+     */
     private boolean shouldRecordOperation(HttpServletRequest request) {
         String path = request.getRequestURI();
         return "POST".equalsIgnoreCase(request.getMethod()) && path != null && path.startsWith("/system/");
     }
 
-    private String postParameters(HttpServletRequest request) {
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            if (builder.length() > 0) {
-                builder.append('&');
-            }
-            builder.append(entry.getKey()).append('=');
-            if (entry.getKey().toLowerCase(Locale.ROOT).contains("password")
-                    || entry.getKey().toLowerCase(Locale.ROOT).contains("pwd")) {
-                builder.append("***");
-            } else {
-                builder.append(String.join(",", entry.getValue()));
-            }
-        }
-        return builder.toString();
-    }
-
-    private String header(HttpServletRequest request, String name) {
-        String value = request.getHeader(name);
-        return value == null ? "" : value;
-    }
-
-    private String left(String value, int maxLength) {
-        if (value == null) {
-            return "";
-        }
-        return value.length() <= maxLength ? value : value.substring(0, maxLength);
+    /**
+     * 响应 JSON 错误。
+     *
+     * @param response 当前响应
+     * @param body     错误信息
+     * @return false
+     * @throws IOException 响应 IO 异常
+     */
+    private boolean writeJsonError(HttpServletResponse response, JsonResponse<?> body) throws IOException {
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.getWriter().write(JsonUtils.writeValueAsString(body));
+        return false;
     }
 }
