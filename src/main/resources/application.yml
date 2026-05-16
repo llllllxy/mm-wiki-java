@@ -1,0 +1,107 @@
+server:
+  port: 8081
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+    # 设置编码
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+spring:
+  application:
+    name: mmwiki
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:h2:mem:mmwiki_install;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+  session:
+    store-type: jdbc
+    timeout: 1800s
+    jdbc:
+      initialize-schema: never
+      cleanup-cron: 0 0/5 * * * ?
+  # 设置上传文件大小
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 200MB
+  # 设置jackson的默认时区和默认格式
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+logging:
+  level:
+    root: info
+  file:
+    name: /opt/logs/mm-wiki.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - [%method,%line] - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - [%method,%line] - %msg%n"
+    level: "%5p"
+    dateformat: "yyyy-MM-dd HH:mm:ss.SSS"
+    correlation: ""
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/mm-wiki.%d{yyyy-MM-dd}.%i.log.gz
+      max-file-size: 10MB
+      max-history: 7
+      total-size-cap: 1GB
+      clean-history-on-start: false
+
+
+mybatis:
+  type-aliases-package: org.tinycloud.mmwiki.domain
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: false
+  support-methods-arguments: false
+
+async:
+  executor:
+    thread:
+      core-pool-size: 2
+      max-pool-size: 8
+      keep-alive-seconds: 60
+      queue-capacity: 100
+      name-prefix: mmwiki-async-
+
+mmwiki:
+  version: v0.2.1
+  copyright: 2026 TinyCloud
+  system-name-fallback: Markdown Mini Wiki
+  document-root-dir: D:\home
+  pdf:
+    # 可选：PDF 导出中文字体路径。支持文件路径或 classpath:/fonts/pdf/xxx.ttf。
+    # 当前仅使用 ttf 格式，避免部分 otf/ttc 字体在 PDFBox 下解析异常。
+    # 为空时使用内置字体目录 fonts/pdf 下的 ttf 字体，不自动探测操作系统字体。
+    font-path:
+  search:
+    interval-time: 30
+    batch-update-doc-num: 100
