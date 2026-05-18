@@ -9,7 +9,7 @@ var Login = {
     ajaxSubmit: function (element) {
         var usernameEle = $(element).find("input[name='username']");
         var passwordEle = $(element).find("input[name='password']");
-        var submitEle = $(element).find("input[name='submit']");
+        var submitEle = $(element).find("button[type='button']");
         var username = usernameEle.val();
         var password = passwordEle.val();
         if (!username) {
@@ -26,7 +26,7 @@ var Login = {
                 passwordEle.val(password);
                 layer.tips(result.message, submitEle);
             }
-            if (result.code == 1) {
+            if (result.code === 1) {
                 var content = '<i class="fa fa-smile-o"></i> ' + result.message;
                 layer.msg(content);
                 if (result.redirect.url) {

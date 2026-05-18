@@ -60,7 +60,9 @@
                                     <input type="password" name="password" class="form-control" placeholder="请输入密码" autocomplete="new-password" onkeydown="KeyDown('#default_login')">
                                 </div>
                             </div>
-                            <input id="default_login" name="submit" type="button" value="登录" class="btn btn-primary btn-block" onclick="Login.ajaxSubmit(this.form)">
+                            <button id="default_login" type="button" class="btn btn-primary btn-block"
+                                    onclick="Login.ajaxSubmit(this.form)">登录
+                            </button>
                         </fieldset>
                     </form>
                 </section>
@@ -79,7 +81,9 @@
                                     <input type="password" name="password" class="form-control" placeholder="请输入统一登录密码" autocomplete="new-password" onkeydown="KeyDown('#auth_login')" th:disabled="${sso_open != '1'}">
                                 </div>
                             </div>
-                            <input id="auth_login" name="submit" type="button" value="登录" class="btn btn-primary" onclick="Login.ajaxSubmit(this.form)" th:disabled="${sso_open != '1'}">
+                            <button id="auth_login" type="button" class="btn btn-primary"
+                                    onclick="Login.ajaxSubmit(this.form)" th:disabled="${sso_open != '1'}">登录
+                            </button>
                         </fieldset>
                     </form>
                 </section>
