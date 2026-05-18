@@ -35,6 +35,10 @@ import java.util.Set;
 public class AuthInterceptor implements HandlerInterceptor {
 
     public static final String SESSION_AUTHOR = "author";
+    /**
+     * session 中账号状态的最短刷新间隔，避免高频请求每次都查询用户表。目前默认是30秒
+     */
+    private static final long USER_STATUS_REFRESH_INTERVAL_MILLIS = 30_000L;
 
     @Autowired
     private UserService userService;
@@ -67,15 +71,27 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         CurrentUser currentUser = (CurrentUser) sessionValue;
 
-        User refreshedUser = userService.findActiveById(currentUser.getUserId());
-        if (refreshedUser == null || refreshedUser.getIsForbidden() == 1) {
-            session.invalidate();
-            return handleUnauthenticated(request, response);
+        if (shouldRefreshUserStatus(currentUser)) {
+            User refreshedUser = userService.findActiveById(currentUser.getUserId());
+            if (refreshedUser == null || refreshedUser.getIsForbidden() == 1) {
+                session.invalidate();
+                return handleUnauthenticated(request, response);
+            }
+            currentUser = CurrentUser.from(refreshedUser);
+            session.setAttribute(SESSION_AUTHOR, currentUser);
         }
 
-        CurrentUser refreshed = CurrentUser.from(refreshedUser);
-        session.setAttribute(SESSION_AUTHOR, refreshed);
-        return checkSystemAccess(request, response, refreshed);
+        return checkSystemAccess(request, response, currentUser);
+    }
+
+    /**
+     * 判断是否需要重新读取账号状态，避免每个请求都查询用户表。
+     *
+     * @param currentUser 当前 session 中的登录用户
+     * @return true 表示需要刷新账号状态
+     */
+    private boolean shouldRefreshUserStatus(CurrentUser currentUser) {
+        return System.currentTimeMillis() - currentUser.getStatusRefreshTime() >= USER_STATUS_REFRESH_INTERVAL_MILLIS;
     }
 
     /**

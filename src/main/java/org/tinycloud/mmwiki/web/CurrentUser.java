@@ -19,6 +19,7 @@ public class CurrentUser implements Serializable {
     private String username;
     private Integer roleId;
     private String givenName;
+    private long statusRefreshTime;
 
     public static CurrentUser from(User user) {
         CurrentUser currentUser = new CurrentUser();
@@ -26,6 +27,7 @@ public class CurrentUser implements Serializable {
         currentUser.setUsername(user.getUsername());
         currentUser.setRoleId(user.getRoleId());
         currentUser.setGivenName(user.getGivenName());
+        currentUser.setStatusRefreshTime(System.currentTimeMillis());
         return currentUser;
     }
 
@@ -59,5 +61,13 @@ public class CurrentUser implements Serializable {
 
     public void setGivenName(String givenName) {
         this.givenName = givenName;
+    }
+
+    public long getStatusRefreshTime() {
+        return statusRefreshTime;
+    }
+
+    public void setStatusRefreshTime(long statusRefreshTime) {
+        this.statusRefreshTime = statusRefreshTime;
     }
 }
