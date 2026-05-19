@@ -4,7 +4,6 @@ server:
     session:
       cookie:
         http-only: true
-        secure: true
     # 设置编码
     encoding:
       charset: UTF-8

@@ -312,7 +312,6 @@ public class InstallService {
                     session:
                       cookie:
                         http-only: true
-                        secure: true
                     encoding:
                       charset: UTF-8
                       force: true
@@ -320,6 +319,8 @@ public class InstallService {
                 spring:
                   application:
                     name: mmwiki
+                  profiles:
+                    active: prod
                   datasource:
                     url: %s
                     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -342,7 +343,8 @@ public class InstallService {
                     store-type: jdbc
                     timeout: 1800s
                     jdbc:
-                      initialize-schema: always
+                      initialize-schema: never
+                      cleanup-cron: 0 0/5 * * * ?
                   servlet:
                     multipart:
                       enabled: true
@@ -353,13 +355,30 @@ public class InstallService {
                     date-format: yyyy-MM-dd HH:mm:ss
                 
                 logging:
+                  level:
+                    root: info
                   file:
-                    name: logs/mm-wiki.log
+                    name: /opt/logs/mm-wiki.log
+                  pattern:
+                    console: "%%d{yyyy-MM-dd HH:mm:ss.SSS} %%-5level [%%thread] %%logger{36} - [%%method,%%line] - %%msg%%n"
+                    file: "%%d{yyyy-MM-dd HH:mm:ss.SSS} %%-5level [%%thread] %%logger{36} - [%%method,%%line] - %%msg%%n"
+                    level: "%%5p"
+                    dateformat: "yyyy-MM-dd HH:mm:ss.SSS"
+                    correlation: ""
+                  logback:
+                    rollingpolicy:
+                      file-name-pattern: logs/mm-wiki.%%d{yyyy-MM-dd}.%%i.log.gz
+                      max-file-size: 10MB
+                      max-history: 7
+                      total-size-cap: 1GB
+                      clean-history-on-start: false
                 
                 mybatis:
                   type-aliases-package: org.tinycloud.mmwiki.domain
+                  mapper-locations: classpath:/mapper/*.xml
                   configuration:
                     map-underscore-to-camel-case: true
+                    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
                 
                 pagehelper:
                   helper-dialect: mysql
@@ -380,6 +399,8 @@ public class InstallService {
                   copyright: %s
                   system-name-fallback: Markdown Mini Wiki
                   document-root-dir: %s
+                  pdf:
+                    font-path:
                   search:
                     interval-time: 30
                     batch-update-doc-num: 100
