@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.Document;
+import org.tinycloud.mmwiki.exception.SystemException;
 
 /**
  * MM-Wiki 业务服务实现。
@@ -36,7 +37,7 @@ public class DocumentFileService {
 
     @PostConstruct
     public void init() {
-        this.documentRootDir = Path.of(properties.getDocumentRootDir());
+        this.documentRootDir = Path.of(properties.getDocumentRootDir()).toAbsolutePath().normalize();
         this.markdownRootDir = this.documentRootDir.resolve("markdowns");
     }
 
@@ -139,8 +140,18 @@ public class DocumentFileService {
         return markdownRootDir.resolve(pageFile);
     }
 
+    /**
+     * 解析附件相对路径，并确保最终路径仍位于文档根目录内。
+     */
     public Path resolveAttachmentPath(String relativePath) {
-        return documentRootDir.resolve(relativePath);
+        if (!StringUtils.hasText(relativePath)) {
+            throw new SystemException("附件路径不能为空。");
+        }
+        Path path = documentRootDir.resolve(relativePath).normalize();
+        if (!path.startsWith(documentRootDir)) {
+            throw new SystemException("附件路径不合法。");
+        }
+        return path;
     }
 
     public Path ensureAttachmentDirectory(String first, String second, String third) throws IOException {

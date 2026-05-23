@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
@@ -21,6 +20,7 @@ import org.tinycloud.mmwiki.service.AttachmentService;
 import org.tinycloud.mmwiki.service.DocumentFileService;
 import org.tinycloud.mmwiki.service.DocumentService;
 import org.tinycloud.mmwiki.service.SpaceService;
+import org.tinycloud.mmwiki.util.FileUtils;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.EditorImageResponse;
 
@@ -62,7 +62,7 @@ public class ImageController extends ControllerSupport {
         }
         Path saveDir = documentFileService.ensureAttachmentDirectory("images", String.valueOf(document.getSpaceId()), documentId);
         String originalFileName = file.getOriginalFilename();
-        String storedFileName = UUID.randomUUID().toString().replace("-", "") + getExtension(originalFileName);
+        String storedFileName = UUID.randomUUID().toString().replace("-", "") + FileUtils.getExtension(originalFileName);
         Path saveFile = saveDir.resolve(storedFileName);
         if (Files.exists(saveFile)) {
             return EditorImageResponse.error("该图片已经上传过。");
@@ -79,14 +79,4 @@ public class ImageController extends ControllerSupport {
         }
     }
 
-    private String getExtension(String fileName) {
-        if (fileName == null) {
-            return "";
-        }
-        int index = fileName.lastIndexOf('.');
-        if (index < 0 || index == fileName.length() - 1) {
-            return "";
-        }
-        return fileName.substring(index).toLowerCase(Locale.ROOT);
-    }
 }
