@@ -86,14 +86,22 @@ var Install = {
             for (var i = 0; i < formData.length; i++) {
                 if (formData[i].name == 'admin_pass') {
                     var value = formData[i].value;
-                    formData[i].value = hex_sha256(value);
+                    var encrypted = rsa2048Encrypt(value);
+                    if (!encrypted) {
+                        layer.tips("密码加密失败", element, {tips: 3});
+                        return false;
+                    }
+                    formData[i].value = encrypted;
                 }
             }
+            return true;
         }
 
         var $form = $(formElement);
         var formData = $form.serializeArray();
-        beforeSubmit(formData);
+        if (!beforeSubmit(formData)) {
+            return false;
+        }
 
         $.ajax({
             type: $form.attr("method") || "post",

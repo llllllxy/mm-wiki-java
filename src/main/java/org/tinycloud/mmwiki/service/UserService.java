@@ -9,8 +9,6 @@ import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.util.BCrypt;
-import org.tinycloud.mmwiki.util.PasswordUtils;
-import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
@@ -37,6 +35,8 @@ public class UserService {
     private UserMapper userMapper;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private PasswordCryptoService passwordCryptoService;
 
     /**
      * 按用户名查询未删除用户。
@@ -166,7 +166,7 @@ public class UserService {
             throw new SystemException("用户名已经存在！");
         }
         LocalDateTime now = LocalDateTime.now();
-        user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+        user.setPassword(BCrypt.hashpw(passwordCryptoService.decryptPassword(user.getPassword()), BCrypt.gensalt()));
         user.setCreateTime(now);
         user.setUpdateTime(now);
         userMapper.insert(user);
@@ -196,7 +196,7 @@ public class UserService {
         }
         user.setUpdateTime(LocalDateTime.now());
         if (StringUtils.hasText(user.getPassword()) && AccessService.isRoot(operator)) {
-            user.setPassword(BCrypt.hashpw(user.getPassword().trim(), BCrypt.gensalt()));
+            user.setPassword(BCrypt.hashpw(passwordCryptoService.decryptPassword(user.getPassword()), BCrypt.gensalt()));
             userMapper.updateSystemUserWithPassword(user);
         } else {
             userMapper.updateSystemUser(user);

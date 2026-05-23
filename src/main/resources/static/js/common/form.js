@@ -57,17 +57,25 @@ var Form = {
             // 只加密显式标记的密码字段，避免通用表单误伤邮箱、LDAP、安装配置等明文密钥。
             for (var i = 0; i < formData.length; i++) {
                 var field = jqForm.find(":input").filter(function () {
-                    return this.name == formData[i].name && $(this).attr("data-sha256") == "true";
+                    return this.name == formData[i].name && $(this).attr("data-rsa2048") == "true";
                 });
                 if (field.length > 0 && formData[i].value) {
-                    formData[i].value = hex_sha256(formData[i].value);
+                    var encrypted = rsa2048Encrypt(formData[i].value);
+                    if (!encrypted) {
+                        failed("密码加密失败", null);
+                        return false;
+                    }
+                    formData[i].value = encrypted;
                 }
             }
+            return true;
         }
 
         var $form = $(element);
         var formData = $form.serializeArray();
-        beforeSubmit(formData, $form);
+        if (!beforeSubmit(formData, $form)) {
+            return false;
+        }
 
         $.ajax({
             type: $form.attr("method") || "post",

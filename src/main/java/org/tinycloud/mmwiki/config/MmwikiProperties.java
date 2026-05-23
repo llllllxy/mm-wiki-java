@@ -18,6 +18,7 @@ public class MmwikiProperties {
     private String documentRootDir = "./data";
     private Search search = new Search();
     private Pdf pdf = new Pdf();
+    private Security security = new Security();
 
     public String getVersion() {
         return version;
@@ -67,6 +68,20 @@ public class MmwikiProperties {
         this.pdf = pdf;
     }
 
+    /**
+     * 获取安全配置。
+     */
+    public Security getSecurity() {
+        return security;
+    }
+
+    /**
+     * 设置安全配置。
+     */
+    public void setSecurity(Security security) {
+        this.security = security;
+    }
+
     public static class Search {
         private int intervalTime = 30;
         private int batchUpdateDocNum = 100;
@@ -97,6 +112,57 @@ public class MmwikiProperties {
 
         public void setFontPath(String fontPath) {
             this.fontPath = fontPath;
+        }
+    }
+
+    public static class Security {
+        private Rsa rsa = new Rsa();
+
+        /**
+         * 获取 RSA 配置。
+         */
+        public Rsa getRsa() {
+            return rsa;
+        }
+
+        /**
+         * 设置 RSA 配置。
+         */
+        public void setRsa(Rsa rsa) {
+            this.rsa = rsa;
+        }
+    }
+
+    public static class Rsa {
+        private String publicKey = "";
+        private String privateKey = "";
+
+        /**
+         * 获取 RSA 公钥。
+         */
+        public String getPublicKey() {
+            return publicKey;
+        }
+
+        /**
+         * 设置 RSA 公钥。
+         */
+        public void setPublicKey(String publicKey) {
+            this.publicKey = publicKey;
+        }
+
+        /**
+         * 获取 RSA 私钥。
+         */
+        public String getPrivateKey() {
+            return privateKey;
+        }
+
+        /**
+         * 设置 RSA 私钥。
+         */
+        public void setPrivateKey(String privateKey) {
+            this.privateKey = privateKey;
         }
     }
 }

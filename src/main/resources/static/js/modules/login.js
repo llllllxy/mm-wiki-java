@@ -40,12 +40,18 @@ var Login = {
 
         var $form = $(element);
         var formData = $form.serializeArray();
+        var encryptedPassword = rsa2048Encrypt(password);
+        if (!encryptedPassword) {
+            passwordEle.val(password);
+            layer.tips("密码加密失败", submitEle);
+            return false;
+        }
         for (var i = 0; i < formData.length; i++) {
             if (formData[i].name == "username") {
                 formData[i].value = username;
             }
             if (formData[i].name == "password") {
-                formData[i].value = hex_sha256(password);
+                formData[i].value = encryptedPassword;
             }
         }
 

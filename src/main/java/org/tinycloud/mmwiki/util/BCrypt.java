@@ -752,7 +752,7 @@ public class BCrypt {
         long start = System.currentTimeMillis();
 
         // 原始密码
-        String rawPassword = "f80286088c61829e4ce3da800d2fd6853a3890a3088139454cd3b6c4c6b37867";
+        String rawPassword = "123456";
 
         // 对密码进行编码
         String encodedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());

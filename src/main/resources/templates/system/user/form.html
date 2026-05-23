@@ -10,7 +10,8 @@
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
-    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/jsencrypt.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/rsa.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
@@ -39,7 +40,7 @@
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 密码</label>
                     <div class="col-sm-4">
                         <input type="password" name="password" class="form-control" placeholder="请输入密码"
-                               data-sha256="true">
+                               data-rsa2048="true">
                     </div>
                 </div>
                 <div class="form-group">

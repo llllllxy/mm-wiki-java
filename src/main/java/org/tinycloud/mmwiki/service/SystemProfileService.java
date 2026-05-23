@@ -51,6 +51,8 @@ public class SystemProfileService {
     private LogDocumentMapper logDocumentMapper;
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private PasswordCryptoService passwordCryptoService;
 
     /**
      * 加载个人中心首页资料与最近动态。
@@ -189,15 +191,18 @@ public class SystemProfileService {
         if (!StringUtils.hasText(password) || !StringUtils.hasText(passwordNew) || !StringUtils.hasText(passwordConfirm)) {
             throw new SystemException("密码不能为空。");
         }
+        String plainPassword = passwordCryptoService.decryptPassword(password);
+        String plainPasswordNew = passwordCryptoService.decryptPassword(passwordNew);
+        String plainPasswordConfirm = passwordCryptoService.decryptPassword(passwordConfirm);
         User user = requireUser(userId);
-        boolean isMatch = BCrypt.checkpw(password, user.getPassword());
+        boolean isMatch = BCrypt.checkpw(plainPassword, user.getPassword());
         if (!isMatch) {
             throw new SystemException("当前密码错误。");
         }
-        if (!passwordNew.equals(passwordConfirm)) {
+        if (!plainPasswordNew.equals(plainPasswordConfirm)) {
             throw new SystemException("确认密码和新密码不一致。");
         }
-        userService.updatePassword(userId, BCrypt.hashpw(passwordNew, BCrypt.gensalt()));
+        userService.updatePassword(userId, BCrypt.hashpw(plainPasswordNew, BCrypt.gensalt()));
         return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
     }
 

@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.domain.InstallData;
-import org.tinycloud.mmwiki.util.PasswordUtils;
 import org.tinycloud.mmwiki.util.JsonUtils;
 
 /**
@@ -54,6 +53,8 @@ public class InstallService {
 
     @Autowired
     private Environment environment;
+    @Autowired
+    private PasswordCryptoService passwordCryptoService;
 
     /**
      * 返回当前安装向导运行期状态。
@@ -234,7 +235,7 @@ public class InstallService {
         LocalDateTime now = LocalDateTime.now();
         try (Connection connection = connectToDatabase(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, data.getDatabaseConf().get("admin_name"));
-            statement.setString(2, BCrypt.hashpw(PasswordUtils.sha256(data.getDatabaseConf().get("admin_pass")), BCrypt.gensalt()));
+            statement.setString(2, BCrypt.hashpw(passwordCryptoService.decryptPassword(data.getDatabaseConf().get("admin_pass")), BCrypt.gensalt()));
             statement.setString(3, data.getDatabaseConf().get("admin_name"));
             statement.setInt(4, 1);
             statement.setObject(5, now);
@@ -399,6 +400,10 @@ public class InstallService {
                   copyright: %s
                   system-name-fallback: Markdown Mini Wiki
                   document-root-dir: %s
+                  security:
+                    rsa:
+                      public-key: %s
+                      private-key: %s
                   pdf:
                     font-path:
                   search:
@@ -414,7 +419,9 @@ public class InstallService {
                 db.get("conn_max_connection"),
                 yamlValue(properties.getVersion()),
                 yamlValue(properties.getCopyright()),
-                yamlValue(data.getSystemConf().get("document_dir").replace("\\", "/"))
+                yamlValue(data.getSystemConf().get("document_dir").replace("\\", "/")),
+                yamlValue(properties.getSecurity().getRsa().getPublicKey()),
+                yamlValue(properties.getSecurity().getRsa().getPrivateKey())
         );
         Files.writeString(configDir.resolve("application.yml"), yaml, StandardCharsets.UTF_8);
     }

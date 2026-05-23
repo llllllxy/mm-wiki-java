@@ -15,7 +15,8 @@
 
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
-    <script type="text/javascript" th:src="@{/static/plugins/cipher/sha256.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/cipher/jsencrypt.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/rsa.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
@@ -57,7 +58,9 @@
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-addon" id="password"><i class="glyphicon glyphicon-lock"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="请输入密码" autocomplete="new-password" onkeydown="KeyDown('#default_login')">
+                                    <input type="password" name="password" class="form-control" data-rsa2048="true"
+                                           placeholder="请输入密码" autocomplete="new-password"
+                                           onkeydown="KeyDown('#default_login')">
                                 </div>
                             </div>
                             <button id="default_login" type="button" class="btn btn-primary btn-block"
@@ -78,7 +81,9 @@
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="请输入统一登录密码" autocomplete="new-password" onkeydown="KeyDown('#auth_login')" th:disabled="${sso_open != '1'}">
+                                    <input type="password" name="password" class="form-control" data-rsa2048="true"
+                                           placeholder="请输入统一登录密码" autocomplete="new-password"
+                                           onkeydown="KeyDown('#auth_login')" th:disabled="${sso_open != '1'}">
                                 </div>
                             </div>
                             <button id="auth_login" type="button" class="btn btn-primary"

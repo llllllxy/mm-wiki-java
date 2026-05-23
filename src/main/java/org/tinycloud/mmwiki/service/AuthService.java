@@ -39,6 +39,8 @@ public class AuthService {
     private LoginAuthService loginAuthService;
     @Autowired
     private UnifiedAuthService unifiedAuthService;
+    @Autowired
+    private PasswordCryptoService passwordCryptoService;
 
     /**
      * 判断系统是否开启统一登录。
@@ -70,7 +72,8 @@ public class AuthService {
             throw new SystemException("用户名或密码错误!");
         }
 
-        boolean isMatch = BCrypt.checkpw(cleanPassword, user.getPassword());
+        String plainPassword = passwordCryptoService.decryptPassword(cleanPassword);
+        boolean isMatch = BCrypt.checkpw(plainPassword, user.getPassword());
         if (!isMatch) {
             throw new SystemException("用户名或密码错误!");
         }
@@ -107,8 +110,9 @@ public class AuthService {
         }
 
         AuthLoginProfile profile;
+        String plainPassword = passwordCryptoService.decryptPassword(cleanPassword);
         try {
-            profile = unifiedAuthService.authenticate(loginAuth, cleanUsername, cleanPassword);
+            profile = unifiedAuthService.authenticate(loginAuth, cleanUsername, plainPassword);
         } catch (Exception ex) {
             log.error("统一登录失败：{}", ex.getMessage(), ex);
             throw new SystemException("统一登录失败！");
@@ -123,7 +127,7 @@ public class AuthService {
         User user = new User();
         user.setUsername(realUsername);
         user.setGivenName(value(profile.getGivenName()));
-        user.setPassword(BCrypt.hashpw(cleanPassword, BCrypt.gensalt()));
+        user.setPassword(BCrypt.hashpw(plainPassword, BCrypt.gensalt()));
         user.setEmail(value(profile.getEmail()));
         user.setMobile(value(profile.getMobile()));
         user.setPhone(value(profile.getPhone()));

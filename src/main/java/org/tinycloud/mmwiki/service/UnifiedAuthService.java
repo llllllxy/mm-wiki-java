@@ -116,7 +116,7 @@ public class UnifiedAuthService {
 
             NamingEnumeration<SearchResult> results = searchContext.search(
                     config.getBasedn(),
-                    String.format(config.getAccountPattern(), username),
+                    String.format(config.getAccountPattern(), escapeLdapFilterValue(username)),
                     controls
             );
             List<SearchResult> entries = new ArrayList<>();
@@ -204,6 +204,28 @@ public class UnifiedAuthService {
 
     private String value(String value) {
         return value == null ? "" : value;
+    }
+
+    /**
+     * 转义 LDAP filter 值，避免用户名注入过滤表达式。
+     */
+    static String escapeLdapFilterValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            switch (ch) {
+                case '\\' -> builder.append("\\5c");
+                case '*' -> builder.append("\\2a");
+                case '(' -> builder.append("\\28");
+                case ')' -> builder.append("\\29");
+                case '\u0000' -> builder.append("\\00");
+                default -> builder.append(ch);
+            }
+        }
+        return builder.toString();
     }
 
     /**
