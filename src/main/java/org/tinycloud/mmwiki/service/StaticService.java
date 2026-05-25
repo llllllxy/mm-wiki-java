@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.Dashboard;
 import org.tinycloud.mmwiki.vo.Monitor;
@@ -98,9 +98,9 @@ public class StaticService {
         serverInfo.put("os", System.getProperty("os.name", ""));
         serverInfo.put("platform", System.getProperty("os.version", ""));
         serverInfo.put("platformFamily", System.getProperty("os.arch", ""));
-        PageInfo<LogEntry> pageInfo = PageHelper.startPage(1, 5)
-                .doSelectPageInfo(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
-        List<LogEntry> errLogs = pageInfo.getList();
+        Page<LogEntry> pageInfo = PaginateRequest.of(1, 5)
+                .request(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
+        List<LogEntry> errLogs = pageInfo.getRecords();
         errLogs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new Monitor(serverInfo, pageInfo.getTotal(), errLogs);
     }

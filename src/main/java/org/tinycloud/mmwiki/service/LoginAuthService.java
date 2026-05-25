@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -31,8 +31,8 @@ public class LoginAuthService {
 
     public PageModel<LoginAuth> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
-        PageInfo<LoginAuth> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<LoginAuth> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (search.isEmpty()) {
                         loginAuthMapper.pageAllActive();
                     } else {

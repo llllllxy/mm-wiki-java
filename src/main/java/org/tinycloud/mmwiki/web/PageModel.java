@@ -4,7 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
 
 /**
  * 分页模型类，用于 Ajax 分页查询返回结果。
@@ -79,8 +79,8 @@ public class PageModel<T> implements Serializable {
         return new PageModel<>(page, size, list, totalCount);
     }
 
-    public static <T> PageModel<T> from(PageInfo<T> pageInfo) {
-        return build((long) pageInfo.getPageNum(), (long) pageInfo.getPageSize(), pageInfo.getList(), pageInfo.getTotal(), (long) pageInfo.getPages());
+    public static <T> PageModel<T> from(Page<T> pageInfo) {
+        return build(pageInfo.getPageNum(), pageInfo.getPageSize(), pageInfo.getRecords(), pageInfo.getTotal(), pageInfo.getPages());
     }
 
     public Long getTotalCount() {

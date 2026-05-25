@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -100,8 +100,8 @@ public class SystemRoleController extends ControllerSupport {
     public JsonResponse<PageModel<org.tinycloud.mmwiki.domain.User>> userData(@RequestParam("role_id") Integer roleId,
                                                                               @RequestParam(defaultValue = "1") int pageNum,
                                                                               @RequestParam(defaultValue = "15") int pageSize) {
-        PageInfo<org.tinycloud.mmwiki.domain.User> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> userService.pageByFilters("", roleId));
+        Page<org.tinycloud.mmwiki.domain.User> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> userService.pageByFilters("", roleId));
         return JsonResponse.success("查询成功", PageModel.from(pageInfo));
     }
 

@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -76,8 +76,8 @@ public class ContactService {
 
     public PageModel<User> importCandidatePage(String username, int pageNum, int pageSize) {
         String search = username == null ? "" : username.trim();
-        PageInfo<User> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<User> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (search.isEmpty()) {
                         userService.pageAllActive();
                     } else {

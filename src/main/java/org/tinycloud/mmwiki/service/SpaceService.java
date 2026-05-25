@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -102,11 +102,11 @@ public class SpaceService {
      */
     public PageModel<Space> listSpacesPage(CurrentUser currentUser, String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
-        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<Space> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     spaceMapper.pageByKeywordAndUser(currentUser.getUserId(), AccessService.isRoot(currentUser), search);
                 });
-        List<Space> spaces = pageInfo.getList();
+        List<Space> spaces = pageInfo.getRecords();
         markCollections(currentUser, spaces);
         spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
         return PageModel.from(pageInfo);
@@ -116,9 +116,9 @@ public class SpaceService {
      * 加载当前用户收藏的空间列表。
      */
     public PageModel<Space> listCollectedSpaces(CurrentUser currentUser, int pageNum, int pageSize) {
-        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> spaceMapper.pageCollectedByUser(currentUser.getUserId(), AccessService.isRoot(currentUser)));
-        List<Space> spaces = pageInfo.getList();
+        Page<Space> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> spaceMapper.pageCollectedByUser(currentUser.getUserId(), AccessService.isRoot(currentUser)));
+        List<Space> spaces = pageInfo.getRecords();
         for (Space space : spaces) {
             space.setCollection(true);
         }
@@ -131,9 +131,9 @@ public class SpaceService {
      */
     public PageModel<Space> searchByTag(CurrentUser currentUser, String tag, int pageNum, int pageSize) {
         String cleanTag = tag == null ? "" : tag.trim();
-        PageInfo<Space> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> spaceMapper.pageByTagAndUser(currentUser.getUserId(), AccessService.isRoot(currentUser), cleanTag));
-        List<Space> spaces = pageInfo.getList();
+        Page<Space> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> spaceMapper.pageByTagAndUser(currentUser.getUserId(), AccessService.isRoot(currentUser), cleanTag));
+        List<Space> spaces = pageInfo.getRecords();
         markCollections(currentUser, spaces);
         spaces.forEach(space -> space.setCreateDateText(TimeUtils.format(space.getCreateTime())));
         return PageModel.from(pageInfo);
@@ -189,12 +189,12 @@ public class SpaceService {
         if (!access.isVisit()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间成员列表。");
         }
-        PageInfo<SpaceUser> pageInfo = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> spaceUserService.pageBySpaceId(spaceId));
-        List<Integer> userIds = pageInfo.getList().stream().map(SpaceUser::getUserId).toList();
+        Page<SpaceUser> pageInfo = PaginateRequest.of(pageNum, pageSize).request(() -> spaceUserService.pageBySpaceId(spaceId));
+        List<Integer> userIds = pageInfo.getRecords().stream().map(SpaceUser::getUserId).toList();
         Map<Integer, User> users = userIds.isEmpty() ? new HashMap<>() : userService.findActiveByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getUserId, item -> item));
         List<MemberView> views = new ArrayList<>();
-        for (SpaceUser member : pageInfo.getList()) {
+        for (SpaceUser member : pageInfo.getRecords()) {
             User user = users.get(member.getUserId());
             if (user != null) {
                 views.add(new MemberView(user, member.getPrivilege(), member.getSpaceUserId()));

@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -39,15 +39,15 @@ public class UserDirectoryService {
 
     public PageModel<User> userPage(CurrentUser currentUser, String username, int pageNum, int pageSize) {
         String keyword = username == null ? "" : username.trim();
-        PageInfo<User> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<User> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (keyword.isBlank()) {
                         userService.pageAllActive();
                     } else {
                         userService.pageByUsernameLike(keyword);
                     }
                 });
-        markFollows(currentUser.getUserId(), pageInfo.getList());
+        markFollows(currentUser.getUserId(), pageInfo.getRecords());
         return PageModel.from(pageInfo);
     }
 
@@ -71,9 +71,9 @@ public class UserDirectoryService {
         if (user == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), AccessService.isRoot(currentUser), ""));
-        List<LogDocumentView> activities = pageInfo.getList();
+        Page<LogDocumentView> pageInfo = PaginateRequest.of(1, 10)
+                .request(() -> logDocumentMapper.pageByUserIdVisibleToViewer(userId, currentUser.getUserId(), AccessService.isRoot(currentUser), ""));
+        List<LogDocumentView> activities = pageInfo.getRecords();
         return new UserProfileView(user, activities, activities.size());
     }
 

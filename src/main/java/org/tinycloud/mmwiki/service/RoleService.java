@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,15 +69,15 @@ public class RoleService {
 
     public PageModel<Role> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
-        PageInfo<Role> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<Role> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (search.isEmpty()) {
                         roleMapper.pageAll();
                     } else {
                         roleMapper.pageByKeyword(search);
                     }
                 });
-        pageInfo.getList().forEach(role -> role.setUpdateTimeText(TimeUtils.format(role.getUpdateTime())));
+        pageInfo.getRecords().forEach(role -> role.setUpdateTimeText(TimeUtils.format(role.getUpdateTime())));
         return PageModel.from(pageInfo);
     }
 

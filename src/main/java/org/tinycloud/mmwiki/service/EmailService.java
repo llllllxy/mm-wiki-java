@@ -29,8 +29,8 @@ import org.tinycloud.mmwiki.mapper.UserMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 
 /**
  * 邮件服务器配置、测试发信与文档更新通知服务。
@@ -71,8 +71,8 @@ public class EmailService {
      */
     public PageModel<EmailServer> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
-        PageInfo<EmailServer> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<EmailServer> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (search.isEmpty()) {
                         emailMapper.findAll();
                     } else {

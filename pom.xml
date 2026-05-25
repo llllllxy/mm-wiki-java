@@ -54,13 +54,13 @@
 			<version>3.0.5</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.pagehelper</groupId>
-			<artifactId>pagehelper-spring-boot-starter</artifactId>
-			<version>2.1.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>top.lxyccc</groupId>
+			<artifactId>tiny-mybatis-paginate</artifactId>
+			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.angus</groupId>

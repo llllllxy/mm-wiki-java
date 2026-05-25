@@ -380,12 +380,6 @@ public class InstallService {
                   configuration:
                     map-underscore-to-camel-case: true
                     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-                
-                pagehelper:
-                  helper-dialect: mysql
-                  reasonable: false
-                  support-methods-arguments: false
-                
                 async:
                   executor:
                     thread:

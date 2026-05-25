@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.domain.*;
@@ -61,9 +61,9 @@ public class MainService {
     }
 
     public PageModel<LogDocumentView> recentDocumentPage(CurrentUser currentUser, int pageNum, int pageSize) {
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> logDocumentMapper.pageVisibleByUserId(currentUser.getUserId(), AccessService.isRoot(currentUser)));
-        for (LogDocumentView logDocument : pageInfo.getList()) {
+        Page<LogDocumentView> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> logDocumentMapper.pageVisibleByUserId(currentUser.getUserId(), AccessService.isRoot(currentUser)));
+        for (LogDocumentView logDocument : pageInfo.getRecords()) {
             logDocument.setCreateTimeText(TimeUtils.format(logDocument.getCreateTime()));
         }
         return PageModel.from(pageInfo);

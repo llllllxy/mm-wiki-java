@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -467,9 +467,9 @@ public class DocumentService {
         if (!access.isVisit()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限查看该空间修改历史。");
         }
-        PageInfo<DocumentHistoryView> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByDocumentId(documentId));
-        pageInfo.getList().forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
+        Page<DocumentHistoryView> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> logDocumentMapper.pageByDocumentId(documentId));
+        pageInfo.getRecords().forEach(item -> item.setCreateTimeText(formatTime(item.getCreateTime())));
         return PageModel.from(pageInfo);
     }
 

@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -60,9 +60,9 @@ public class SystemProfileService {
     public ProfileInfoView loadInfo(Integer userId) {
         User user = requireUser(userId);
         // 最近动态，查询前10条
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(1, 10)
-                .doSelectPageInfo(() -> logDocumentMapper.pageByUserId(userId));
-        List<LogDocumentView> logs = pageInfo.getList();
+        Page<LogDocumentView> pageInfo = PaginateRequest.of(1, 10)
+                .request(() -> logDocumentMapper.pageByUserId(userId));
+        List<LogDocumentView> logs = pageInfo.getRecords();
         logs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new ProfileInfoView(user, logs, logs.size());
     }
@@ -172,15 +172,15 @@ public class SystemProfileService {
     public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
         requireUser(userId);
         String search = trim(keyword);
-        PageInfo<LogDocumentView> pageInfo = PageHelper.startPage(pageNum, pageSize)
-                .doSelectPageInfo(() -> {
+        Page<LogDocumentView> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> {
                     if (search.isBlank()) {
                         logDocumentMapper.pageByUserId(userId);
                     } else {
                         logDocumentMapper.pageByUserIdAndKeyword(userId, search);
                     }
                 });
-        pageInfo.getList().forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
+        pageInfo.getRecords().forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return PageModel.from(pageInfo);
     }
 
