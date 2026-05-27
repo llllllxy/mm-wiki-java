@@ -141,6 +141,19 @@ public class PdfExportService {
     }
 
     /**
+     * 导出单篇文档为完整 HTML 字节数组。
+     *
+     * @param document 当前导出的文档信息
+     * @param markdown 文档 Markdown 原文
+     * @return HTML 文件内容
+     */
+    public byte[] exportHtml(Document document, String markdown) {
+        String bodyHtml = renderMarkdown(markdown);
+        String html = buildHtml(document, inlineLocalImages(bodyHtml));
+        return html.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
      * 将 Markdown 文本渲染为 HTML 片段。
      *
      * @param markdown Markdown 原文，允许为空
@@ -264,7 +277,7 @@ public class PdfExportService {
                         img {
                             display: block;
                             height: auto;
-                            margin: 12px auto;
+                            margin: 12px 0;
                             max-width: 100%;
                         }
                         ul, ol {

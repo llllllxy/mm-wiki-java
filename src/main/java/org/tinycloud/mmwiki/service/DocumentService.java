@@ -172,14 +172,17 @@ public class DocumentService {
         }
 
         String exportType = StringUtils.hasText(output) ? output.trim().toLowerCase() : "markdown";
-        if (!"markdown".equals(exportType) && !"pdf".equals(exportType)) {
+        if (!"markdown".equals(exportType) && !"pdf".equals(exportType) && !"html".equals(exportType)) {
             throw new SystemException("不支持的导出类型。");
         }
 
         List<Document> parentDocuments = getParentDocuments(document);
         String pageFile = documentFileService.resolvePageFile(document, parentDocuments);
-        if ("pdf".equals(exportType)) {
+        if ("pdf".equals(exportType) || "html".equals(exportType)) {
             String pageContent = documentFileService.readPage(pageFile);
+            if ("html".equals(exportType)) {
+                return new ExportPayload(document.getName() + ".html", new ByteArrayResource(pdfExportService.exportHtml(document, pageContent)), MediaType.TEXT_HTML);
+            }
             return new ExportPayload(document.getName() + ".pdf", new ByteArrayResource(pdfExportService.export(document, pageContent)), MediaType.APPLICATION_PDF);
         }
         List<Attachment> attachments = attachmentService.findByDocumentId(documentId);

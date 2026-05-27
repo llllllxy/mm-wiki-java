@@ -60,6 +60,18 @@ class PdfExportServiceTest {
     }
 
     @Test
+    void exportHtmlReturnsFullUtf8Html() {
+        Document document = new Document();
+        document.setName("HTML导出");
+
+        String html = new String(pdfExportService.exportHtml(document, "## 标题\n\n正文"), java.nio.charset.StandardCharsets.UTF_8);
+
+        assertThat(html).contains("<!DOCTYPE html>");
+        assertThat(html).contains("<h2>标题</h2>");
+        assertThat(html).contains("<p>正文</p>");
+    }
+
+    @Test
     void inlineLocalImagesEmbedsUploadedImagesAsDataUri() throws Exception {
         Path image = tempDir.resolve("image.png");
         Files.write(image, minimalPngBytes());
