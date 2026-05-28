@@ -121,6 +121,15 @@ ul,li {
     padding: 0!important;
 }
 
+.webui-popover {
+    z-index: 202100 !important;
+}
+
+.webui-popover .webui-popover-content,
+.webui-popover .dropdown-menu {
+    background-color: #fff;
+}
+
 .webui-popover-menu {
     min-width: 100px!important;
 }
