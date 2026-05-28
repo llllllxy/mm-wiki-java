@@ -52,7 +52,7 @@ class AuthInterceptorTest {
         boolean allowed = authInterceptor.preHandle(request, response, new Object());
 
         assertThat(allowed).isTrue();
-        assertThat(request.getSession(false).getAttribute(AuthInterceptor.SESSION_AUTHOR)).isSameAs(currentUser);
+        assertThat(request.getSession(false).getAttribute(GlobalConstant.SESSION_AUTHOR)).isSameAs(currentUser);
         verify(userService, never()).findActiveById(5);
     }
 
@@ -66,7 +66,7 @@ class AuthInterceptorTest {
         boolean allowed = authInterceptor.preHandle(request, response, new Object());
 
         assertThat(allowed).isTrue();
-        CurrentUser refreshed = (CurrentUser) request.getSession(false).getAttribute(AuthInterceptor.SESSION_AUTHOR);
+        CurrentUser refreshed = (CurrentUser) request.getSession(false).getAttribute(GlobalConstant.SESSION_AUTHOR);
         assertThat(refreshed).isNotSameAs(currentUser);
         assertThat(refreshed.getUsername()).isEqualTo("new-name");
         assertThat(refreshed.getRoleId()).isEqualTo(2);
@@ -89,7 +89,7 @@ class AuthInterceptorTest {
 
     private static MockHttpServletRequest requestWithUser(String uri, CurrentUser currentUser) {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
-        request.getSession(true).setAttribute(AuthInterceptor.SESSION_AUTHOR, currentUser);
+        request.getSession(true).setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         return request;
     }
 

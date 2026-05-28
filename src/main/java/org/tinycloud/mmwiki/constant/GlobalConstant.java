@@ -13,6 +13,11 @@ import java.util.List;
 public final class GlobalConstant {
 
     /**
+     * 登录用户在 HTTP Session 中保存的属性名。
+     */
+    public static final String SESSION_AUTHOR = "author";
+
+    /**
      * root 角色ID，root 用户默认拥有所有空间的访问、编辑和管理权限。
      */
     public static final int ROLE_ROOT_ID = 1;

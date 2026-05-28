@@ -12,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tinycloud.mmwiki.TestFileUtils;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.service.AccessService;
@@ -63,7 +64,7 @@ class ImageControllerTest {
         ReflectionTestUtils.setField(imageController, "documentFileService", documentFileService);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.getSession(true).setAttribute(AuthInterceptor.SESSION_AUTHOR, currentUser());
+        request.getSession(true).setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser());
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
     }
 

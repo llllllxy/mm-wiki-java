@@ -34,7 +34,6 @@ import java.util.Set;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
-    public static final String SESSION_AUTHOR = "author";
     /**
      * session 中账号状态的最短刷新间隔，避免高频请求每次都查询用户表。目前默认是30秒
      */
@@ -65,7 +64,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return handleUnauthenticated(request, response);
         }
 
-        Object sessionValue = session.getAttribute(SESSION_AUTHOR);
+        Object sessionValue = session.getAttribute(GlobalConstant.SESSION_AUTHOR);
         if (!(sessionValue instanceof CurrentUser)) {
             return handleUnauthenticated(request, response);
         }
@@ -78,7 +77,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return handleUnauthenticated(request, response);
             }
             currentUser = CurrentUser.from(refreshedUser);
-            session.setAttribute(SESSION_AUTHOR, currentUser);
+            session.setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         }
 
         return checkSystemAccess(request, response, currentUser);
@@ -105,7 +104,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         HttpSession session = request.getSession(false);
-        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(SESSION_AUTHOR);
+        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(GlobalConstant.SESSION_AUTHOR);
         if (currentUser == null || !shouldRecordOperation(request)) {
             return;
         }

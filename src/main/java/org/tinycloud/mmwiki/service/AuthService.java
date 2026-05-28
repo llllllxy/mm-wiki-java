@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.util.IpUtils;
-import org.tinycloud.mmwiki.web.AuthInterceptor;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.service.UnifiedAuthService.AuthLoginProfile;
@@ -83,7 +83,7 @@ public class AuthService {
 
         User refreshed = userService.findActiveById(user.getUserId());
         CurrentUser currentUser = CurrentUser.from(refreshed);
-        request.getSession().setAttribute(AuthInterceptor.SESSION_AUTHOR, currentUser);
+        request.getSession().setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         return JsonResponse.success("登录成功！", "/main/index");
     }
 
@@ -145,7 +145,7 @@ public class AuthService {
             throw new SystemException("登录失败!");
         }
         CurrentUser currentUser = CurrentUser.from(refreshed);
-        request.getSession().setAttribute(AuthInterceptor.SESSION_AUTHOR, currentUser);
+        request.getSession().setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         return JsonResponse.success("登录成功！", "/main/index");
     }
 

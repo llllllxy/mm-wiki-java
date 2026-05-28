@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.ConfigService;
 import org.tinycloud.mmwiki.service.InstallService;
@@ -80,7 +81,7 @@ public class GlobalModelAttributes {
         model.addAttribute("system_name", configService.getValue("system_name", properties.getSystemNameFallback()));
 
         HttpSession session = request.getSession(false);
-        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(AuthInterceptor.SESSION_AUTHOR);
+        CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(GlobalConstant.SESSION_AUTHOR);
         if (currentUser != null) {
             model.addAttribute("login_user_id", currentUser.getUserId());
             model.addAttribute("login_username", currentUser.getUsername());

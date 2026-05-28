@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.tinycloud.mmwiki.constant.GlobalConstant;
 
 /**
  * MM-Wiki Web 层支持组件。
@@ -23,7 +24,7 @@ public abstract class ControllerSupport {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
         HttpServletRequest request = servletRequestAttributes.getRequest();
         HttpSession session = request.getSession(false);
-        return session == null ? null : (CurrentUser) session.getAttribute(AuthInterceptor.SESSION_AUTHOR);
+        return session == null ? null : (CurrentUser) session.getAttribute(GlobalConstant.SESSION_AUTHOR);
     }
 
     protected void nav(Model model, String navName) {
