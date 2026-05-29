@@ -117,11 +117,11 @@ public class DocumentFileService {
         Path newFile = resolvePagePath(newPageFile);
         Files.createDirectories(newFile.getParent());
         if (docType == DOCUMENT_TYPE_PAGE) {
-            Files.move(oldFile, newFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(oldFile, newFile);
             return;
         }
         Files.createDirectories(newFile.getParent());
-        Files.move(oldFile.getParent(), newFile.getParent(), StandardCopyOption.REPLACE_EXISTING);
+        Files.move(oldFile.getParent(), newFile.getParent());
     }
 
     public void deletePageOrDirectory(String pageFile, int docType) throws IOException {

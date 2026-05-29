@@ -46,8 +46,21 @@ public interface DocumentMapper {
 
     int updateParentPathEditor(Document document);
 
-    int bumpSequenceBySpaceIdFrom(@Param("spaceId") Integer spaceId, @Param("startSequence") Integer startSequence,
-                                  @Param("delta") Integer delta, @Param("updateTime") LocalDateTime updateTime);
+    /**
+     * 调整同一父目录下指定起始序号之后的文档排序，排除正在移动的文档自身。
+     *
+     * @param parentId          父文档 ID，只影响同级文档
+     * @param spaceId           空间 ID，限制排序范围
+     * @param excludeDocumentId 需要排除的文档 ID，避免移动自身时重复 bump
+     * @param startSequence     起始序号，序号大于等于该值的文档会整体偏移
+     * @param delta             序号偏移量
+     * @param updateTime        更新时间
+     * @return 更新的行数
+     */
+    int bumpSequenceByParentIdFrom(@Param("parentId") String parentId, @Param("spaceId") Integer spaceId,
+                                   @Param("excludeDocumentId") String excludeDocumentId,
+                                   @Param("startSequence") Integer startSequence,
+                                   @Param("delta") Integer delta, @Param("updateTime") LocalDateTime updateTime);
 
     int updateSequence(Document document);
 

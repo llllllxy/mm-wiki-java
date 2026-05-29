@@ -214,11 +214,13 @@
           and is_delete = 0
     </update>
 
-    <update id="bumpSequenceBySpaceIdFrom">
+    <update id="bumpSequenceByParentIdFrom">
         update mw_document
         set sequence    = sequence + #{delta},
             update_time = #{updateTime}
         where space_id = #{spaceId}
+          and parent_id = #{parentId}
+          and document_id != #{excludeDocumentId}
           and sequence &gt;= #{startSequence}
           and is_delete = 0
     </update>

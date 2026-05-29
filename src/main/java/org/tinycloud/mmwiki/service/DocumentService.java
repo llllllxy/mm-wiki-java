@@ -389,12 +389,21 @@ public class DocumentService {
         }
 
         LocalDateTime now = TimeUtils.now();
+        if (Objects.equals(document.getDocumentId(), targetDocument.getDocumentId())) {
+            throw new SystemException("不能移动到文档自身。");
+        }
         if ("next".equals(moveType) || "prev".equals(moveType)) {
+            if ("0".equals(document.getParentId()) || "0".equals(targetDocument.getParentId())) {
+                throw new SystemException("默认根文档不能参与排序。");
+            }
+            if (!Objects.equals(document.getParentId(), targetDocument.getParentId())) {
+                throw new SystemException("只能在同一目录下调整文档排序。");
+            }
             int updateSequence = Objects.requireNonNullElse(targetDocument.getSequence(), 0);
             if ("next".equals(moveType)) {
                 updateSequence += 1;
             }
-            documentMapper.bumpSequenceBySpaceIdFrom(document.getSpaceId(), updateSequence, 1, now);
+            documentMapper.bumpSequenceByParentIdFrom(document.getParentId(), document.getSpaceId(), document.getDocumentId(), updateSequence, 1, now);
             document.setSequence(updateSequence);
             document.setEditUserId(currentUser.getUserId());
             document.setUpdateTime(now);
@@ -407,6 +416,11 @@ public class DocumentService {
         }
         if (!Objects.equals(targetDocument.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
             throw new SystemException("目标文档必须是目录。");
+        }
+
+        Document duplicate = documentMapper.findByNameParentIdAndSpaceId(document.getName(), targetId, document.getSpaceId(), document.getType());
+        if (duplicate != null && !Objects.equals(duplicate.getDocumentId(), document.getDocumentId())) {
+            throw new SystemException("目标目录下已存在同名文档。");
         }
 
         List<Document> oldParents = getParentDocuments(document);
