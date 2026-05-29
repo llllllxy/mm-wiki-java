@@ -70,6 +70,12 @@ public class GlobalModelAttributes {
         return view;
     }
 
+    /**
+     * 全局页面模板属性设置。
+     *
+     * @param model   模型对象
+     * @param request 当前请求
+     */
     @ModelAttribute
     public void populate(Model model, HttpServletRequest request) {
         model.addAttribute("version", properties.getVersion());

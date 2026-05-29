@@ -29,18 +29,11 @@ public class ExportPayload {
     public ExportPayload() {
     }
 
-    public ExportPayload(
-            String fileName,
-            ByteArrayResource resource
-    ) {
+    public ExportPayload(String fileName, ByteArrayResource resource) {
         this(fileName, resource, MediaType.APPLICATION_OCTET_STREAM);
     }
 
-    public ExportPayload(
-            String fileName,
-            ByteArrayResource resource,
-            MediaType contentType
-    ) {
+    public ExportPayload(String fileName, ByteArrayResource resource, MediaType contentType) {
         this.fileName = fileName;
         this.resource = resource;
         this.contentType = contentType;

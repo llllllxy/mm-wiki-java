@@ -61,26 +61,26 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return handleUnauthenticated(request, response);
+            return this.handleUnauthenticated(request, response);
         }
 
         Object sessionValue = session.getAttribute(GlobalConstant.SESSION_AUTHOR);
         if (!(sessionValue instanceof CurrentUser)) {
-            return handleUnauthenticated(request, response);
+            return this.handleUnauthenticated(request, response);
         }
         CurrentUser currentUser = (CurrentUser) sessionValue;
 
         if (shouldRefreshUserStatus(currentUser)) {
-            User refreshedUser = userService.findActiveById(currentUser.getUserId());
+            User refreshedUser = this.userService.findActiveById(currentUser.getUserId());
             if (refreshedUser == null || refreshedUser.getIsForbidden() == 1) {
                 session.invalidate();
-                return handleUnauthenticated(request, response);
+                return this.handleUnauthenticated(request, response);
             }
             currentUser = CurrentUser.from(refreshedUser);
             session.setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         }
-
-        return checkSystemAccess(request, response, currentUser);
+        // 验证权限
+        return this.checkSystemAccess(request, response, currentUser);
     }
 
     /**
@@ -108,7 +108,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (currentUser == null || !shouldRecordOperation(request)) {
             return;
         }
-        logService.recordSystemOperationAsync(request, currentUser, ex);
+        this.logService.recordSystemOperationAsync(request, currentUser, ex);
     }
 
     /**
@@ -148,11 +148,11 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (currentUser.getRoleId() != null && currentUser.getRoleId() == GlobalConstant.ROOT_ROLE_ID) {
             return true;
         }
-        Privilege privilege = privilegeMapper.findControllerPrivilege(controller, action);
+        Privilege privilege = this.privilegeMapper.findControllerPrivilege(controller, action);
         if (privilege == null) {
-            return true;
+            return handleForbidden(request, response);
         }
-        Set<Integer> allowed = new HashSet<>(rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
+        Set<Integer> allowed = new HashSet<>(this.rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
         if (allowed.contains(privilege.getPrivilegeId())) {
             return true;
         }

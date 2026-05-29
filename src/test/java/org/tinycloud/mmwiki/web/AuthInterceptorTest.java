@@ -9,11 +9,14 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
@@ -87,6 +90,46 @@ class AuthInterceptorTest {
         assertThat(request.getSession(false)).isNull();
     }
 
+    @Test
+    void systemRouteWithoutPrivilegeRecordIsDenied() throws Exception {
+        CurrentUser currentUser = currentUser(5, GlobalConstant.DEFAULT_ROLE_ID, System.currentTimeMillis());
+        MockHttpServletRequest request = requestWithUser("/system/plugin/list", currentUser);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(privilegeMapper.findControllerPrivilege("plugin", "list")).thenReturn(null);
+
+        boolean allowed = authInterceptor.preHandle(request, response, new Object());
+
+        assertThat(allowed).isFalse();
+        assertThat(response.getRedirectedUrl()).isEqualTo("/error/403");
+        verify(rolePrivilegeMapper, never()).findPrivilegeIdsByRoleId(GlobalConstant.DEFAULT_ROLE_ID);
+    }
+
+    @Test
+    void rootUserCanAccessSystemRouteWithoutPrivilegeLookup() throws Exception {
+        CurrentUser currentUser = currentUser(1, GlobalConstant.ROOT_ROLE_ID, System.currentTimeMillis());
+        MockHttpServletRequest request = requestWithUser("/system/plugin/list", currentUser);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        boolean allowed = authInterceptor.preHandle(request, response, new Object());
+
+        assertThat(allowed).isTrue();
+        verify(privilegeMapper, never()).findControllerPrivilege("plugin", "list");
+        verify(rolePrivilegeMapper, never()).findPrivilegeIdsByRoleId(GlobalConstant.ROOT_ROLE_ID);
+    }
+
+    @Test
+    void normalUserCanAccessConfiguredSystemRouteWithGrantedPrivilege() throws Exception {
+        CurrentUser currentUser = currentUser(5, GlobalConstant.DEFAULT_ROLE_ID, System.currentTimeMillis());
+        MockHttpServletRequest request = requestWithUser("/system/user/list", currentUser);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(privilegeMapper.findControllerPrivilege("user", "list")).thenReturn(privilege(12));
+        when(rolePrivilegeMapper.findPrivilegeIdsByRoleId(GlobalConstant.DEFAULT_ROLE_ID)).thenReturn(List.of(12));
+
+        boolean allowed = authInterceptor.preHandle(request, response, new Object());
+
+        assertThat(allowed).isTrue();
+    }
+
     private static MockHttpServletRequest requestWithUser(String uri, CurrentUser currentUser) {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
         request.getSession(true).setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
@@ -110,5 +153,11 @@ class AuthInterceptorTest {
         user.setRoleId(roleId);
         user.setIsForbidden(isForbidden);
         return user;
+    }
+
+    private static Privilege privilege(Integer privilegeId) {
+        Privilege privilege = new Privilege();
+        privilege.setPrivilegeId(privilegeId);
+        return privilege;
     }
 }

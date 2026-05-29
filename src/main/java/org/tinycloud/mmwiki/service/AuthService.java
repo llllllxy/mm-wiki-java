@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -83,7 +84,9 @@ public class AuthService {
 
         User refreshed = userService.findActiveById(user.getUserId());
         CurrentUser currentUser = CurrentUser.from(refreshed);
-        request.getSession().setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
+        HttpSession session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         return JsonResponse.success("登录成功！", "/main/index");
     }
 
@@ -145,7 +148,9 @@ public class AuthService {
             throw new SystemException("登录失败!");
         }
         CurrentUser currentUser = CurrentUser.from(refreshed);
-        request.getSession().setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
+        HttpSession session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
         return JsonResponse.success("登录成功！", "/main/index");
     }
 
