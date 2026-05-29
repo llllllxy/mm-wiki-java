@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -42,7 +43,8 @@ public class InstallService {
 
     private static final Pattern SAFE_DATABASE_NAME = Pattern.compile("^[A-Za-z0-9_]+$");
     private final InstallData data = new InstallData();
-    private final Path configDir = Path.of("config").toAbsolutePath().normalize();
+    private final Path applicationDir = new ApplicationHome(InstallService.class).getDir().toPath().toAbsolutePath().normalize();
+    private final Path configDir = applicationDir.resolve("config").normalize();
     private final Path lockFile = configDir.resolve("install.lock");
 
     @Autowired
@@ -89,7 +91,7 @@ public class InstallService {
         Map<String, String> server = new LinkedHashMap<>();
         server.put("host", localIp());
         server.put("sys", System.getProperty("os.name", ""));
-        server.put("install_dir", Path.of("").toAbsolutePath().normalize().toString());
+        server.put("install_dir", applicationDir.toString());
         server.put("version", properties.getVersion());
 
         long memoryMb = Runtime.getRuntime().maxMemory() / 1024 / 1024;
