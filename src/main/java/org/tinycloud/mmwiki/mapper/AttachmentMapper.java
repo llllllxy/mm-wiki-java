@@ -22,6 +22,18 @@ public interface AttachmentMapper {
 
     Attachment findById(@Param("attachmentId") Integer attachmentId);
 
+    /**
+     * 根据文档ID、存储路径和来源查找附件，用于校验图片资源确实属于指定文档。
+     *
+     * @param documentId 文档ID
+     * @param path       附件存储相对路径
+     * @param source     附件来源类型
+     * @return 匹配的附件记录，不存在时返回 null
+     */
+    Attachment findByDocumentIdPathAndSource(@Param("documentId") String documentId,
+                                             @Param("path") String path,
+                                             @Param("source") Integer source);
+
     int insert(Attachment attachment);
 
     int deleteById(@Param("attachmentId") Integer attachmentId);

@@ -63,6 +63,21 @@
         where attachment_id = #{attachmentId} limit 1
     </select>
 
+    <select id="findByDocumentIdPathAndSource" resultType="org.tinycloud.mmwiki.domain.Attachment">
+        select attachment_id,
+               user_id,
+               document_id,
+               name,
+               path,
+               source,
+               create_time,
+               update_time
+        from mw_attachment
+        where document_id = #{documentId}
+          and path = #{path}
+          and source = #{source} limit 1
+    </select>
+
     <insert id="insert">
         insert into mw_attachment(user_id, document_id, name, path, source, create_time, update_time)
         values (#{userId}, #{documentId}, #{name}, #{path}, #{source}, #{createTime}, #{updateTime})

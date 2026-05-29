@@ -4,18 +4,32 @@
  */
 
 var Statics = {
+    /**
+     * 统一展示统计接口错误，优先使用后端返回消息，缺省时使用兜底文案。
+     *
+     * @param response 后端响应或请求失败对象
+     * @param fallback 缺省错误提示
+     */
+    ShowError: function (response, fallback) {
+        var message = response && response.message ? response.message : fallback;
+        if (window.Layers && Layers.failedMsg) {
+            Layers.failedMsg(message);
+        } else {
+            console.log(message);
+        }
+    },
 
     GetSpaceDocsRank: function (element1, element2, url) {
-		$.ajax({
-			type : 'post',
-			url : url,
-			data : {'arr':''},
-			dataType: "json",
-			success : function(response) {
+        $.ajax({
+            type: 'post',
+            url: url,
+            data: {'arr': ''},
+            dataType: "json",
+            success: function (response) {
                 if (response.code !== 1) {
-					console.log(response.message);
-					return false
-				}
+                    Statics.ShowError(response, "数据加载失败");
+                    return false
+                }
                 Morris.Bar({
                     element: element1,
                     data: response.data,
@@ -29,7 +43,7 @@ var Statics = {
                 });
                 var values = [];
                 var count = 0;
-                for (var i=0; i < response.data.length; i++) {
+                for (var i = 0; i < response.data.length; i++) {
                     var value = {
                         value: response.data[i].total,
                         label: response.data[i].space_name
@@ -40,26 +54,28 @@ var Statics = {
                 Morris.Donut({
                     element: element2,
                     data: values,
-                    formatter: function (x) { return Math.round((x/count)*100)+ "%"}
-                }).on('click', function(i, row){
+                    formatter: function (x) {
+                        return Math.round((x / count) * 100) + "%"
+                    }
+                }).on('click', function (i, row) {
                     console.log(i, row);
                 });
-			},
-			error : function(response) {
-				console.log(response.message)
-			}
-		});
-	},
+            },
+            error: function (response) {
+                Statics.ShowError(response, "请求失败")
+            }
+        });
+    },
 
     GetDocCountByTime: function (element, url) {
         $.ajax({
-            type : 'post',
-            url : url,
-            data : {'arr':''},
+            type: 'post',
+            url: url,
+            data: {'arr': ''},
             dataType: "json",
-            success : function(response) {
+            success: function (response) {
                 if (response.code !== 1) {
-                    console.log(response.message);
+                    Statics.ShowError(response, "数据加载失败");
                     return false
                 }
                 if (response.data.length > 0) {
@@ -70,23 +86,23 @@ var Statics = {
                         ykeys: ['total'],
                         labels: ['新增文档数']
                     });
-				}
+                }
             },
-            error : function(response) {
-                console.log(response.message)
+            error: function (response) {
+                Statics.ShowError(response, "请求失败")
             }
         });
     },
 
     GetCollectDocsRank: function (element, url) {
         $.ajax({
-            type : 'post',
-            url : url,
-            data : {'arr':''},
+            type: 'post',
+            url: url,
+            data: {'arr': ''},
             dataType: "json",
-            success : function(response) {
+            success: function (response) {
                 if (response.code !== 1) {
-                    console.log(response.message);
+                    Statics.ShowError(response, "数据加载失败");
                     return false
                 }
                 if (response.data.length > 0) {
@@ -103,87 +119,90 @@ var Statics = {
                     });
                 }
             },
-            error : function(response) {
-                console.log(response.message)
+            error: function (response) {
+                Statics.ShowError(response, "请求失败")
             }
         });
     },
 
-	GetServerStatus: function (url) {
-		$.ajax({
-			type : 'post',
-			url : url,
-			data : {'arr':''},
-			dataType: "json",
-			success : function(response) {
+    GetServerStatus: function (url) {
+        $.ajax({
+            type: 'post',
+            url: url,
+            data: {'arr': ''},
+            dataType: "json",
+            success: function (response) {
                 if (response.code !== 1) {
-					console.log(response.message);
-					return false
-				}
-				var cpu = response.data.cpu_used_percent;
-				var memory = response.data.memory_used_percent;
-				var disk = response.data.disk_used_percent;
-				// cpu
-				$(".cpu_text").each(function () {
-					$(this).text(cpu+"%")
-				});
-				$("#cpu_progress").attr("aria-valuenow", cpu);
-				$("#cpu_progress").attr('style', 'min-width: 2em; width: '+cpu+'%');
+                    Statics.ShowError(response, "数据加载失败");
+                    return false
+                }
+                var cpu = response.data.cpu_used_percent;
+                var memory = response.data.memory_used_percent;
+                var disk = response.data.disk_used_percent;
+                // cpu
+                $(".cpu_text").each(function () {
+                    $(this).text(cpu + "%")
+                });
+                $("#cpu_progress").attr("aria-valuenow", cpu);
+                $("#cpu_progress").attr('style', 'min-width: 2em; width: ' + cpu + '%');
 
-				// memory
-				$(".memory_text").each(function () {
-					$(this).text(memory+"%")
-				});
-				$("#memory_progress").attr("aria-valuenow", memory);
-				$("#memory_progress").attr('style', 'min-width: 2em; width: '+memory+'%');
+                // memory
+                $(".memory_text").each(function () {
+                    $(this).text(memory + "%")
+                });
+                $("#memory_progress").attr("aria-valuenow", memory);
+                $("#memory_progress").attr('style', 'min-width: 2em; width: ' + memory + '%');
 
-				// disk
-				$(".disk_text").each(function () {
-					$(this).text(disk+"%")
-				});
-				$("#disk_progress").attr("aria-valuenow", disk);
-				$("#disk_progress").attr('style', 'min-width: 2em; width: '+disk+'%');
+                // disk
+                $(".disk_text").each(function () {
+                    $(this).text(disk + "%")
+                });
+                $("#disk_progress").attr("aria-valuenow", disk);
+                $("#disk_progress").attr('style', 'min-width: 2em; width: ' + disk + '%');
 
-			},
-			error : function(response) {
-				console.log(response.message)
-			}
-		});
-	},
+            },
+            error: function (response) {
+                Statics.ShowError(response, "请求失败")
+            }
+        });
+    },
 
     GetServerTime: function (element, url) {
 
-        var clock4   = Snap("#"+element);
-        var hours4   = clock4.rect(79, 35, 3, 55).attr({fill: "#282828", transform: "r" + 10 * 30 + "," + 80 + "," + 80});
-        var minutes4 = clock4.rect(79, 20, 3, 70).attr({fill: "#535353", transform: "r" + 10 * 6 + "," + 80 + "," + 80});
+        var clock4 = Snap("#" + element);
+        var hours4 = clock4.rect(79, 35, 3, 55).attr({fill: "#282828", transform: "r" + 10 * 30 + "," + 80 + "," + 80});
+        var minutes4 = clock4.rect(79, 20, 3, 70).attr({
+            fill: "#535353",
+            transform: "r" + 10 * 6 + "," + 80 + "," + 80
+        });
         var seconds4 = clock4.rect(80, 10, 1, 80).attr({fill: "#ff6400"});
-        var middle4 =   clock4.circle(81, 80, 3).attr({fill: "#535353"});
+        var middle4 = clock4.circle(81, 80, 3).attr({fill: "#535353"});
 
-        var updateTime = function(serverTime, _clock, _hours, _minutes, _seconds) {
+        var updateTime = function (serverTime, _clock, _hours, _minutes, _seconds) {
 
             var currentTime, hour, minute, second;
             currentTime = new Date(parseInt(serverTime) * 1000);
             second = currentTime.getSeconds();
             minute = currentTime.getMinutes();
             hour = currentTime.getHours();
-            hour = (hour > 12)? hour - 12 : hour;
-            hour = (hour == '00')? 12 : hour;
+            hour = (hour > 12) ? hour - 12 : hour;
+            hour = (hour == '00') ? 12 : hour;
 
-            if(second == 0){
+            if (second == 0) {
                 //got to 360deg at 60s
                 second = 60;
-            }else if(second == 1 && _seconds){
+            } else if (second == 1 && _seconds) {
                 //reset rotation transform(going from 360 to 6 deg)
                 _seconds.attr({transform: "r" + 0 + "," + 80 + "," + 80});
             }
-            if(minute == 0){
+            if (minute == 0) {
                 minute = 60;
-            }else if(minute == 1){
+            } else if (minute == 1) {
                 _minutes.attr({transform: "r" + 0 + "," + 80 + "," + 80});
             }
             _hours.animate({transform: "r" + hour * 30 + "," + 80 + "," + 80}, 200, mina.elastic);
             _minutes.animate({transform: "r" + minute * 6 + "," + 80 + "," + 80}, 200, mina.elastic);
-            if(_seconds){
+            if (_seconds) {
                 _seconds.animate({transform: "r" + second * 6 + "," + 80 + "," + 80}, 500, mina.elastic);
             }
         };
@@ -198,26 +217,30 @@ var Statics = {
 
         function getServerTime(url) {
             $.ajax({
-                type : 'post',
-                url : url,
-                data : {},
+                type: 'post',
+                url: url,
+                data: {},
                 dataType: "json",
-                success : function(response) {
+                success: function (response) {
+                    if (response.code !== 1) {
+                        Statics.ShowError(response, "数据加载失败");
+                        return false
+                    }
                     // console.log(response.data.server_time);
                     // update lock time
                     updateTime(response.data.server_time, clock4, hours4, minutes4, seconds4);
                     // update run time
                     updateRuntime(response.data.run_time);
                 },
-                error : function(response) {
-                    console.log("request error")
+                error: function (response) {
+                    Statics.ShowError(response, "请求失败")
                 }
             });
         }
 
         getServerTime(url);
 
-        setInterval(function(){
+        setInterval(function () {
             getServerTime(url);
         }, 1000);
     }

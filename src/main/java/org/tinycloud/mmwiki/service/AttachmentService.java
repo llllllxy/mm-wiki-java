@@ -20,8 +20,13 @@ import org.tinycloud.mmwiki.util.TimeUtils;
  */
 @Service
 public class AttachmentService {
-
+    /**
+     * 附件来源类型：附件
+     */
     public static final int SOURCE_ATTACHMENT = 0;
+    /**
+     * 附件来源类型：图片
+     */
     public static final int SOURCE_IMAGE = 1;
 
     @Autowired
@@ -43,6 +48,18 @@ public class AttachmentService {
 
     public Attachment findById(Integer attachmentId) {
         return attachmentMapper.findById(attachmentId);
+    }
+
+    /**
+     * 根据文档ID、存储路径和来源查找附件，主要用于图片直链访问前的归属校验。
+     *
+     * @param documentId 文档ID
+     * @param path       附件存储相对路径
+     * @param source     附件来源类型
+     * @return 匹配的附件记录，不存在时返回 null
+     */
+    public Attachment findByDocumentIdPathAndSource(String documentId, String path, int source) {
+        return attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source);
     }
 
     public Attachment save(Integer userId, String documentId, String name, String path, int source) {
@@ -80,4 +97,3 @@ public class AttachmentService {
         attachmentMapper.deleteByDocumentId(documentId);
     }
 }
-

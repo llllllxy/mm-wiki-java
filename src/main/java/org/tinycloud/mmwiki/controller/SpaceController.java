@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.controller;
 
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.vo.MemberPage;
 import org.tinycloud.mmwiki.vo.MemberView;
@@ -94,7 +96,7 @@ public class SpaceController extends ControllerSupport {
         Space space = spaceService.requireSpace(spaceId);
         Access access = accessService.access(currentUser, space);
         if (!access.isVisit()) {
-            return "error/403";
+            throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间文档。");
         }
         Document spaceDefault = documentService.findSpaceDefaultDocument(spaceId);
         return "redirect:/document/index?document_id=" + spaceDefault.getDocumentId();

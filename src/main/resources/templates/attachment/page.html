@@ -83,7 +83,7 @@
     };
     var attachmentObj = $("#attach_upload").fileinput(attachmentOption);
     attachmentObj.on("fileuploaded", function (event, data) {
-        if (data.response.code) {
+        if (data.response.code === 1) {
             var redirect = data.response.redirect || {};
             var sleep = redirect.sleep !== undefined ? redirect.sleep : 2000;
             Layers.successMsg(data.response.message, sleep, function () {
