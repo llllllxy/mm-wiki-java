@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tinycloud.mmwiki.TestFileUtils;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.Document;
@@ -107,7 +108,7 @@ class ImageControllerTest {
         assertThat(files.get(0).getFileName().toString()).matches("[a-f0-9]{32}\\.png");
         verify(attachmentService).save(eq(9), eq("doc-1"), eq("image (1).PNG"),
                 org.mockito.ArgumentMatchers.matches("images/5/doc-1/[a-f0-9]{32}\\.png"),
-                eq(AttachmentService.SOURCE_IMAGE));
+                eq(AttachmentSourceEnum.IMAGE));
     }
 
     /**
@@ -124,9 +125,9 @@ class ImageControllerTest {
         Attachment attachment = new Attachment();
         attachment.setDocumentId("doc-1");
         attachment.setPath("images/5/doc-1/image.png");
-        attachment.setSource(AttachmentService.SOURCE_IMAGE);
+        attachment.setSource(AttachmentSourceEnum.IMAGE.getCode());
         when(documentService.findActiveById("doc-1")).thenReturn(document);
-        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/image.png", AttachmentService.SOURCE_IMAGE)).thenReturn(attachment);
+        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/image.png", AttachmentSourceEnum.IMAGE)).thenReturn(attachment);
         when(spaceService.requireSpace(5)).thenReturn(space);
         when(accessService.access(org.mockito.ArgumentMatchers.any(CurrentUser.class), eq(space))).thenReturn(new Access(true, false, false));
         when(documentFileService.resolveAttachmentPath("images/5/doc-1/image.png")).thenReturn(image);
@@ -154,9 +155,9 @@ class ImageControllerTest {
         Attachment attachment = new Attachment();
         attachment.setDocumentId("doc-1");
         attachment.setPath("images/5/doc-1/share.png");
-        attachment.setSource(AttachmentService.SOURCE_IMAGE);
+        attachment.setSource(AttachmentSourceEnum.IMAGE.getCode());
         when(documentService.findActiveById("doc-1")).thenReturn(document);
-        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/share.png", AttachmentService.SOURCE_IMAGE)).thenReturn(attachment);
+        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/share.png", AttachmentSourceEnum.IMAGE)).thenReturn(attachment);
         when(spaceService.requireSpace(5)).thenReturn(space);
         when(documentFileService.resolveAttachmentPath("images/5/doc-1/share.png")).thenReturn(image);
 
@@ -177,9 +178,9 @@ class ImageControllerTest {
         Attachment attachment = new Attachment();
         attachment.setDocumentId("doc-1");
         attachment.setPath("images/5/doc-1/private.png");
-        attachment.setSource(AttachmentService.SOURCE_IMAGE);
+        attachment.setSource(AttachmentSourceEnum.IMAGE.getCode());
         when(documentService.findActiveById("doc-1")).thenReturn(document);
-        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/private.png", AttachmentService.SOURCE_IMAGE)).thenReturn(attachment);
+        when(attachmentService.findByDocumentIdPathAndSource("doc-1", "images/5/doc-1/private.png", AttachmentSourceEnum.IMAGE)).thenReturn(attachment);
         when(spaceService.requireSpace(5)).thenReturn(space);
         when(accessService.access(org.mockito.ArgumentMatchers.any(CurrentUser.class), eq(space))).thenReturn(new Access(false, false, false));
 

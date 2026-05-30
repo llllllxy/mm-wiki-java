@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tinycloud.mmwiki.TestFileUtils;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.Document;
@@ -110,7 +111,7 @@ class AttachmentControllerTest {
         assertThat(files.get(0).getFileName().toString()).matches("[a-f0-9]{32}\\.pdf");
         verify(attachmentService).save(eq(9), eq("doc-1"), eq("report (1).PDF"),
                 org.mockito.ArgumentMatchers.matches("attachment/5/doc-1/[a-f0-9]{32}\\.pdf"),
-                eq(AttachmentService.SOURCE_ATTACHMENT));
+                eq(AttachmentSourceEnum.ATTACHMENT));
     }
 
     /**

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
@@ -74,7 +75,7 @@ public class ImageController extends ControllerSupport {
         if (document == null || !Objects.equals(document.getSpaceId(), spaceId)) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "图片不存在。");
         }
-        Attachment attachment = attachmentService.findByDocumentIdPathAndSource(documentId, relativePath, AttachmentService.SOURCE_IMAGE);
+        Attachment attachment = attachmentService.findByDocumentIdPathAndSource(documentId, relativePath, AttachmentSourceEnum.IMAGE);
         if (attachment == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "图片不存在。");
         }
@@ -123,7 +124,7 @@ public class ImageController extends ControllerSupport {
         try {
             String relativePath = "images/" + document.getSpaceId() + "/" + documentId + "/" + storedFileName;
             String markdownUrl = "/" + relativePath;
-            attachmentService.save(currentUser().getUserId(), documentId, originalFileName, relativePath, AttachmentService.SOURCE_IMAGE);
+            attachmentService.save(currentUser().getUserId(), documentId, originalFileName, relativePath, AttachmentSourceEnum.IMAGE);
             return EditorImageResponse.success("上传成功", markdownUrl);
         } catch (Exception ex) {
             Files.deleteIfExists(saveFile);

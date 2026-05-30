@@ -78,6 +78,9 @@
         return '<a href="javascript:void(0)" onclick="removeMember(\'' + spaceId + '\', \'' + row.user.userId + '\', \'' + row.spaceUserId + '\')"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
     }
 
+    /**
+     * 绑定空间用户权限修改事件处理程序
+     */
     function bindPrivilegeChange() {
         $("select[name='edit_privilege']").off("change").on("change", function () {
             Common.ajaxSubmit($(this).attr("data-link"), "privilege=" + this.value);

@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tinycloud.mmwiki.TestFileUtils;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.mapper.AttachmentMapper;
 
@@ -46,7 +47,7 @@ class AttachmentServiceTest {
     @Test
     void savePersistsAttachmentMetadataWithoutChangingOriginalName() {
         Attachment attachment = attachmentService.save(3, "doc-1", "image (1).png",
-                "images/5/doc-1/uuid.png", AttachmentService.SOURCE_IMAGE);
+                "images/5/doc-1/uuid.png", AttachmentSourceEnum.IMAGE);
 
         ArgumentCaptor<Attachment> captor = ArgumentCaptor.forClass(Attachment.class);
         verify(attachmentMapper).insert(captor.capture());
@@ -56,7 +57,7 @@ class AttachmentServiceTest {
         assertThat(inserted.getDocumentId()).isEqualTo("doc-1");
         assertThat(inserted.getName()).isEqualTo("image (1).png");
         assertThat(inserted.getPath()).isEqualTo("images/5/doc-1/uuid.png");
-        assertThat(inserted.getSource()).isEqualTo(AttachmentService.SOURCE_IMAGE);
+        assertThat(inserted.getSource()).isEqualTo(AttachmentSourceEnum.IMAGE.getCode());
         assertThat(inserted.getCreateTime()).isNotNull();
         assertThat(inserted.getUpdateTime()).isNotNull();
     }

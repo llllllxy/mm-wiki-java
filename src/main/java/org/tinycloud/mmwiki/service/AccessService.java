@@ -3,6 +3,7 @@ package org.tinycloud.mmwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
 import org.tinycloud.mmwiki.vo.Access;
@@ -35,18 +36,20 @@ public class AccessService {
         if (currentUser == null || space == null) {
             return new Access(false, false, false);
         }
+        // 如果当前用户是超级管理员，则直接返回所有都是 true
         if (currentUser.getRoleId() != null && currentUser.getRoleId() == GlobalConstant.ROLE_ROOT_ID) {
             return new Access(true, true, true);
         }
 
         SpaceUser membership = this.spaceUserService.findBySpaceIdAndUserId(space.getSpaceId(), currentUser.getUserId());
+        // 如果当前用户不是空间成员，则判断空间访问权限，如果是公开空间则允许访问，否则不允许访问。
         if (membership == null) {
-            if ("private".equalsIgnoreCase(space.getVisitLevel())) {
+            if (SpaceVisitLevelEnum.PRIVATE.is(space.getVisitLevel())) {
                 return new Access(false, false, false);
             }
             return new Access(true, false, false);
         }
-
+        // 如果当前用户是空间成员，则判断空间成员权限等级，如果是管理员或编辑者则允许访问、编辑、管理，如果是普通成员则允许访问、编辑，如果是非成员则不允许访问。
         if (membership.getPrivilege() != null && membership.getPrivilege() == GlobalConstant.SPACE_MANAGER) {
             return new Access(true, true, true);
         }

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
 import org.tinycloud.mmwiki.vo.Access;
@@ -34,7 +35,7 @@ class AccessServiceTest {
 
     @Test
     void publicSpaceAllowsNonMemberToVisitOnly() {
-        Space space = space(10, "public");
+        Space space = space(10, SpaceVisitLevelEnum.PUBLIC.getCode());
         CurrentUser currentUser = user(8, GlobalConstant.DEFAULT_ROLE_ID);
         when(spaceUserService.findBySpaceIdAndUserId(10, 8)).thenReturn(null);
 
@@ -85,7 +86,7 @@ class AccessServiceTest {
     }
 
     private static Space privateSpace() {
-        return space(10, "private");
+        return space(10, SpaceVisitLevelEnum.PRIVATE.getCode());
     }
 
     private static Space space(Integer spaceId, String visitLevel) {

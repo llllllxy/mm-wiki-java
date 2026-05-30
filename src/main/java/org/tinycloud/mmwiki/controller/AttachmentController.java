@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
@@ -60,7 +61,7 @@ public class AttachmentController extends ControllerSupport {
     public String page(@RequestParam("document_id") String documentId, Model model) {
         Document document = requireDocument(documentId);
         Access access = requireAccess(document);
-        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_ATTACHMENT));
+        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentSourceEnum.ATTACHMENT));
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_upload", access.isEditor());
         model.addAttribute("is_delete", access.isManager());
@@ -71,7 +72,7 @@ public class AttachmentController extends ControllerSupport {
     public String image(@RequestParam("document_id") String documentId, Model model) {
         Document document = requireDocument(documentId);
         Access access = requireAccess(document);
-        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentService.SOURCE_IMAGE));
+        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentSourceEnum.IMAGE));
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_delete", access.isManager());
         return "attachment/image";
@@ -104,7 +105,7 @@ public class AttachmentController extends ControllerSupport {
                     documentId,
                     originalFileName,
                     relativePath,
-                    AttachmentService.SOURCE_ATTACHMENT
+                    AttachmentSourceEnum.ATTACHMENT
             );
             return JsonResponse.success("附件上传成功", "/attachment/page?document_id=" + documentId);
         } catch (Exception ex) {
@@ -126,7 +127,7 @@ public class AttachmentController extends ControllerSupport {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限删除该空间文档附件。");
         }
         attachmentService.deleteById(attachmentId);
-        String redirect = attachment.getSource() != null && attachment.getSource() == AttachmentService.SOURCE_IMAGE
+        String redirect = AttachmentSourceEnum.IMAGE.is(attachment.getSource())
                 ? "/attachment/image?document_id=" + document.getDocumentId()
                 : "/attachment/page?document_id=" + document.getDocumentId();
         return JsonResponse.success("删除成功", redirect);

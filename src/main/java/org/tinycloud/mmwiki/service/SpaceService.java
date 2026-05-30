@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
@@ -405,12 +406,15 @@ public class SpaceService {
         space.setName(trim(space.getName()));
         space.setDescription(trim(space.getDescription()));
         space.setTags(trim(space.getTags()));
-        space.setVisitLevel(trim(space.getVisitLevel()).toLowerCase());
-        if (!StringUtils.hasText(space.getVisitLevel())) {
-            space.setVisitLevel("public");
+        String visitLevel = trim(space.getVisitLevel());
+        if (!StringUtils.hasText(visitLevel)) {
+            space.setVisitLevel(SpaceVisitLevelEnum.PUBLIC.getCode());
         }
-        if (!"public".equals(space.getVisitLevel()) && !"private".equals(space.getVisitLevel())) {
+        if (StringUtils.hasText(visitLevel) && SpaceVisitLevelEnum.fromCode(visitLevel) == null) {
             throw new SystemException("访问级别不正确！");
+        }
+        if (StringUtils.hasText(visitLevel)) {
+            space.setVisitLevel(SpaceVisitLevelEnum.fromCode(visitLevel).getCode());
         }
         space.setIsShare(Objects.equals(space.getIsShare(), 1) ? 1 : 0);
         space.setIsExport(Objects.equals(space.getIsExport(), 1) ? 1 : 0);

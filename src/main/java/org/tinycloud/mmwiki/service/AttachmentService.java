@@ -1,33 +1,26 @@
 package org.tinycloud.mmwiki.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.mapper.AttachmentMapper;
-import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 附件业务服务，负责附件元数据查询、保存和删除时的磁盘文件清理。
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 @Service
 public class AttachmentService {
-    /**
-     * 附件来源类型：附件
-     */
-    public static final int SOURCE_ATTACHMENT = 0;
-    /**
-     * 附件来源类型：图片
-     */
-    public static final int SOURCE_IMAGE = 1;
 
     @Autowired
     private AttachmentMapper attachmentMapper;
@@ -61,8 +54,8 @@ public class AttachmentService {
      * @param source     附件来源类型
      * @return 匹配来源的附件列表
      */
-    public List<Attachment> findByDocumentIdAndSource(String documentId, int source) {
-        return attachmentMapper.findByDocumentIdAndSource(documentId, source);
+    public List<Attachment> findByDocumentIdAndSource(String documentId, AttachmentSourceEnum source) {
+        return attachmentMapper.findByDocumentIdAndSource(documentId, source.getCode());
     }
 
     /**
@@ -83,8 +76,8 @@ public class AttachmentService {
      * @param source     附件来源类型
      * @return 匹配的附件记录，不存在时返回 null
      */
-    public Attachment findByDocumentIdPathAndSource(String documentId, String path, int source) {
-        return attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source);
+    public Attachment findByDocumentIdPathAndSource(String documentId, String path, AttachmentSourceEnum source) {
+        return attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source.getCode());
     }
 
     /**
@@ -97,14 +90,14 @@ public class AttachmentService {
      * @param source     附件来源类型
      * @return 新增后的附件实体
      */
-    public Attachment save(Integer userId, String documentId, String name, String path, int source) {
+    public Attachment save(Integer userId, String documentId, String name, String path, AttachmentSourceEnum source) {
         LocalDateTime now = LocalDateTime.now();
         Attachment attachment = new Attachment();
         attachment.setUserId(userId);
         attachment.setDocumentId(documentId);
         attachment.setName(name);
         attachment.setPath(path);
-        attachment.setSource(source);
+        attachment.setSource(source.getCode());
         attachment.setCreateTime(now);
         attachment.setUpdateTime(now);
         attachmentMapper.insert(attachment);
