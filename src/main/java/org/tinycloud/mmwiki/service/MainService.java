@@ -4,6 +4,7 @@ import org.tinycloud.paginate.Page;
 import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.mapper.*;
 import org.tinycloud.mmwiki.util.TimeUtils;
@@ -23,8 +24,6 @@ import java.util.List;
  */
 @Service
 public class MainService {
-
-    private static final int COLLECTION_TYPE_DOC = 1;
 
     @Autowired
     private CollectionMapper collectionMapper;
@@ -46,7 +45,7 @@ public class MainService {
      * @return 用户可见的收藏文档列表
      */
     public List<Document> loadCollectedDocuments(CurrentUser currentUser) {
-        List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(currentUser.getUserId(), COLLECTION_TYPE_DOC);
+        List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(currentUser.getUserId(), CollectionTypeEnum.DOCUMENT.getCode());
         if (collections.isEmpty()) {
             return List.of();
         }

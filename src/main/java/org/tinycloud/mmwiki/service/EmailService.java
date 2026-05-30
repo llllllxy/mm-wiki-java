@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.util.EmailUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
@@ -270,7 +271,7 @@ public class EmailService {
      * @return 关注用户邮箱列表
      */
     private List<String> findDocumentFollowerEmails(String documentId) {
-        List<Follow> follows = followMapper.findByObjectIdAndType(documentId, FollowService.TYPE_DOC);
+        List<Follow> follows = followMapper.findByObjectIdAndType(documentId, FollowTypeEnum.DOCUMENT.getCode());
         if (follows.isEmpty()) {
             return List.of();
         }

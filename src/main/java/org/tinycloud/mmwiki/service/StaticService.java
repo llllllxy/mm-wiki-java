@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.mapper.CollectionMapper;
@@ -71,8 +73,8 @@ public class StaticService {
                 userMapper.countByLastTimeAfter(todayStart),
                 topUser(documentMapper.findTopCreateUserId()),
                 topUser(documentMapper.findTopEditUserId()),
-                topUser(collectionMapper.findTopUserIdByType(CollectionService.TYPE_DOC)),
-                topUser(followMapper.findTopObjectIdByType(FollowService.TYPE_USER))
+                topUser(collectionMapper.findTopUserIdByType(CollectionTypeEnum.DOCUMENT.getCode())),
+                topUser(followMapper.findTopObjectIdByType(FollowTypeEnum.USER.getCode()))
         );
     }
 
@@ -93,7 +95,7 @@ public class StaticService {
      * @return 文档收藏排行数据
      */
     public List<Map<String, Object>> collectDocRank(int number) {
-        return collectionMapper.findResourceRank(CollectionService.TYPE_DOC, Math.max(1, Math.min(number, 100)));
+        return collectionMapper.findResourceRank(CollectionTypeEnum.DOCUMENT.getCode(), Math.max(1, Math.min(number, 100)));
     }
 
     /**

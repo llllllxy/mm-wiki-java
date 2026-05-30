@@ -2,6 +2,7 @@ package org.tinycloud.mmwiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
 import org.tinycloud.mmwiki.domain.CollectionEntry;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Document;
@@ -23,9 +24,6 @@ import org.tinycloud.mmwiki.web.JsonResponse;
  */
 @Service
 public class CollectionService {
-
-    public static final int TYPE_DOC = 1;
-    public static final int TYPE_SPACE = 2;
 
     @Autowired
     private CollectionMapper collectionMapper;
@@ -72,7 +70,7 @@ public class CollectionService {
         if (resourceId == null || resourceId.isBlank()) {
             throw new SystemException("没有选择收藏资源！");
         }
-        if (type != TYPE_DOC && type != TYPE_SPACE) {
+        if (!CollectionTypeEnum.DOCUMENT.is(type) && !CollectionTypeEnum.SPACE.is(type)) {
             throw new SystemException("收藏类型错误！");
         }
         if (!canVisit(currentUser, type, resourceId)) {
@@ -100,7 +98,7 @@ public class CollectionService {
      * @return true 表示可访问，false 表示不可访问
      */
     private boolean canVisit(CurrentUser currentUser, int type, String resourceId) {
-        if (type == TYPE_SPACE) {
+        if (CollectionTypeEnum.SPACE.is(type)) {
             try {
                 Space space = spaceMapper.findActiveById(Integer.valueOf(resourceId));
                 return accessService.access(currentUser, space).isVisit();

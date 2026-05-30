@@ -7,6 +7,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
+import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
@@ -224,7 +226,7 @@ public class SpaceService {
         defaultDocument.setParentId("0");
         defaultDocument.setSpaceId(space.getSpaceId());
         defaultDocument.setName(space.getName());
-        defaultDocument.setType(DocumentFileService.DOCUMENT_TYPE_DIR);
+        defaultDocument.setType(DocumentTypeEnum.DIRECTORY.getCode());
         defaultDocument.setPath("0");
         defaultDocument.setSequence(0);
         defaultDocument.setCreateUserId(currentUser.getUserId());
@@ -268,7 +270,7 @@ public class SpaceService {
             documentFileService.renamePageOrDirectory(
                     oldPageFile,
                     space.getName(),
-                    DocumentFileService.DOCUMENT_TYPE_DIR,
+                    DocumentTypeEnum.DIRECTORY.getCode(),
                     !Objects.equals(existing.getName(), space.getName())
             );
             defaultDocument.setName(space.getName());
@@ -306,9 +308,9 @@ public class SpaceService {
             defaultDocument.setUpdateTime(TimeUtils.now());
             documentMapper.markDeleted(defaultDocument);
             attachmentService.deleteByDocumentId(defaultDocument.getDocumentId());
-            documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentFileService.DOCUMENT_TYPE_DIR);
+            documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentTypeEnum.DIRECTORY.getCode());
         } else {
-            documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentFileService.DOCUMENT_TYPE_DIR);
+            documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentTypeEnum.DIRECTORY.getCode());
         }
         spaceUserService.deleteBySpaceId(spaceId);
         spaceMapper.markDeleted(spaceId);
@@ -379,7 +381,7 @@ public class SpaceService {
      * @param spaces      待处理的空间列表
      */
     private void markCollections(CurrentUser currentUser, List<Space> spaces) {
-        List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionService.TYPE_SPACE);
+        List<CollectionEntry> collections = collectionService.findByUserIdAndType(currentUser.getUserId(), CollectionTypeEnum.SPACE.getCode());
         Map<Integer, Integer> collectionBySpace = collections.stream()
                 .collect(Collectors.toMap(entry -> Integer.valueOf(entry.getResourceId()), CollectionEntry::getCollectionId, (left, right) -> left));
         for (Space space : spaces) {

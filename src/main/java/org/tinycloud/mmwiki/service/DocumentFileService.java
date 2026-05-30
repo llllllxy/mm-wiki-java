@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
+import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.exception.SystemException;
 
@@ -24,8 +25,6 @@ import org.tinycloud.mmwiki.exception.SystemException;
 @Service
 public class DocumentFileService {
 
-    public static final int DOCUMENT_TYPE_PAGE = 1;
-    public static final int DOCUMENT_TYPE_DIR = 2;
     public static final String DEFAULT_FILE_NAME = "README";
     public static final String PAGE_SUFFIX = ".md";
 
@@ -53,7 +52,7 @@ public class DocumentFileService {
      * @return 页面 Markdown 文件相对路径
      */
     public String getPageFileByParentPath(String name, int docType, String parentPath) {
-        if (docType == DOCUMENT_TYPE_PAGE) {
+        if (DocumentTypeEnum.PAGE.is(docType)) {
             return parentPath + "/" + name + PAGE_SUFFIX;
         }
         return parentPath + "/" + name + "/" + DEFAULT_FILE_NAME + PAGE_SUFFIX;
@@ -145,7 +144,7 @@ public class DocumentFileService {
         Path oldFile = resolvePagePath(oldPageFile);
         if (!Files.exists(oldFile)) {
             Files.createDirectories(oldFile.getParent());
-            if (docType == DOCUMENT_TYPE_PAGE) {
+            if (DocumentTypeEnum.PAGE.is(docType)) {
                 Files.createFile(oldFile);
             } else {
                 Files.createDirectories(oldFile.getParent());
@@ -155,7 +154,7 @@ public class DocumentFileService {
         if (!nameChanged) {
             return;
         }
-        if (docType == DOCUMENT_TYPE_PAGE) {
+        if (DocumentTypeEnum.PAGE.is(docType)) {
             Path target = oldFile.getParent().resolve(newName + PAGE_SUFFIX);
             Files.move(oldFile, target, StandardCopyOption.REPLACE_EXISTING);
             return;
@@ -177,7 +176,7 @@ public class DocumentFileService {
         Path oldFile = resolvePagePath(oldPageFile);
         Path newFile = resolvePagePath(newPageFile);
         Files.createDirectories(newFile.getParent());
-        if (docType == DOCUMENT_TYPE_PAGE) {
+        if (DocumentTypeEnum.PAGE.is(docType)) {
             Files.move(oldFile, newFile);
             return;
         }
@@ -194,10 +193,10 @@ public class DocumentFileService {
      */
     public void deletePageOrDirectory(String pageFile, int docType) throws IOException {
         Path file = resolvePagePath(pageFile);
-        if (!Files.exists(file) && (docType == DOCUMENT_TYPE_PAGE || !Files.exists(file.getParent()))) {
+        if (!Files.exists(file) && (DocumentTypeEnum.PAGE.is(docType) || !Files.exists(file.getParent()))) {
             return;
         }
-        if (docType == DOCUMENT_TYPE_PAGE) {
+        if (DocumentTypeEnum.PAGE.is(docType)) {
             Files.deleteIfExists(file);
             return;
         }

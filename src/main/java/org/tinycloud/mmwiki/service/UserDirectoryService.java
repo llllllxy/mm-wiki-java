@@ -5,6 +5,7 @@ import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -67,7 +68,7 @@ public class UserDirectoryService {
      * @return 关注用户列表视图
      */
     public FollowUserListPage listFollowedUsers(Integer userId) {
-        List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_USER);
+        List<Follow> follows = followService.findByUserIdAndType(userId, FollowTypeEnum.USER.getCode());
         List<Integer> ids = follows.stream().map(follow -> Integer.valueOf(follow.getObjectId())).toList();
         List<User> users = ids.isEmpty() ? List.of() : userService.findActiveByIds(ids);
         Map<String, Follow> followIndex = follows.stream().collect(java.util.stream.Collectors.toMap(Follow::getObjectId, follow -> follow, (left, right) -> left));
@@ -112,7 +113,7 @@ public class UserDirectoryService {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
 
-        List<Follow> follows = followService.findByUserIdAndType(profileUserId, FollowService.TYPE_USER);
+        List<Follow> follows = followService.findByUserIdAndType(profileUserId, FollowTypeEnum.USER.getCode());
         List<Integer> followedIds = follows.stream().map(follow -> Integer.valueOf(follow.getObjectId())).toList();
         List<User> followedUsers = followedIds.isEmpty() ? List.of() : userService.findActiveByIds(followedIds);
         Map<String, Follow> followIndex = follows.stream().collect(java.util.stream.Collectors.toMap(Follow::getObjectId, follow -> follow, (left, right) -> left));
@@ -124,7 +125,7 @@ public class UserDirectoryService {
             }
         }
 
-        List<Follow> fans = followService.findByObjectIdAndType(String.valueOf(profileUserId), FollowService.TYPE_USER);
+        List<Follow> fans = followService.findByObjectIdAndType(String.valueOf(profileUserId), FollowTypeEnum.USER.getCode());
         List<Integer> fanIds = fans.stream().map(Follow::getUserId).toList();
         List<User> fansUsers = fanIds.isEmpty() ? List.of() : userService.findActiveByIds(fanIds);
 
@@ -143,7 +144,7 @@ public class UserDirectoryService {
         if (user == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在。");
         }
-        List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_DOC);
+        List<Follow> follows = followService.findByUserIdAndType(userId, FollowTypeEnum.DOCUMENT.getCode());
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         List<Document> documents = docIds.isEmpty()
                 ? List.of()
@@ -162,7 +163,7 @@ public class UserDirectoryService {
      * @param users       待标记的用户列表
      */
     private void markFollows(Integer loginUserId, List<User> users) {
-        Map<String, Follow> followIndex = followService.indexByObjectId(loginUserId, FollowService.TYPE_USER);
+        Map<String, Follow> followIndex = followService.indexByObjectId(loginUserId, FollowTypeEnum.USER.getCode());
         for (User user : users) {
             Follow follow = followIndex.get(String.valueOf(user.getUserId()));
             if (follow != null) {

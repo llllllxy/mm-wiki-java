@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.tinycloud.mmwiki.TestFileUtils;
 import org.tinycloud.mmwiki.config.MmwikiProperties;
+import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.exception.SystemException;
 
@@ -39,7 +40,7 @@ class DocumentFileServiceTest {
 
     @Test
     void resolvesDefaultSpaceReadmeForRootDocument() {
-        Document document = document("0", "产品空间", DocumentFileService.DOCUMENT_TYPE_DIR);
+        Document document = document("0", "产品空间", DocumentTypeEnum.DIRECTORY.getCode());
 
         String pageFile = documentFileService.resolvePageFile(document, List.of());
 
@@ -48,8 +49,8 @@ class DocumentFileServiceTest {
 
     @Test
     void resolvesPageFileUnderParentPath() {
-        Document parent = document("0", "指南", DocumentFileService.DOCUMENT_TYPE_DIR);
-        Document child = document("parent", "安装", DocumentFileService.DOCUMENT_TYPE_PAGE);
+        Document parent = document("0", "指南", DocumentTypeEnum.DIRECTORY.getCode());
+        Document child = document("parent", "安装", DocumentTypeEnum.PAGE.getCode());
 
         String pageFile = documentFileService.resolvePageFile(child, List.of(parent));
 
@@ -111,7 +112,7 @@ class DocumentFileServiceTest {
         documentFileService.writePage("指南/README.md", "index");
         documentFileService.writePage("指南/子页面.md", "child");
 
-        documentFileService.deletePageOrDirectory("指南/README.md", DocumentFileService.DOCUMENT_TYPE_DIR);
+        documentFileService.deletePageOrDirectory("指南/README.md", DocumentTypeEnum.DIRECTORY.getCode());
 
         assertThat(Files.exists(documentRoot.resolve("markdowns/指南"))).isFalse();
     }

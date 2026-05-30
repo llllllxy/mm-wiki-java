@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.Space;
@@ -28,9 +29,6 @@ import org.tinycloud.mmwiki.util.TimeUtils;
  */
 @Service
 public class FollowService {
-
-    public static final int TYPE_DOC = 1;
-    public static final int TYPE_USER = 2;
 
     @Autowired
     private FollowMapper followMapper;
@@ -68,13 +66,13 @@ public class FollowService {
         if (userId == null || documentId == null || documentId.isBlank()) {
             return;
         }
-        Follow exists = followMapper.findByUserTypeAndObjectId(userId, TYPE_DOC, documentId);
+        Follow exists = followMapper.findByUserTypeAndObjectId(userId, FollowTypeEnum.DOCUMENT.getCode(), documentId);
         if (exists != null) {
             return;
         }
         Follow follow = new Follow();
         follow.setUserId(userId);
-        follow.setType(TYPE_DOC);
+        follow.setType(FollowTypeEnum.DOCUMENT.getCode());
         follow.setObjectId(documentId);
         follow.setCreateTime(TimeUtils.now());
         followMapper.insert(follow);
@@ -139,10 +137,10 @@ public class FollowService {
         if (objectId == null || objectId.isBlank()) {
             throw new SystemException("没有选择关注对象。");
         }
-        if (!TYPE_DOCEquals(type) && !TYPE_USEREquals(type)) {
+        if (!FollowTypeEnum.DOCUMENT.is(type) && !FollowTypeEnum.USER.is(type)) {
             throw new SystemException("关注类型错误。");
         }
-        if (TYPE_USEREquals(type) && objectId.equals(String.valueOf(currentUser.getUserId()))) {
+        if (FollowTypeEnum.USER.is(type) && objectId.equals(String.valueOf(currentUser.getUserId()))) {
             throw new SystemException("不能关注自己。");
         }
         if (!canFollow(currentUser, type, objectId)) {
@@ -169,7 +167,7 @@ public class FollowService {
      * @return true 表示允许关注，false 表示不允许关注
      */
     private boolean canFollow(CurrentUser currentUser, Integer type, String objectId) {
-        if (TYPE_USEREquals(type)) {
+        if (FollowTypeEnum.USER.is(type)) {
             try {
                 User user = userService.findActiveById(Integer.valueOf(objectId));
                 return user != null;
@@ -215,27 +213,7 @@ public class FollowService {
      * @param documentId 文档ID
      */
     public void deleteDocumentFollowers(String documentId) {
-        followMapper.deleteByObjectIdAndType(documentId, TYPE_DOC);
-    }
-
-    /**
-     * 判断关注类型是否为文档。
-     *
-     * @param type 关注类型
-     * @return true 表示文档关注类型
-     */
-    private boolean TYPE_DOCEquals(Integer type) {
-        return type != null && type == TYPE_DOC;
-    }
-
-    /**
-     * 判断关注类型是否为用户。
-     *
-     * @param type 关注类型
-     * @return true 表示用户关注类型
-     */
-    private boolean TYPE_USEREquals(Integer type) {
-        return type != null && type == TYPE_USER;
+        followMapper.deleteByObjectIdAndType(documentId, FollowTypeEnum.DOCUMENT.getCode());
     }
 }
 

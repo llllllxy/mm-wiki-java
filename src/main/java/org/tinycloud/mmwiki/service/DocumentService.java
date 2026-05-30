@@ -9,7 +9,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
+import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
@@ -116,8 +119,8 @@ public class DocumentService {
         String pageContent = documentFileService.readPage(pageFile);
 
         Map<Integer, User> users = loadUsers(document.getCreateUserId(), document.getEditUserId());
-        CollectionEntry collection = collectionService.findByUserTypeAndResourceId(currentUser.getUserId(), CollectionService.TYPE_DOC, documentId);
-        Follow follow = followService.findByUserTypeAndObjectId(currentUser.getUserId(), FollowService.TYPE_DOC, documentId);
+        CollectionEntry collection = collectionService.findByUserTypeAndResourceId(currentUser.getUserId(), CollectionTypeEnum.DOCUMENT.getCode(), documentId);
+        Follow follow = followService.findByUserTypeAndObjectId(currentUser.getUserId(), FollowTypeEnum.DOCUMENT.getCode(), documentId);
 
         return new DocumentViewData(
                 space,
@@ -200,7 +203,7 @@ public class DocumentService {
             node.setName(document.getName());
             node.setSpaceId(document.getSpaceId());
             node.setOpen(false);
-            node.setParent(document.getType() != null && document.getType() == DocumentFileService.DOCUMENT_TYPE_DIR);
+            node.setParent(DocumentTypeEnum.DIRECTORY.is(document.getType()));
             return node;
         }).toList();
         return JsonUtils.writeValueAsString(treeNodes);
@@ -262,7 +265,7 @@ public class DocumentService {
         if (!isValidName(cleanName)) {
             throw new SystemException("文档名称格式不正确。");
         }
-        if (!Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_PAGE) && !Objects.equals(type, DocumentFileService.DOCUMENT_TYPE_DIR)) {
+        if (!DocumentTypeEnum.PAGE.is(type) && !DocumentTypeEnum.DIRECTORY.is(type)) {
             throw new SystemException("文档类型错误。");
         }
 
@@ -276,7 +279,7 @@ public class DocumentService {
         if (!Objects.equals(parentDocument.getSpaceId(), spaceId)) {
             throw new SystemException("父文档不属于当前空间。");
         }
-        if (parentDocument.getType() == null || parentDocument.getType() != DocumentFileService.DOCUMENT_TYPE_DIR) {
+        if (!DocumentTypeEnum.DIRECTORY.is(parentDocument.getType())) {
             throw new SystemException("父文档不是目录。");
         }
         if (documentMapper.findByNameParentIdAndSpaceId(cleanName, parentId, spaceId, type) != null) {
@@ -411,10 +414,10 @@ public class DocumentService {
             return JsonResponse.success("移动文档成功", "/document/index?document_id=" + documentId);
         }
 
-        if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
+        if (DocumentTypeEnum.DIRECTORY.is(document.getType())) {
             throw new SystemException("目录不能移动到其他目录中。");
         }
-        if (!Objects.equals(targetDocument.getType(), DocumentFileService.DOCUMENT_TYPE_DIR)) {
+        if (!DocumentTypeEnum.DIRECTORY.is(targetDocument.getType())) {
             throw new SystemException("目标文档必须是目录。");
         }
 
@@ -454,7 +457,7 @@ public class DocumentService {
             throw new SystemException("没有选择文档。");
         }
         Document document = requireDocument(documentId);
-        if (Objects.equals(document.getType(), DocumentFileService.DOCUMENT_TYPE_DIR) && !documentMapper.findByParentId(documentId).isEmpty()) {
+        if (DocumentTypeEnum.DIRECTORY.is(document.getType()) && !documentMapper.findByParentId(documentId).isEmpty()) {
             throw new SystemException("请先删除或移动目录下所有文档。");
         }
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.tinycloud.mmwiki.constant.FollowTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -108,7 +109,7 @@ public class SystemProfileService {
     public FollowUserView loadFollowUsers(Integer userId) {
         User user = this.requireUser(userId);
 
-        List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_USER);
+        List<Follow> follows = followService.findByUserIdAndType(userId, FollowTypeEnum.USER.getCode());
         List<Integer> followedIds = follows.stream()
                 .map(item -> Integer.valueOf(item.getObjectId()))
                 .toList();
@@ -125,7 +126,7 @@ public class SystemProfileService {
             }
         }
 
-        List<Follow> fans = followService.findByObjectIdAndType(String.valueOf(userId), FollowService.TYPE_USER);
+        List<Follow> fans = followService.findByObjectIdAndType(String.valueOf(userId), FollowTypeEnum.USER.getCode());
         List<Integer> fanIds = fans.stream().map(Follow::getUserId).toList();
         List<User> fansUsers = userService.findActiveByIds(fanIds);
         return new FollowUserView(user, users, fansUsers, users.size(), fansUsers.size());
@@ -149,7 +150,7 @@ public class SystemProfileService {
      */
     public PageModel<ProfileFollowedDocument> loadFollowDocPage(CurrentUser currentUser, int pageNum, int pageSize) {
         User user = this.requireUser(currentUser.getUserId());
-        List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowService.TYPE_DOC);
+        List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowTypeEnum.DOCUMENT.getCode());
         List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
         Map<String, Document> docs = documentMapper.findVisibleByIds(currentUser.getUserId(), AccessService.isRoot(currentUser), docIds).stream()
                 .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
