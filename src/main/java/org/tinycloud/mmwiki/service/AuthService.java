@@ -164,6 +164,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * 将统一认证返回的可空字段转换为空字符串，避免同步本地用户时写入 null。
+     *
+     * @param value 原始字段值
+     * @return 非 null 字符串
+     */
     private String value(String value) {
         return value == null ? "" : value;
     }

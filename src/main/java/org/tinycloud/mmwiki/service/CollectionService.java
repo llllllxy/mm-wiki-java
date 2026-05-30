@@ -36,14 +36,38 @@ public class CollectionService {
     @Autowired
     private AccessService accessService;
 
+    /**
+     * 查询用户对指定资源的收藏记录。
+     *
+     * @param userId     用户ID
+     * @param type       收藏资源类型
+     * @param resourceId 资源ID
+     * @return 收藏记录，不存在时返回 null
+     */
     public CollectionEntry findByUserTypeAndResourceId(Integer userId, int type, String resourceId) {
         return collectionMapper.findByUserTypeAndResourceId(userId, type, resourceId);
     }
 
+    /**
+     * 查询用户指定类型的全部收藏记录。
+     *
+     * @param userId 用户ID
+     * @param type   收藏资源类型
+     * @return 收藏记录列表
+     */
     public java.util.List<CollectionEntry> findByUserIdAndType(Integer userId, int type) {
         return collectionMapper.findByUserIdAndType(userId, type);
     }
 
+    /**
+     * 添加收藏，收藏前会校验资源类型、访问权限和重复收藏。
+     *
+     * @param currentUser 当前登录用户
+     * @param type        收藏资源类型
+     * @param resourceId  资源ID
+     * @param redirect    操作成功后的跳转地址
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> add(CurrentUser currentUser, int type, String resourceId, String redirect) {
         if (resourceId == null || resourceId.isBlank()) {
             throw new SystemException("没有选择收藏资源！");
@@ -67,6 +91,14 @@ public class CollectionService {
         return JsonResponse.success("收藏成功！", redirect);
     }
 
+    /**
+     * 判断当前用户是否可以访问待收藏资源，空间和文档分别按空间权限校验。
+     *
+     * @param currentUser 当前登录用户
+     * @param type        收藏资源类型
+     * @param resourceId  资源ID
+     * @return true 表示可访问，false 表示不可访问
+     */
     private boolean canVisit(CurrentUser currentUser, int type, String resourceId) {
         if (type == TYPE_SPACE) {
             try {
@@ -85,6 +117,14 @@ public class CollectionService {
         return access.isVisit();
     }
 
+    /**
+     * 取消收藏，只允许当前用户取消自己的收藏记录。
+     *
+     * @param currentUserId 当前登录用户ID
+     * @param collectionId  收藏记录ID
+     * @param redirect      操作成功后的跳转地址
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> cancel(Integer currentUserId, Integer collectionId, String redirect) {
         if (collectionId == null) {
             throw new SystemException("没有选择收藏资源！");

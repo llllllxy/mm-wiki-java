@@ -27,6 +27,14 @@ public class LinkService {
     @Autowired
     private LinkMapper linkMapper;
 
+    /**
+     * 分页查询友情链接，支持按名称或地址关键字过滤。
+     *
+     * @param keyword  查询关键字
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 友情链接分页数据
+     */
     public PageModel<Link> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
         Page<Link> pageInfo = PaginateRequest.of(pageNum, pageSize)
@@ -40,10 +48,22 @@ public class LinkService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 根据链接ID查询友情链接。
+     *
+     * @param linkId 链接ID
+     * @return 链接记录，不存在时返回 null
+     */
     public Link findById(Integer linkId) {
         return linkId == null ? null : linkMapper.findById(linkId);
     }
 
+    /**
+     * 新增友情链接，保存前会校验名称、地址格式和名称唯一性。
+     *
+     * @param link 待新增的链接信息
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> save(Link link) {
         JsonResponse<Void> validation = validate(link, null);
         if (validation != null) {
@@ -56,6 +76,12 @@ public class LinkService {
         return JsonResponse.success("添加链接成功", "/system/link/list");
     }
 
+    /**
+     * 更新友情链接，要求目标记录存在并通过字段校验。
+     *
+     * @param link 待更新的链接信息
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> update(Link link) {
         if (link.getLinkId() == null || findById(link.getLinkId()) == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "链接不存在。");
@@ -69,6 +95,12 @@ public class LinkService {
         return JsonResponse.success("修改链接成功", "/system/link/list");
     }
 
+    /**
+     * 删除指定友情链接，删除前会确认记录存在。
+     *
+     * @param linkId 链接ID
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> delete(Integer linkId) {
         if (findById(linkId) == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "链接不存在。");
@@ -77,6 +109,13 @@ public class LinkService {
         return JsonResponse.success("删除链接成功", "/system/link/list");
     }
 
+    /**
+     * 校验并规范化友情链接字段，包含必填、URL 协议和名称唯一性检查。
+     *
+     * @param link      待校验的链接信息
+     * @param currentId 当前更新记录ID，新增时为 null
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validate(Link link, Integer currentId) {
         if (link == null) {
             throw new SystemException("链接参数错误。");

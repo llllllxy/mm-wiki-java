@@ -39,6 +39,12 @@ public class MainService {
     @Autowired
     private ConfigService configService;
 
+    /**
+     * 加载当前用户收藏且仍可访问的文档列表。
+     *
+     * @param currentUser 当前登录用户
+     * @return 用户可见的收藏文档列表
+     */
     public List<Document> loadCollectedDocuments(CurrentUser currentUser) {
         List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(currentUser.getUserId(), COLLECTION_TYPE_DOC);
         if (collections.isEmpty()) {
@@ -51,6 +57,11 @@ public class MainService {
         return documentMapper.findVisibleByIds(currentUser.getUserId(), AccessService.isRoot(currentUser), documentIds);
     }
 
+    /**
+     * 加载首页默认视图数据，包括链接、联系人和首页面板配置。
+     *
+     * @return 首页默认视图数据
+     */
     public MainDefaultView loadDefaultView() {
         List<Link> links = linkMapper.findAllOrderBySequence();
         List<Contact> contacts = contactMapper.findAll();
@@ -60,6 +71,14 @@ public class MainService {
         return new MainDefaultView(panelTitle, panelDescription, links, contacts);
     }
 
+    /**
+     * 分页加载当前用户可见的最近文档动态。
+     *
+     * @param currentUser 当前登录用户
+     * @param pageNum     页码
+     * @param pageSize    每页数量
+     * @return 最近文档动态分页数据
+     */
     public PageModel<LogDocumentView> recentDocumentPage(CurrentUser currentUser, int pageNum, int pageSize) {
         Page<LogDocumentView> pageInfo = PaginateRequest.of(pageNum, pageSize)
                 .request(() -> logDocumentMapper.pageVisibleByUserId(currentUser.getUserId(), AccessService.isRoot(currentUser)));
@@ -69,6 +88,14 @@ public class MainService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 按标题搜索当前用户可见的文档。
+     *
+     * @param currentUser 当前登录用户
+     * @param keyword     搜索关键字
+     * @param searchType  搜索类型参数，当前固定按标题搜索
+     * @return 搜索结果视图数据
+     */
     public SearchView searchDocuments(CurrentUser currentUser, String keyword, String searchType) {
         String cleanKeyword = keyword == null ? "" : keyword.trim();
         String cleanSearchType = "title";

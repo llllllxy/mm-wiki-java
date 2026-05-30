@@ -169,6 +169,15 @@ public class SystemProfileService {
         return PageModel.build((long) pageNum, (long) pageSize, pageItems, (long) items.size());
     }
 
+    /**
+     * 分页加载指定用户的文档动态，支持按关键字过滤。
+     *
+     * @param userId   用户ID
+     * @param keyword  搜索关键字
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 文档动态分页数据
+     */
     public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
         requireUser(userId);
         String search = trim(keyword);
@@ -222,6 +231,12 @@ public class SystemProfileService {
     }
 
 
+    /**
+     * 安全裁剪字符串，null 会转换为空字符串。
+     *
+     * @param value 原始字符串
+     * @return 裁剪后的字符串
+     */
     private String trim(String value) {
         return value == null ? "" : value.trim();
     }

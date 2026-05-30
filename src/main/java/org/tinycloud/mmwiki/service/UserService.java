@@ -204,6 +204,14 @@ public class UserService {
         return JsonResponse.success("修改用户成功", "/system/user/list");
     }
 
+    /**
+     * 校验并规范化后台用户字段，新增时会额外校验用户名和密码。
+     *
+     * @param user            待校验的用户信息
+     * @param requirePassword 是否要求密码必填
+     * @param operator        当前操作人
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {
         if (user == null) {
             throw new SystemException("用户信息不能为空！");
@@ -255,6 +263,12 @@ public class UserService {
     }
 
 
+    /**
+     * 安全裁剪字符串，null 会转换为空字符串。
+     *
+     * @param value 原始字符串
+     * @return 裁剪后的字符串
+     */
     private String trim(String value) {
         return value == null ? "" : value.trim();
     }

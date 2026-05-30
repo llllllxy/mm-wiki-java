@@ -37,6 +37,15 @@ public class UserDirectoryService {
     @Autowired
     private DocumentMapper documentMapper;
 
+    /**
+     * 分页查询用户目录，并标记当前登录用户是否已关注列表中的用户。
+     *
+     * @param currentUser 当前登录用户
+     * @param username    用户名关键字
+     * @param pageNum     页码
+     * @param pageSize    每页数量
+     * @return 用户分页数据
+     */
     public PageModel<User> userPage(CurrentUser currentUser, String username, int pageNum, int pageSize) {
         String keyword = username == null ? "" : username.trim();
         Page<User> pageInfo = PaginateRequest.of(pageNum, pageSize)
@@ -51,6 +60,12 @@ public class UserDirectoryService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 查询指定用户关注的用户列表，并标记关注关系ID。
+     *
+     * @param userId 用户ID
+     * @return 关注用户列表视图
+     */
     public FollowUserListPage listFollowedUsers(Integer userId) {
         List<Follow> follows = followService.findByUserIdAndType(userId, FollowService.TYPE_USER);
         List<Integer> ids = follows.stream().map(follow -> Integer.valueOf(follow.getObjectId())).toList();
@@ -66,6 +81,13 @@ public class UserDirectoryService {
         return new FollowUserListPage(users, users.size());
     }
 
+    /**
+     * 加载用户个人主页信息和当前用户可见的最近文档动态。
+     *
+     * @param userId      被访问的用户ID
+     * @param currentUser 当前登录用户
+     * @return 用户主页视图
+     */
     public UserProfileView loadProfile(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
@@ -77,6 +99,13 @@ public class UserDirectoryService {
         return new UserProfileView(user, activities, activities.size());
     }
 
+    /**
+     * 加载用户关注页数据，包括关注用户和粉丝用户。
+     *
+     * @param profileUserId 被访问的用户ID
+     * @param loginUserId   当前登录用户ID
+     * @return 用户关注视图
+     */
     public UserFollowView loadUserFollowView(Integer profileUserId, Integer loginUserId) {
         User user = userService.findActiveById(profileUserId);
         if (user == null) {
@@ -102,6 +131,13 @@ public class UserDirectoryService {
         return new UserFollowView(user, followedUsers, fansUsers, followedUsers.size(), fansUsers.size(), loginUserId);
     }
 
+    /**
+     * 加载用户关注的文档列表，并按当前登录用户权限过滤不可见文档。
+     *
+     * @param userId      被访问的用户ID
+     * @param currentUser 当前登录用户
+     * @return 关注文档视图
+     */
     public FollowDocView loadFollowDocs(Integer userId, CurrentUser currentUser) {
         User user = userService.findActiveById(userId);
         if (user == null) {
@@ -119,6 +155,12 @@ public class UserDirectoryService {
         return new FollowDocView(user, items, items.size());
     }
 
+    /**
+     * 为用户列表标记当前登录用户的关注状态和关注记录ID。
+     *
+     * @param loginUserId 当前登录用户ID
+     * @param users       待标记的用户列表
+     */
     private void markFollows(Integer loginUserId, List<User> users) {
         Map<String, Follow> followIndex = followService.indexByObjectId(loginUserId, FollowService.TYPE_USER);
         for (User user : users) {

@@ -29,6 +29,14 @@ public class LoginAuthService {
     @Autowired
     private LoginAuthMapper loginAuthMapper;
 
+    /**
+     * 分页查询登录认证配置，支持按名称或地址关键字过滤。
+     *
+     * @param keyword  查询关键字
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 登录认证配置分页数据
+     */
     public PageModel<LoginAuth> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
         Page<LoginAuth> pageInfo = PaginateRequest.of(pageNum, pageSize)
@@ -42,14 +50,31 @@ public class LoginAuthService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 根据ID查询未删除的登录认证配置。
+     *
+     * @param loginAuthId 登录认证配置ID
+     * @return 登录认证配置，不存在时返回 null
+     */
     public LoginAuth findById(Integer loginAuthId) {
         return loginAuthId == null ? null : loginAuthMapper.findActiveById(loginAuthId);
     }
 
+    /**
+     * 查询当前启用的登录认证配置。
+     *
+     * @return 已启用的登录认证配置，不存在时返回 null
+     */
     public LoginAuth findUsed() {
         return loginAuthMapper.findUsed();
     }
 
+    /**
+     * 新增登录认证配置，保存前会校验名称、用户名前缀、认证地址和唯一性。
+     *
+     * @param loginAuth 待新增的登录认证配置
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> save(LoginAuth loginAuth) {
         JsonResponse<Void> validation = validate(loginAuth, null);
         if (validation != null) {
@@ -64,6 +89,12 @@ public class LoginAuthService {
         return JsonResponse.success("添加登录认证成功", "/system/auth/list");
     }
 
+    /**
+     * 更新登录认证配置，要求目标配置存在并通过字段校验。
+     *
+     * @param loginAuth 待更新的登录认证配置
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> update(LoginAuth loginAuth) {
         if (loginAuth.getLoginAuthId() == null || findById(loginAuth.getLoginAuthId()) == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "登录认证不存在。");
@@ -77,6 +108,12 @@ public class LoginAuthService {
         return JsonResponse.success("修改登录认证成功", "/system/auth/list");
     }
 
+    /**
+     * 启用指定登录认证配置，并清除其他配置的启用状态。
+     *
+     * @param loginAuthId 登录认证配置ID
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> markUsed(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
@@ -87,6 +124,12 @@ public class LoginAuthService {
         return JsonResponse.success("启用登录认证成功", "/system/auth/list");
     }
 
+    /**
+     * 逻辑删除指定登录认证配置。
+     *
+     * @param loginAuthId 登录认证配置ID
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> delete(Integer loginAuthId) {
         LoginAuth auth = findById(loginAuthId);
         if (auth == null) {
@@ -96,6 +139,13 @@ public class LoginAuthService {
         return JsonResponse.success("删除登录认证成功", "/system/auth/list");
     }
 
+    /**
+     * 校验并规范化登录认证配置字段，包含 URL 协议和唯一性检查。
+     *
+     * @param loginAuth 待校验的登录认证配置
+     * @param currentId 当前更新记录ID，新增时为 null
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validate(LoginAuth loginAuth, Integer currentId) {
         if (loginAuth == null) {
             throw new SystemException("登录认证参数错误。");

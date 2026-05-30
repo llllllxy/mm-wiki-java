@@ -38,14 +38,30 @@ public class RoleService {
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * 查询全部未删除角色。
+     *
+     * @return 有效角色列表
+     */
     public List<Role> findAllActive() {
         return roleMapper.findAllActive();
     }
 
+    /**
+     * 根据角色ID查询未删除角色。
+     *
+     * @param roleId 角色ID
+     * @return 角色记录，不存在时返回 null
+     */
     public Role findActiveById(Integer roleId) {
         return roleId == null ? null : roleMapper.findActiveById(roleId);
     }
 
+    /**
+     * 查询角色名称索引，用于页面展示角色名称。
+     *
+     * @return 以角色ID为键、角色名称为值的映射
+     */
     public Map<Integer, String> roleNameIndex() {
         Map<Integer, String> index = new LinkedHashMap<>();
         for (Role role : findAllActive()) {
@@ -54,6 +70,12 @@ public class RoleService {
         return index;
     }
 
+    /**
+     * 获取角色名称，数据库不存在时回退到系统内置角色名称。
+     *
+     * @param roleId 角色ID
+     * @return 角色名称
+     */
     public String roleName(Integer roleId) {
         Role role = findActiveById(roleId);
         if (role != null && role.getName() != null && !role.getName().isBlank()) {
@@ -67,6 +89,14 @@ public class RoleService {
         };
     }
 
+    /**
+     * 分页查询角色，支持按关键字过滤并格式化更新时间。
+     *
+     * @param keyword  查询关键字
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 角色分页数据
+     */
     public PageModel<Role> pageModel(String keyword, int pageNum, int pageSize) {
         String search = keyword == null ? "" : keyword.trim();
         Page<Role> pageInfo = PaginateRequest.of(pageNum, pageSize)
@@ -81,6 +111,12 @@ public class RoleService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 新增自定义角色，并自动授予默认权限。
+     *
+     * @param role 待新增的角色
+     * @return 前端统一 JSON 响应
+     */
     @Transactional
     public JsonResponse<Void> save(Role role) {
         JsonResponse<Void> validation = validate(role, null);
@@ -96,6 +132,12 @@ public class RoleService {
         return JsonResponse.success("添加角色成功", "/system/role/list");
     }
 
+    /**
+     * 更新角色基础信息，超级管理员角色禁止修改。
+     *
+     * @param role 待更新的角色
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> update(Role role) {
         if (role == null || role.getRoleId() == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "角色不存在");
@@ -116,6 +158,12 @@ public class RoleService {
         return JsonResponse.success("修改角色成功", "/system/role/list");
     }
 
+    /**
+     * 删除自定义角色，删除前会校验系统角色、超级管理员角色和用户占用情况。
+     *
+     * @param roleId 角色ID
+     * @return 前端统一 JSON 响应
+     */
     @Transactional
     public JsonResponse<Void> delete(Integer roleId) {
         Role role = findActiveById(roleId);
@@ -136,6 +184,12 @@ public class RoleService {
         return JsonResponse.success("删除角色成功", "/system/role/list");
     }
 
+    /**
+     * 查询指定角色已授予的权限ID列表，超级管理员不需要显式权限列表。
+     *
+     * @param roleId 角色ID
+     * @return 权限ID列表
+     */
     public List<Integer> rolePrivilegeIds(Integer roleId) {
         if (roleId == null) {
             return List.of();
@@ -146,6 +200,13 @@ public class RoleService {
         return rolePrivilegeMapper.findPrivilegeIdsByRoleId(roleId);
     }
 
+    /**
+     * 重置角色权限，始终合并系统默认权限后重新写入角色权限关系。
+     *
+     * @param roleId       角色ID
+     * @param privilegeIds 前端提交的权限ID列表
+     * @return 前端统一 JSON 响应
+     */
     @Transactional
     public JsonResponse<Void> grantPrivileges(Integer roleId, List<Integer> privilegeIds) {
         Role role = findActiveById(roleId);
@@ -165,6 +226,12 @@ public class RoleService {
         return JsonResponse.success("角色授权成功", "/system/role/list");
     }
 
+    /**
+     * 将指定用户角色重置为默认普通用户角色。
+     *
+     * @param userId 用户ID
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> resetUserRole(Integer userId) {
         if (userId == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在");
@@ -180,6 +247,13 @@ public class RoleService {
         return JsonResponse.success("重置用户角色成功", "/system/role/user?role_id=" + DEFAULT_ROLE_ID);
     }
 
+    /**
+     * 校验并规范化角色名称，包含必填和名称唯一性检查。
+     *
+     * @param role      待校验的角色
+     * @param currentId 当前更新角色ID，新增时为 null
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validate(Role role, Integer currentId) {
         if (role == null || !StringUtils.hasText(role.getName())) {
             throw new SystemException("角色名称不能为空");

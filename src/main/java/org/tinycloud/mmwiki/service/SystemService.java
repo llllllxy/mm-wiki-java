@@ -50,6 +50,12 @@ public class SystemService {
     @Autowired
     private RolePrivilegeMapper rolePrivilegeMapper;
 
+    /**
+     * 加载当前用户可见的后台菜单分组，root 用户可见全部已实现菜单。
+     *
+     * @param currentUser 当前登录用户
+     * @return 后台菜单分组列表
+     */
     public List<MenuGroup> loadMenuGroups(CurrentUser currentUser) {
         List<Privilege> displayed = privilegeMapper.findDisplayed();
         boolean unrestricted = currentUser != null && currentUser.getRoleId() != null && currentUser.getRoleId() == ROOT_ROLE_ID;
@@ -76,6 +82,12 @@ public class SystemService {
         return groups;
     }
 
+    /**
+     * 查询当前用户角色已授权的权限ID集合。
+     *
+     * @param currentUser 当前登录用户
+     * @return 已授权权限ID集合
+     */
     private Set<Integer> allowedPrivilegeIds(CurrentUser currentUser) {
         if (currentUser == null || currentUser.getRoleId() == null) {
             return Set.of();
@@ -83,6 +95,12 @@ public class SystemService {
         return new LinkedHashSet<>(rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
     }
 
+    /**
+     * 判断权限是否为菜单，或是否为当前 Java 版本已经实现的控制器菜单项。
+     *
+     * @param privilege 权限配置
+     * @return true 表示可以显示在后台菜单中
+     */
     private boolean isMenuOrImplementedController(Privilege privilege) {
         if ("menu".equalsIgnoreCase(privilege.getType())) {
             return true;
@@ -90,6 +108,12 @@ public class SystemService {
         return IMPLEMENTED_DISPLAY_ROUTES.contains(routeKey(privilege));
     }
 
+    /**
+     * 生成控制器权限的路由键，格式为 controller/action。
+     *
+     * @param privilege 权限配置
+     * @return 路由键
+     */
     private String routeKey(Privilege privilege) {
         return (privilege.getController() == null ? "" : privilege.getController())
             + "/"
@@ -100,15 +124,31 @@ public class SystemService {
         private final Privilege menu;
         private final List<Privilege> items;
 
+        /**
+         * 创建后台菜单分组。
+         *
+         * @param menu  菜单权限
+         * @param items 菜单下的控制器权限列表
+         */
         public MenuGroup(Privilege menu, List<Privilege> items) {
             this.menu = menu;
             this.items = items;
         }
 
+        /**
+         * 获取菜单权限。
+         *
+         * @return 菜单权限
+         */
         public Privilege getMenu() {
             return menu;
         }
 
+        /**
+         * 获取菜单下的控制器权限列表。
+         *
+         * @return 控制器权限列表
+         */
         public List<Privilege> getItems() {
             return items;
         }

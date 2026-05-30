@@ -54,6 +54,11 @@ public class StaticService {
     @Autowired
     private LogMapper logMapper;
 
+    /**
+     * 汇总后台仪表盘统计数据，包括用户、空间、文档和活跃用户指标。
+     *
+     * @return 仪表盘统计视图
+     */
     public Dashboard dashboard() {
         int todayStart = Math.toIntExact(LocalDate.now()
                 .atStartOfDay(ZoneId.systemDefault())
@@ -71,20 +76,43 @@ public class StaticService {
         );
     }
 
+    /**
+     * 查询空间文档数量排行，数量会限制在 1 到 100 之间。
+     *
+     * @param number 期望返回的排行数量
+     * @return 空间文档排行数据
+     */
     public List<Map<String, Object>> spaceDocsRank(int number) {
         return documentMapper.findSpaceDocumentRank(Math.max(1, Math.min(number, 100)));
     }
 
+    /**
+     * 查询文档收藏数量排行，数量会限制在 1 到 100 之间。
+     *
+     * @param number 期望返回的排行数量
+     * @return 文档收藏排行数据
+     */
     public List<Map<String, Object>> collectDocRank(int number) {
         return collectionMapper.findResourceRank(CollectionService.TYPE_DOC, Math.max(1, Math.min(number, 100)));
     }
 
+    /**
+     * 查询最近指定天数内的文档创建数量趋势，天数会限制在 1 到 365 之间。
+     *
+     * @param limitDay 统计天数
+     * @return 按日期聚合的文档数量数据
+     */
     public List<Map<String, Object>> docCountByTime(int limitDay) {
         int days = Math.max(1, Math.min(limitDay, 365));
         LocalDateTime start = LocalDateTime.now().minusDays(days);
         return documentMapper.countGroupByCreateDate(start);
     }
 
+    /**
+     * 加载系统监控页数据，包括服务器信息和最近错误日志。
+     *
+     * @return 系统监控视图
+     */
     public Monitor monitor() {
         Map<String, String> serverInfo = new LinkedHashMap<>();
         try {
@@ -105,6 +133,11 @@ public class StaticService {
         return new Monitor(serverInfo, pageInfo.getTotal(), errLogs);
     }
 
+    /**
+     * 获取服务器 CPU、内存和磁盘使用率。
+     *
+     * @return 使用率数据映射
+     */
     public Map<String, Object> serverStatus() {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("cpu_used_percent", cpuUsedPercent());
@@ -113,11 +146,22 @@ public class StaticService {
         return data;
     }
 
+    /**
+     * 获取当前服务器时间和应用运行时长。
+     *
+     * @return 服务时间数据映射
+     */
     public Map<String, Object> serverTime() {
         long now = Instant.now().getEpochSecond();
         return Map.of("server_time", now, "run_time", now - startTime);
     }
 
+    /**
+     * 根据用户ID构造排行用户信息，用户不存在时返回空用户名。
+     *
+     * @param userId 用户ID
+     * @return 排行用户信息
+     */
     private TopUser topUser(Integer userId) {
         if (userId == null || userId <= 0) {
             return new TopUser(0, "");
@@ -126,6 +170,11 @@ public class StaticService {
         return new TopUser(userId, user == null ? "" : user.getUsername());
     }
 
+    /**
+     * 读取 JVM 暴露的系统 CPU 使用率，读取失败时返回 0。
+     *
+     * @return CPU 使用率百分比
+     */
     private int cpuUsedPercent() {
         try {
             OperatingSystemMXBean os = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
@@ -136,6 +185,11 @@ public class StaticService {
         }
     }
 
+    /**
+     * 计算当前 JVM 内存使用率。
+     *
+     * @return 内存使用率百分比
+     */
     private int memoryUsedPercent() {
         Runtime runtime = Runtime.getRuntime();
         long max = runtime.maxMemory();
@@ -143,6 +197,11 @@ public class StaticService {
         return max <= 0 ? 0 : (int) Math.round(used * 100.0 / max);
     }
 
+    /**
+     * 计算当前磁盘根分区使用率。
+     *
+     * @return 磁盘使用率百分比
+     */
     private int diskUsedPercent() {
         File root = new File(".").getAbsoluteFile().toPath().getRoot().toFile();
         long total = root.getTotalSpace();

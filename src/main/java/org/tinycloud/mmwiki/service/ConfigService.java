@@ -32,10 +32,22 @@ public class ConfigService {
         return value == null || value.isBlank() ? defaultValue : value;
     }
 
+    /**
+     * 查询系统配置表中的全部配置项。
+     *
+     * @return 系统配置列表
+     */
     public List<ConfigEntry> findAll() {
         return configMapper.findAll();
     }
 
+    /**
+     * 根据配置键更新配置值。
+     *
+     * @param key   配置键
+     * @param value 新配置值
+     * @return 受影响的记录数
+     */
     public int updateValueByKey(String key, String value) {
         return configMapper.updateValueByKey(key, value);
     }

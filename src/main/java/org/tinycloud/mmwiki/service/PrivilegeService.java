@@ -37,6 +37,11 @@ public class PrivilegeService {
     @Value("${spring.profiles.active:dev}")
     private String mode;
 
+    /**
+     * 查询全部权限并按菜单权限和控制器权限分组。
+     *
+     * @return 权限分组视图
+     */
     public PrivilegeGroups groups() {
         List<Privilege> all = privilegeMapper.findAllOrderBySequence();
         return new PrivilegeGroups(
@@ -45,18 +50,40 @@ public class PrivilegeService {
         );
     }
 
+    /**
+     * 根据权限ID查询权限配置。
+     *
+     * @param privilegeId 权限ID
+     * @return 权限记录，不存在时返回 null
+     */
     public Privilege findById(Integer privilegeId) {
         return privilegeId == null ? null : privilegeMapper.findById(privilegeId);
     }
 
+    /**
+     * 获取当前运行模式，未配置时默认按开发模式处理。
+     *
+     * @return 当前运行模式
+     */
     public String mode() {
         return mode == null || mode.isBlank() ? "dev" : mode;
     }
 
+    /**
+     * 判断当前是否为开发模式，权限配置增删改仅允许开发模式执行。
+     *
+     * @return true 表示开发模式
+     */
     public boolean devMode() {
         return mode().toLowerCase().contains("dev");
     }
 
+    /**
+     * 新增权限配置，仅允许在开发模式下执行。
+     *
+     * @param privilege 待新增的权限配置
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> save(Privilege privilege) {
         if (!devMode()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "只允许在开发模式下添加权限");
@@ -72,6 +99,12 @@ public class PrivilegeService {
         return JsonResponse.success("添加权限成功", "/system/privilege/list");
     }
 
+    /**
+     * 更新权限配置，仅允许在开发模式下执行。
+     *
+     * @param privilege 待更新的权限配置
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> update(Privilege privilege) {
         if (!devMode()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "只允许在开发模式下修改权限");
@@ -88,6 +121,12 @@ public class PrivilegeService {
         return JsonResponse.success("修改权限成功", "/system/privilege/list");
     }
 
+    /**
+     * 删除权限配置，仅允许在开发模式下执行，并会清理角色权限关系。
+     *
+     * @param privilegeId 权限ID
+     * @return 前端统一 JSON 响应
+     */
     @Transactional
     public JsonResponse<Void> delete(Integer privilegeId) {
         if (!devMode()) {
@@ -105,6 +144,12 @@ public class PrivilegeService {
         return JsonResponse.success("删除权限成功", "/system/privilege/list");
     }
 
+    /**
+     * 校验并规范化权限配置字段，控制器权限会额外校验父级菜单和路由信息。
+     *
+     * @param privilege 待校验的权限配置
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validate(Privilege privilege) {
         if (privilege == null || !StringUtils.hasText(privilege.getName())) {
             throw new SystemException("权限名称不能为空");

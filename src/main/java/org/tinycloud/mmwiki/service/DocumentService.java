@@ -477,6 +477,15 @@ public class DocumentService {
         return JsonResponse.success("删除文档成功", "/document/index?document_id=" + document.getParentId());
     }
 
+    /**
+     * 分页查询文档修改历史，访问前会校验当前用户的空间访问权限。
+     *
+     * @param documentId  文档ID
+     * @param currentUser 当前登录用户
+     * @param pageNum     页码
+     * @param pageSize    每页数量
+     * @return 文档历史分页数据
+     */
     public PageModel<DocumentHistoryView> historyPage(String documentId, CurrentUser currentUser, int pageNum, int pageSize) {
         Document document = requireDocument(documentId);
         Space space = spaceService.requireSpace(document.getSpaceId());
@@ -490,12 +499,24 @@ public class DocumentService {
         return PageModel.from(pageInfo);
     }
 
+    /**
+     * 校验文档名称是否可用，禁止空名称、默认 README 名称和非法路径字符。
+     *
+     * @param name 文档名称
+     * @return true 表示名称合法
+     */
     private boolean isValidName(String name) {
         return StringUtils.hasText(name)
                 && !DocumentFileService.DEFAULT_FILE_NAME.equalsIgnoreCase(name)
                 && !INVALID_NAME.matcher(name).find();
     }
 
+    /**
+     * 批量加载用户信息并按用户ID建立索引。
+     *
+     * @param userIds 用户ID列表
+     * @return 以用户ID为键的用户映射
+     */
     private Map<Integer, User> loadUsers(Integer... userIds) {
         List<Integer> ids = new ArrayList<>();
         for (Integer userId : userIds) {
@@ -510,6 +531,12 @@ public class DocumentService {
                 .collect(Collectors.toMap(User::getUserId, item -> item, (left, right) -> left, LinkedHashMap::new));
     }
 
+    /**
+     * 加载有效文档，文档不存在时抛出业务异常。
+     *
+     * @param documentId 文档ID
+     * @return 有效文档
+     */
     private Document requireDocument(String documentId) {
         Document document = documentMapper.findActiveById(documentId);
         if (document == null) {
@@ -518,6 +545,12 @@ public class DocumentService {
         return document;
     }
 
+    /**
+     * 加载空间默认首页文档，不存在时抛出业务异常。
+     *
+     * @param spaceId 空间ID
+     * @return 空间默认文档
+     */
     private Document requireSpaceDefaultDocument(Integer spaceId) {
         Document document = documentMapper.findSpaceDefaultDocument(spaceId);
         if (document == null) {
@@ -526,6 +559,15 @@ public class DocumentService {
         return document;
     }
 
+    /**
+     * 将文档 Markdown 文件和关联附件打包为 ZIP 字节数组。
+     *
+     * @param document    文档信息
+     * @param pageFile    Markdown 文件相对路径
+     * @param attachments 文档附件列表
+     * @return ZIP 文件内容
+     * @throws IOException 读取或写入 ZIP 失败时抛出
+     */
     private byte[] zipDocument(Document document, String pageFile, List<Attachment> attachments) throws IOException {
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(); ZipOutputStream zip = new ZipOutputStream(output)) {
             Path pagePath = documentFileService.resolvePagePath(pageFile);
@@ -551,6 +593,12 @@ public class DocumentService {
         }
     }
 
+    /**
+     * 将日期时间格式化为文档历史页展示用的日期文本。
+     *
+     * @param dateTime 日期时间
+     * @return 日期文本，空值返回空字符串
+     */
     private String formatTime(LocalDateTime dateTime) {
         if (dateTime == null) {
             return "";

@@ -45,6 +45,12 @@ public class FollowService {
     @Autowired
     private UserService userService;
 
+    /**
+     * 根据系统配置自动关注文档，未开启自动关注时直接返回。
+     *
+     * @param userId     用户ID
+     * @param documentId 文档ID
+     */
     public void autoFollowDocument(Integer userId, String documentId) {
         if (!"1".equals(configService.getValue("auto_follow_doc_open", "0"))) {
             return;
@@ -52,6 +58,12 @@ public class FollowService {
         followDocument(userId, documentId);
     }
 
+    /**
+     * 关注指定文档，已关注时不会重复插入记录。
+     *
+     * @param userId     用户ID
+     * @param documentId 文档ID
+     */
     public void followDocument(Integer userId, String documentId) {
         if (userId == null || documentId == null || documentId.isBlank()) {
             return;
@@ -68,23 +80,61 @@ public class FollowService {
         followMapper.insert(follow);
     }
 
+    /**
+     * 查询用户指定类型的关注记录。
+     *
+     * @param userId 用户ID
+     * @param type   关注对象类型
+     * @return 关注记录列表
+     */
     public List<Follow> findByUserIdAndType(Integer userId, Integer type) {
         return followMapper.findByUserIdAndType(userId, type);
     }
 
+    /**
+     * 查询指定对象被关注的记录。
+     *
+     * @param objectId 关注对象ID
+     * @param type     关注对象类型
+     * @return 关注记录列表
+     */
     public List<Follow> findByObjectIdAndType(String objectId, Integer type) {
         return followMapper.findByObjectIdAndType(objectId, type);
     }
 
+    /**
+     * 查询用户对指定对象的关注记录。
+     *
+     * @param userId   用户ID
+     * @param type     关注对象类型
+     * @param objectId 关注对象ID
+     * @return 关注记录，不存在时返回 null
+     */
     public Follow findByUserTypeAndObjectId(Integer userId, Integer type, String objectId) {
         return followMapper.findByUserTypeAndObjectId(userId, type, objectId);
     }
 
+    /**
+     * 查询用户指定类型关注记录，并按对象ID建立索引。
+     *
+     * @param userId 用户ID
+     * @param type   关注对象类型
+     * @return 以对象ID为键的关注记录映射
+     */
     public Map<String, Follow> indexByObjectId(Integer userId, Integer type) {
         return findByUserIdAndType(userId, type).stream()
             .collect(Collectors.toMap(Follow::getObjectId, Function.identity(), (left, right) -> left));
     }
 
+    /**
+     * 添加关注，关注前会校验对象类型、访问权限和重复关注。
+     *
+     * @param currentUser 当前登录用户
+     * @param type        关注对象类型
+     * @param objectId    关注对象ID
+     * @param redirect    操作成功后的跳转地址
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> add(CurrentUser currentUser, Integer type, String objectId, String redirect) {
         if (objectId == null || objectId.isBlank()) {
             throw new SystemException("没有选择关注对象。");
@@ -110,6 +160,14 @@ public class FollowService {
         return JsonResponse.success("关注成功", redirect);
     }
 
+    /**
+     * 判断当前用户是否可以关注指定对象，用户对象要求存在，文档对象要求可访问。
+     *
+     * @param currentUser 当前登录用户
+     * @param type        关注对象类型
+     * @param objectId    关注对象ID
+     * @return true 表示允许关注，false 表示不允许关注
+     */
     private boolean canFollow(CurrentUser currentUser, Integer type, String objectId) {
         if (TYPE_USEREquals(type)) {
             try {
@@ -128,6 +186,14 @@ public class FollowService {
         return access.isVisit();
     }
 
+    /**
+     * 取消关注，只允许当前用户取消自己的关注记录。
+     *
+     * @param currentUserId 当前登录用户ID
+     * @param followId      关注记录ID
+     * @param redirect      操作成功后的跳转地址
+     * @return 前端统一 JSON 响应
+     */
     public JsonResponse<Void> cancel(Integer currentUserId, Integer followId, String redirect) {
         if (followId == null) {
             throw new SystemException("没有选择关注对象。");
@@ -143,14 +209,31 @@ public class FollowService {
         return JsonResponse.success("已取消关注", redirect);
     }
 
+    /**
+     * 删除指定文档的全部关注记录，通常在文档删除时调用。
+     *
+     * @param documentId 文档ID
+     */
     public void deleteDocumentFollowers(String documentId) {
         followMapper.deleteByObjectIdAndType(documentId, TYPE_DOC);
     }
 
+    /**
+     * 判断关注类型是否为文档。
+     *
+     * @param type 关注类型
+     * @return true 表示文档关注类型
+     */
     private boolean TYPE_DOCEquals(Integer type) {
         return type != null && type == TYPE_DOC;
     }
 
+    /**
+     * 判断关注类型是否为用户。
+     *
+     * @param type 关注类型
+     * @return true 表示用户关注类型
+     */
     private boolean TYPE_USEREquals(Integer type) {
         return type != null && type == TYPE_USER;
     }

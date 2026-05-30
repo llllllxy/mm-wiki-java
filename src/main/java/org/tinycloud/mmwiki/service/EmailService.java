@@ -213,6 +213,15 @@ public class EmailService {
         }
     }
 
+    /**
+     * 使用指定邮件服务器发送 HTML 邮件。
+     *
+     * @param emailServer 邮件服务器配置
+     * @param recipients  收件人邮箱列表
+     * @param title       邮件标题
+     * @param body        邮件正文
+     * @return true 表示发送成功
+     */
     private boolean send(EmailServer emailServer, List<String> recipients, String title, String body) {
         EmailUtils.EmailRequest request = EmailUtils.EmailRequest.builder()
                 .account(emailServer.getSenderAddress())
@@ -229,11 +238,23 @@ public class EmailService {
         return EmailUtils.sendMsg(request);
     }
 
+    /**
+     * 为邮件标题添加配置的标题前缀，未配置时使用默认前缀。
+     *
+     * @param emailServer 邮件服务器配置
+     * @param title       原始标题
+     * @return 带前缀的邮件标题
+     */
     private String normalizeTitle(EmailServer emailServer, String title) {
         String prefix = StringUtils.hasText(emailServer.getSenderTitlePrefix()) ? emailServer.getSenderTitlePrefix() : "[MM-Wiki]";
         return prefix + title;
     }
 
+    /**
+     * 构造邮件模板基础上下文，填充当前时间和版权信息。
+     *
+     * @return Thymeleaf 模板上下文
+     */
     private Context baseContext() {
         Context context = new Context();
         LocalDateTime now = LocalDateTime.now();
@@ -242,6 +263,12 @@ public class EmailService {
         return context;
     }
 
+    /**
+     * 查询关注指定文档的有效用户邮箱，并去重后返回。
+     *
+     * @param documentId 文档ID
+     * @return 关注用户邮箱列表
+     */
     private List<String> findDocumentFollowerEmails(String documentId) {
         List<Follow> follows = followMapper.findByObjectIdAndType(documentId, FollowService.TYPE_DOC);
         if (follows.isEmpty()) {
@@ -264,6 +291,12 @@ public class EmailService {
         return new ArrayList<>(emails);
     }
 
+    /**
+     * 解析用户输入的邮箱列表，支持逗号、分号和空白字符分隔。
+     *
+     * @param emails 邮箱字符串
+     * @return 去重后的邮箱列表
+     */
     private List<String> parseEmails(String emails) {
         if (!StringUtils.hasText(emails)) {
             return List.of();
@@ -277,6 +310,13 @@ public class EmailService {
         return new ArrayList<>(result);
     }
 
+    /**
+     * 截断文本内容到指定长度，空内容返回空字符串。
+     *
+     * @param content   原始内容
+     * @param maxLength 最大长度
+     * @return 截断后的内容
+     */
     private String abbreviate(String content, int maxLength) {
         if (!StringUtils.hasText(content)) {
             return "";
@@ -285,6 +325,13 @@ public class EmailService {
         return clean.length() <= maxLength ? clean : clean.substring(0, maxLength);
     }
 
+    /**
+     * 校验并规范化邮件服务器配置，包含必填项、端口范围和名称唯一性。
+     *
+     * @param emailServer 待校验的邮件服务器配置
+     * @param currentId   当前更新记录ID，新增时为 null
+     * @return 校验通过时返回 null，校验失败时抛出业务异常
+     */
     private JsonResponse<Void> validate(EmailServer emailServer, Integer currentId) {
         if (emailServer == null) {
             throw new SystemException("邮件服务器参数错误。");
@@ -324,4 +371,3 @@ public class EmailService {
         return null;
     }
 }
-

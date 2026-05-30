@@ -34,18 +34,43 @@ public class AttachmentService {
     @Autowired
     private DocumentFileService documentFileService;
 
+    /**
+     * 查询指定文档下的全部附件记录。
+     *
+     * @param documentId 文档ID
+     * @return 文档关联的附件列表
+     */
     public List<Attachment> findByDocumentId(String documentId) {
         return attachmentMapper.findByDocumentId(documentId);
     }
 
+    /**
+     * 查询指定空间下未删除文档关联的全部附件记录。
+     *
+     * @param spaceId 空间ID
+     * @return 空间内文档关联的附件列表
+     */
     public List<Attachment> findBySpaceId(Integer spaceId) {
         return attachmentMapper.findBySpaceId(spaceId);
     }
 
+    /**
+     * 按文档ID和附件来源查询附件，用于区分普通附件和编辑器图片。
+     *
+     * @param documentId 文档ID
+     * @param source     附件来源类型
+     * @return 匹配来源的附件列表
+     */
     public List<Attachment> findByDocumentIdAndSource(String documentId, int source) {
         return attachmentMapper.findByDocumentIdAndSource(documentId, source);
     }
 
+    /**
+     * 根据附件ID查询单条附件记录。
+     *
+     * @param attachmentId 附件ID
+     * @return 附件记录，不存在时返回 null
+     */
     public Attachment findById(Integer attachmentId) {
         return attachmentMapper.findById(attachmentId);
     }
@@ -62,6 +87,16 @@ public class AttachmentService {
         return attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source);
     }
 
+    /**
+     * 保存附件元数据，文件本身由调用方写入磁盘。
+     *
+     * @param userId     上传用户ID
+     * @param documentId 关联文档ID
+     * @param name       原始附件名称
+     * @param path       附件存储相对路径
+     * @param source     附件来源类型
+     * @return 新增后的附件实体
+     */
     public Attachment save(Integer userId, String documentId, String name, String path, int source) {
         LocalDateTime now = LocalDateTime.now();
         Attachment attachment = new Attachment();
@@ -76,6 +111,12 @@ public class AttachmentService {
         return attachment;
     }
 
+    /**
+     * 删除单个附件，先根据附件记录解析并删除磁盘文件，再删除数据库记录。
+     *
+     * @param attachmentId 附件ID
+     * @throws IOException 删除磁盘文件失败时抛出
+     */
     @Transactional
     public void deleteById(Integer attachmentId) throws IOException {
         Attachment attachment = attachmentMapper.findById(attachmentId);
@@ -87,6 +128,12 @@ public class AttachmentService {
         attachmentMapper.deleteById(attachmentId);
     }
 
+    /**
+     * 删除指定文档下的全部附件，逐个清理磁盘文件后删除数据库记录。
+     *
+     * @param documentId 文档ID
+     * @throws IOException 删除磁盘文件失败时抛出
+     */
     @Transactional
     public void deleteByDocumentId(String documentId) throws IOException {
         List<Attachment> attachments = attachmentMapper.findByDocumentId(documentId);

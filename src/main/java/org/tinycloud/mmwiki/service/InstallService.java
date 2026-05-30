@@ -202,6 +202,9 @@ public class InstallService {
         return "";
     }
 
+    /**
+     * 执行完整安装流程，按顺序检查数据库、建库、导入脚本、写配置并生成锁文件。
+     */
     private void runInstall() {
         try {
             checkDb();
@@ -218,6 +221,11 @@ public class InstallService {
         }
     }
 
+    /**
+     * 检查数据库服务器连接是否可用，不指定具体数据库。
+     *
+     * @throws Exception 数据库连接不可用时抛出
+     */
     private void checkDb() throws Exception {
         try (Connection connection = connectWithoutDatabase()) {
             if (!connection.isValid(5)) {
@@ -226,12 +234,22 @@ public class InstallService {
         }
     }
 
+    /**
+     * 根据安装表单中的数据库名称创建数据库。
+     *
+     * @throws Exception 创建数据库失败时抛出
+     */
     private void createDb() throws Exception {
         try (Connection connection = connectWithoutDatabase(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE DATABASE IF NOT EXISTS `" + data.getDatabaseConf().get("name") + "` CHARACTER SET utf8mb4");
         }
     }
 
+    /**
+     * 创建初始管理员用户，密码会先解密再使用 BCrypt 存储。
+     *
+     * @throws Exception 创建管理员失败时抛出
+     */
     private void createAdmin() throws Exception {
         String sql = "INSERT mw_user SET username=?, password=?, given_name=?, role_id=?, create_time=?, update_time=?";
         LocalDateTime now = LocalDateTime.now();
@@ -246,6 +264,11 @@ public class InstallService {
         }
     }
 
+    /**
+     * 写入系统版本配置项，安装后用于展示和版本识别。
+     *
+     * @throws Exception 写入配置失败时抛出
+     */
     private void insertSystemVersion() throws Exception {
         String sql = "INSERT mw_config SET `name`=?, `key`=?, `value`=?, create_time=?, update_time=?";
         LocalDateTime now = LocalDateTime.now();
@@ -259,12 +282,25 @@ public class InstallService {
         }
     }
 
+    /**
+     * 使用指定数据库连接执行 SQL 脚本，方法结束时会关闭连接。
+     *
+     * @param connection 数据库连接
+     * @param sql        待执行的 SQL 脚本
+     * @throws Exception 执行 SQL 失败时抛出
+     */
     private void executeSql(Connection connection, String sql) throws Exception {
         try (connection; Statement statement = connection.createStatement()) {
             statement.execute(sql);
         }
     }
 
+    /**
+     * 建立不指定数据库名的 MySQL 连接，用于检查服务和创建数据库。
+     *
+     * @return 数据库连接
+     * @throws Exception 建立连接失败时抛出
+     */
     private Connection connectWithoutDatabase() throws Exception {
         Map<String, String> conf = data.getDatabaseConf();
         String url = "jdbc:mysql://" + conf.get("host") + ":" + conf.get("port")
@@ -272,6 +308,12 @@ public class InstallService {
         return DriverManager.getConnection(url, conf.get("user"), conf.get("pass"));
     }
 
+    /**
+     * 建立指向目标安装数据库的 MySQL 连接。
+     *
+     * @return 数据库连接
+     * @throws Exception 建立连接失败时抛出
+     */
     private Connection connectToDatabase() throws Exception {
         Map<String, String> conf = data.getDatabaseConf();
         String url = "jdbc:mysql://" + conf.get("host") + ":" + conf.get("port") + "/" + conf.get("name")
@@ -279,18 +321,43 @@ public class InstallService {
         return DriverManager.getConnection(url, conf.get("user"), conf.get("pass"));
     }
 
+    /**
+     * 读取数据库结构初始化脚本。
+     *
+     * @return 数据库结构 SQL
+     * @throws IOException 读取资源失败时抛出
+     */
     private String schemaSql() throws IOException {
         return readRequiredResource("db/mmwiki-schema.sql");
     }
 
+    /**
+     * 读取数据库基础数据初始化脚本。
+     *
+     * @return 基础数据 SQL
+     * @throws IOException 读取资源失败时抛出
+     */
     private String dataSql() throws IOException {
         return readRequiredResource("db/data.sql");
     }
 
+    /**
+     * 判断 classpath 资源是否存在。
+     *
+     * @param path 资源路径
+     * @return true 表示资源存在
+     */
     private boolean resourceReadable(String path) {
         return new ClassPathResource(path).exists();
     }
 
+    /**
+     * 读取必须存在的 classpath 资源，不存在时抛出异常。
+     *
+     * @param resourcePath 资源路径
+     * @return 资源文本内容
+     * @throws IOException 资源不存在或读取失败时抛出
+     */
     private String readRequiredResource(String resourcePath) throws IOException {
         ClassPathResource resource = new ClassPathResource(resourcePath);
         if (!resource.exists()) {
@@ -301,6 +368,11 @@ public class InstallService {
         }
     }
 
+    /**
+     * 根据安装表单和默认配置生成 jar 同级 config/application.yml。
+     *
+     * @throws IOException 创建目录或写入配置失败时抛出
+     */
     private void writeApplicationYaml() throws IOException {
         Map<String, String> db = data.getDatabaseConf();
         Map<String, String> sys = data.getSystemConf();
@@ -422,16 +494,29 @@ public class InstallService {
         Files.writeString(configDir.resolve("application.yml"), yaml, StandardCharsets.UTF_8);
     }
 
+    /**
+     * 创建安装锁文件，用于标记系统已经完成安装。
+     *
+     * @throws IOException 写入锁文件失败时抛出
+     */
     private void createLockFile() throws IOException {
         Files.writeString(lockFile, "installed at " + Instant.now(), StandardCharsets.UTF_8);
     }
 
+    /**
+     * 标记安装失败并记录失败原因。
+     *
+     * @param message 失败原因
+     */
     private void installFailed(String message) {
         data.setResult(message == null ? "安装失败" : message);
         data.setStatus(InstallData.INSTALL_END);
         data.setIsSuccess(InstallData.INSTALL_FAILED);
     }
 
+    /**
+     * 标记安装成功并生成启动命令、访问地址和配置文件路径。
+     */
     private void installSuccess() {
         Map<String, String> result = new LinkedHashMap<>();
         result.put("cmd", "java -jar mmwiki-0.0.1-SNAPSHOT.jar");
@@ -442,6 +527,15 @@ public class InstallService {
         data.setIsSuccess(InstallData.INSTALL_SUCCESS);
     }
 
+    /**
+     * 构造安装环境检查结果行。
+     *
+     * @param name    检查项名称
+     * @param require 要求描述
+     * @param value   当前值
+     * @param ok      是否通过
+     * @return 环境检查结果映射
+     */
     private Map<String, Object> envRow(String name, String require, String value, boolean ok) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("name", name);
@@ -452,6 +546,14 @@ public class InstallService {
         return row;
     }
 
+    /**
+     * 构造目录权限检查结果行。
+     *
+     * @param path    目录路径
+     * @param require 要求描述
+     * @param ok      是否通过
+     * @return 目录检查结果映射
+     */
     private Map<String, Object> dirRow(String path, String require, boolean ok) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("path", path);
@@ -461,6 +563,11 @@ public class InstallService {
         return row;
     }
 
+    /**
+     * 检查配置目录是否可写，会创建临时探测文件后立即删除。
+     *
+     * @return true 表示配置目录可写
+     */
     private boolean canWriteConfigDirectory() {
         try {
             Files.createDirectories(configDir);
@@ -473,6 +580,11 @@ public class InstallService {
         }
     }
 
+    /**
+     * 获取本机 IP，获取失败时回退到 127.0.0.1。
+     *
+     * @return 本机 IP 地址
+     */
     private String localIp() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -481,6 +593,13 @@ public class InstallService {
         }
     }
 
+    /**
+     * 将字符串解析为整数，解析失败时返回默认值。
+     *
+     * @param value        原始字符串
+     * @param defaultValue 默认值
+     * @return 解析后的整数或默认值
+     */
     private int parsePositiveInt(String value, int defaultValue) {
         try {
             return Integer.parseInt(value == null ? "" : value.trim());
@@ -489,6 +608,12 @@ public class InstallService {
         }
     }
 
+    /**
+     * 将字符串转换为安全的 YAML 标量文本，必要时自动加引号并转义。
+     *
+     * @param value 原始配置值
+     * @return YAML 可写入的配置值
+     */
     private String yamlValue(String value) {
         String safeValue = value == null ? "" : value;
         if (safeValue.isBlank()) {
