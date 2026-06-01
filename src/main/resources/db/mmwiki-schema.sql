@@ -120,8 +120,8 @@ CREATE TABLE `mw_space_user` (
 -- --------------------------------
 DROP TABLE IF EXISTS `mw_document`;
 CREATE TABLE `mw_document` (
-  `document_id` varchar(50) NOT NULL COMMENT '文档 id',
-  `parent_id` varchar(50) NOT NULL COMMENT '文档父 id',
+                               `document_id` varchar(32) NOT NULL COMMENT '文档 id',
+                               `parent_id`   varchar(32) NOT NULL COMMENT '文档父 id',
   `space_id` int(10) NOT NULL DEFAULT '0' COMMENT '空间id',
   `name` varchar(150) NOT NULL DEFAULT '' COMMENT '文档名称',
   `type` tinyint(4) NOT NULL DEFAULT '1' COMMENT '文档类型 1 page 2 dir',
@@ -174,7 +174,7 @@ CREATE TABLE `mw_follow` (
 DROP TABLE IF EXISTS `mw_log_document`;
 CREATE TABLE `mw_log_document` (
   `log_document_id` int(10) NOT NULL AUTO_INCREMENT COMMENT '文档日志 id',
-  `document_id` varchar(50) NOT NULL DEFAULT '0' COMMENT '文档id',
+  `document_id` varchar(32) NOT NULL DEFAULT '0' COMMENT '文档id',
   `space_id` int(10) NOT NULL DEFAULT '0' COMMENT '空间id',
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '用户id',
   `action` tinyint(4) NOT NULL DEFAULT '1' COMMENT '动作 1 创建 2 修改 3 删除',
@@ -294,7 +294,7 @@ DROP TABLE IF EXISTS `mw_attachment`;
 CREATE TABLE `mw_attachment` (
   `attachment_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '附件 id',
   `user_id` int(10) NOT NULL DEFAULT '0' COMMENT '创建用户id',
-  `document_id` varchar(50)  NOT NULL DEFAULT '0' COMMENT '所属文档id',
+  `document_id` varchar(32) NOT NULL DEFAULT '0' COMMENT '所属文档id',
   `name` varchar(50) NOT NULL DEFAULT '' COMMENT '附件名称',
   `path` varchar(100) NOT NULL DEFAULT '' COMMENT '附件路径',
   `source` tinyint(4) NOT NULL DEFAULT '0' COMMENT '附件来源， 0 默认是附件 1 图片',
