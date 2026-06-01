@@ -18,37 +18,17 @@ public final class GlobalConstant {
     public static final String SESSION_AUTHOR = "author";
 
     /**
-     * root 角色ID，root 用户默认拥有所有空间的访问、编辑和管理权限。
-     */
-    public static final int ROLE_ROOT_ID = 1;
-
-    /**
-     * 空间访问者权限值，可访问空间文档，但不能编辑和添加空间成员。
-     */
-    public static final int SPACE_VISITOR = 0;
-
-    /**
-     * 空间编辑者权限值，可访问并编辑空间文档，但不能管理空间成员。
-     */
-    public static final int SPACE_EDITOR = 1;
-
-    /**
-     * 空间管理员权限值，可访问、编辑空间文档，并管理空间成员。
-     */
-    public static final int SPACE_MANAGER = 2;
-
-    /**
-     * root 角色ID，root 超级管理员，默认拥有所有空间访问，编辑和管理权限。
+     * root 角色ID（超级管理员），默认拥有所有功能权限和空间访问，编辑和管理权限。
      */
     public static final int ROOT_ROLE_ID = 1;
 
     /**
-     * 角色ID，普通管理员
+     * 普通管理员角色ID，管理员角色，默认拥有空间管理权限。
      */
-    public static final int MANAGE_ROLE_ID = 1;
+    public static final int MANAGE_ROLE_ID = 2;
 
     /**
-     * 默认角色ID，系统默认创建的普通用户角色。
+     * 默认角色ID（普通用户），系统默认创建的普通用户角色。
      */
     public static final int DEFAULT_ROLE_ID = 3;
 

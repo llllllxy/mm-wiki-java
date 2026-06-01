@@ -18,6 +18,7 @@ import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.JsonUtils;
+import org.tinycloud.mmwiki.util.NanoIdUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.*;
 import org.tinycloud.mmwiki.web.CurrentUser;
@@ -289,7 +290,7 @@ public class DocumentService {
         LocalDateTime now = TimeUtils.now();
         int nextSequence = Objects.requireNonNullElse(documentMapper.findMaxSequence(parentId, spaceId), 0) + 1;
         Document document = new Document();
-        document.setDocumentId(UUID.randomUUID().toString().replace("-", ""));
+        document.setDocumentId(NanoIdUtils.randomNanoId());
         document.setParentId(parentId);
         document.setSpaceId(spaceId);
         document.setName(cleanName);

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.constant.SpaceMemberPrivilegeEnum;
 import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
 import org.tinycloud.mmwiki.domain.Space;
 import org.tinycloud.mmwiki.domain.SpaceUser;
@@ -26,7 +27,7 @@ class AccessServiceTest {
 
     @Test
     void rootUserCanVisitEditAndManageAnySpace() {
-        Access access = accessService.access(user(1, GlobalConstant.ROLE_ROOT_ID), privateSpace());
+        Access access = accessService.access(user(1, GlobalConstant.ROOT_ROLE_ID), privateSpace());
 
         assertThat(access.isVisit()).isTrue();
         assertThat(access.isEditor()).isTrue();
@@ -63,7 +64,7 @@ class AccessServiceTest {
     void editorMemberCanVisitAndEditButCannotManage() {
         Space space = privateSpace();
         CurrentUser currentUser = user(8, GlobalConstant.DEFAULT_ROLE_ID);
-        when(spaceUserService.findBySpaceIdAndUserId(10, 8)).thenReturn(member(GlobalConstant.SPACE_EDITOR));
+        when(spaceUserService.findBySpaceIdAndUserId(10, 8)).thenReturn(member(SpaceMemberPrivilegeEnum.EDITOR.getCode()));
 
         Access access = accessService.access(currentUser, space);
 
@@ -76,7 +77,7 @@ class AccessServiceTest {
     void managerMemberCanVisitEditAndManage() {
         Space space = privateSpace();
         CurrentUser currentUser = user(8, GlobalConstant.DEFAULT_ROLE_ID);
-        when(spaceUserService.findBySpaceIdAndUserId(10, 8)).thenReturn(member(GlobalConstant.SPACE_MANAGER));
+        when(spaceUserService.findBySpaceIdAndUserId(10, 8)).thenReturn(member(SpaceMemberPrivilegeEnum.MANAGER.getCode()));
 
         Access access = accessService.access(currentUser, space);
 

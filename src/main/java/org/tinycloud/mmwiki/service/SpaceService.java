@@ -10,12 +10,13 @@ import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.CollectionTypeEnum;
 import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
-import org.tinycloud.mmwiki.constant.GlobalConstant;
+import org.tinycloud.mmwiki.constant.SpaceMemberPrivilegeEnum;
 import org.tinycloud.mmwiki.constant.SpaceVisitLevelEnum;
 import org.tinycloud.mmwiki.domain.*;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.DocumentMapper;
 import org.tinycloud.mmwiki.mapper.SpaceMapper;
+import org.tinycloud.mmwiki.util.NanoIdUtils;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.vo.MemberPage;
@@ -222,7 +223,7 @@ public class SpaceService {
         spaceMapper.insert(space);
 
         Document defaultDocument = new Document();
-        defaultDocument.setDocumentId(UUID.randomUUID().toString().replace("-", ""));
+        defaultDocument.setDocumentId(NanoIdUtils.randomNanoId());
         defaultDocument.setParentId("0");
         defaultDocument.setSpaceId(space.getSpaceId());
         defaultDocument.setName(space.getName());
@@ -235,7 +236,7 @@ public class SpaceService {
         defaultDocument.setUpdateTime(now);
         documentMapper.insert(defaultDocument);
         documentFileService.createEmptyPage(documentFileService.getDefaultPageFileBySpaceName(space.getName()));
-        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), GlobalConstant.SPACE_MANAGER);
+        spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), SpaceMemberPrivilegeEnum.MANAGER.getCode());
         return JsonResponse.success("添加空间成功", "/system/space/list");
     }
 
@@ -397,18 +398,18 @@ public class SpaceService {
     /**
      * 校验空间基础信息，并规范化可空字段和开关字段。
      *
-     * @param space     待校验的空间对象
-     * @param currentId 当前空间ID，新增时为空，编辑时用于排除自身重名
+     * @param space          待校验的空间对象
+     * @param currentSpaceId 当前空间ID，新增时为空，编辑时用于排除自身重名
      * @return 校验失败时返回错误响应，校验通过时返回 null
      */
-    private JsonResponse<Void> validateSpace(Space space, Integer currentId) {
+    private JsonResponse<Void> validateSpace(Space space, Integer currentSpaceId) {
         if (space == null) {
             throw new SystemException("空间信息不能为空！");
         }
-        space.setName(trim(space.getName()));
-        space.setDescription(trim(space.getDescription()));
-        space.setTags(trim(space.getTags()));
-        String visitLevel = trim(space.getVisitLevel());
+        space.setName(space.getName() == null ? "" : space.getName().trim());
+        space.setDescription(space.getDescription() == null ? "" : space.getDescription().trim());
+        space.setTags(space.getTags() == null ? "" : space.getTags().trim());
+        String visitLevel = space.getVisitLevel() == null ? "" : space.getVisitLevel().trim();
         if (!StringUtils.hasText(visitLevel)) {
             space.setVisitLevel(SpaceVisitLevelEnum.PUBLIC.getCode());
         }
@@ -426,7 +427,7 @@ public class SpaceService {
         if (INVALID_SPACE_NAME.matcher(space.getName()).find()) {
             throw new SystemException("空间名称格式不正确！");
         }
-        long duplicate = currentId == null ? spaceMapper.countByName(space.getName()) : spaceMapper.countByNameAndNotId(currentId, space.getName());
+        long duplicate = currentSpaceId == null ? spaceMapper.countByName(space.getName()) : spaceMapper.countByNameAndNotId(currentSpaceId, space.getName());
         if (duplicate > 0) {
             throw new SystemException("空间名已经存在！");
         }
@@ -487,13 +488,4 @@ public class SpaceService {
         zip.closeEntry();
     }
 
-    /**
-     * 去除字符串首尾空白，空值统一转换为空字符串。
-     *
-     * @param value 原始字符串
-     * @return 去除首尾空白后的字符串
-     */
-    private String trim(String value) {
-        return value == null ? "" : value.trim();
-    }
 }

@@ -158,18 +158,15 @@ public class UserService {
      * 在系统管理中创建用户。
      */
     public JsonResponse<Void> saveSystemUser(User user, CurrentUser operator) {
-        JsonResponse<Void> validation = validateSystemUser(user, true, operator);
-        if (validation != null) {
-            return validation;
-        }
-        if (userMapper.countByUsername(user.getUsername()) > 0) {
+        this.validateSystemUser(user, true, operator);
+        if (this.userMapper.countByUsername(user.getUsername()) > 0) {
             throw new SystemException("用户名已经存在！");
         }
         LocalDateTime now = LocalDateTime.now();
-        user.setPassword(BCrypt.hashpw(passwordCryptoService.decryptPassword(user.getPassword()), BCrypt.gensalt()));
+        user.setPassword(BCrypt.hashpw(this.passwordCryptoService.decryptPassword(user.getPassword()), BCrypt.gensalt()));
         user.setCreateTime(now);
         user.setUpdateTime(now);
-        userMapper.insert(user);
+        this.userMapper.insert(user);
         return JsonResponse.success("添加用户成功", "/system/user/list");
     }
 
@@ -190,10 +187,7 @@ public class UserService {
         if (AccessService.isRootRole(existing.getRoleId())) {
             user.setRoleId(ROOT_ROLE_ID);
         }
-        JsonResponse<Void> validation = validateSystemUser(user, false, operator);
-        if (validation != null) {
-            return validation;
-        }
+        this.validateSystemUser(user, false, operator);
         user.setUpdateTime(LocalDateTime.now());
         if (StringUtils.hasText(user.getPassword()) && AccessService.isRoot(operator)) {
             user.setPassword(BCrypt.hashpw(passwordCryptoService.decryptPassword(user.getPassword()), BCrypt.gensalt()));
@@ -210,9 +204,8 @@ public class UserService {
      * @param user            待校验的用户信息
      * @param requirePassword 是否要求密码必填
      * @param operator        当前操作人
-     * @return 校验通过时返回 null，校验失败时抛出业务异常
      */
-    private JsonResponse<Void> validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {
+    private void validateSystemUser(User user, boolean requirePassword, CurrentUser operator) {
         if (user == null) {
             throw new SystemException("用户信息不能为空！");
         }
@@ -259,7 +252,6 @@ public class UserService {
         if (AccessService.isRootRole(user.getRoleId()) && !AccessService.isRoot(operator)) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "没有权限分配超级管理员角色！");
         }
-        return null;
     }
 
 
