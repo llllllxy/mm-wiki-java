@@ -18,9 +18,9 @@ public final class GlobalConstant {
     public static final String SESSION_AUTHOR = "author";
 
     /**
-     * session 中账号状态的最短刷新间隔，避免高频请求每次都查询用户表。目前默认是30秒
+     * session 中账号状态的最短刷新间隔，避免高频请求每次都查询用户表。目前默认是300秒
      */
-    public static final long USER_STATUS_REFRESH_INTERVAL_MILLIS = 30_000L;
+    public static final long USER_STATUS_REFRESH_INTERVAL_MILLIS = 300_000L;
 
     /**
      * root 角色ID（超级管理员），默认拥有所有功能权限和空间访问，编辑和管理权限。

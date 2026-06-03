@@ -16,7 +16,7 @@ import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
 import org.tinycloud.mmwiki.util.JsonUtils;
-import org.tinycloud.mmwiki.util.RequestUtils;
+import org.tinycloud.mmwiki.util.WebUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -105,15 +105,16 @@ public class AuthInterceptor implements HandlerInterceptor {
      * @return false 表示请求已处理完毕，不再进入 Controller
      */
     private boolean handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (RequestUtils.expectsJsonResponse(request)) {
-            return writeJsonError(response, JsonResponse.error(ErrorCodeEnum.UNAUTHORIZED, "未登录或登录已失效！", "/author/index"));
+        if (WebUtils.expectsJsonResponse(request)) {
+            WebUtils.writeJson(response, JsonResponse.error(ErrorCodeEnum.UNAUTHORIZED, "未登录或登录已失效！", "/author/index"));
+            return false;
         }
         response.sendRedirect("/author/index");
         return false;
     }
 
     /**
-     * 校验后台系统菜单权限。
+     * 校验后台管理系统菜单权限。
      *
      * @param request     当前请求
      * @param response    当前响应
@@ -153,8 +154,9 @@ public class AuthInterceptor implements HandlerInterceptor {
      * @return false 表示请求已处理完毕，不再进入 Controller
      */
     private boolean handleForbidden(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (RequestUtils.expectsJsonResponse(request)) {
-            return writeJsonError(response, JsonResponse.error(ErrorCodeEnum.FORBIDDEN, "抱歉，您没有权限操作！", "/error/403"));
+        if (WebUtils.expectsJsonResponse(request)) {
+            WebUtils.writeJson(response, JsonResponse.error(ErrorCodeEnum.FORBIDDEN, "抱歉，您没有权限操作！", "/error/403"));
+            return false;
         }
         response.sendRedirect("/error/403");
         return false;
@@ -169,21 +171,5 @@ public class AuthInterceptor implements HandlerInterceptor {
     private boolean shouldRecordOperation(HttpServletRequest request) {
         String path = request.getRequestURI();
         return "POST".equalsIgnoreCase(request.getMethod()) && path != null && path.startsWith("/system/");
-    }
-
-    /**
-     * 响应 JSON 错误。
-     *
-     * @param response 当前响应
-     * @param body     错误信息
-     * @return false
-     * @throws IOException 响应 IO 异常
-     */
-    private boolean writeJsonError(HttpServletResponse response, JsonResponse<?> body) throws IOException {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(JsonUtils.writeValueAsString(body));
-        return false;
     }
 }

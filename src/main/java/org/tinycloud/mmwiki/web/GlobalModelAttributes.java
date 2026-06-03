@@ -18,7 +18,7 @@ import org.tinycloud.mmwiki.constant.GlobalConstant;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.ConfigService;
 import org.tinycloud.mmwiki.service.InstallService;
-import org.tinycloud.mmwiki.util.RequestUtils;
+import org.tinycloud.mmwiki.util.WebUtils;
 
 /**
  * MM-Wiki Web 全局模型属性与异常处理组件。
@@ -58,7 +58,7 @@ public class GlobalModelAttributes {
                 : null;
         log.warn("handleRuntimeException code: {}, message: {}", code, message, e);
 
-        if (RequestUtils.expectsJsonResponse(request)) {
+        if (WebUtils.expectsJsonResponse(request)) {
             return ResponseEntity.ok(JsonResponse.error(code, message, redirectUrl));
         }
 
