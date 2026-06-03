@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -33,11 +34,6 @@ import java.util.Set;
  */
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
-
-    /**
-     * session 中账号状态的最短刷新间隔，避免高频请求每次都查询用户表。目前默认是30秒
-     */
-    private static final long USER_STATUS_REFRESH_INTERVAL_MILLIS = 30_000L;
 
     @Autowired
     private UserService userService;
@@ -69,8 +65,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             return this.handleUnauthenticated(request, response);
         }
         CurrentUser currentUser = (CurrentUser) sessionValue;
-
-        if (shouldRefreshUserStatus(currentUser)) {
+        // 判断是否需要重新读取账号状态，避免每个请求都查询用户表
+        if (System.currentTimeMillis() - currentUser.getStatusRefreshTime() >= GlobalConstant.USER_STATUS_REFRESH_INTERVAL_MILLIS) {
             User refreshedUser = this.userService.findActiveById(currentUser.getUserId());
             if (refreshedUser == null || refreshedUser.getIsForbidden() == 1) {
                 session.invalidate();
@@ -81,16 +77,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         // 验证权限
         return this.checkSystemAccess(request, response, currentUser);
-    }
-
-    /**
-     * 判断是否需要重新读取账号状态，避免每个请求都查询用户表。
-     *
-     * @param currentUser 当前 session 中的登录用户
-     * @return true 表示需要刷新账号状态
-     */
-    private boolean shouldRefreshUserStatus(CurrentUser currentUser) {
-        return System.currentTimeMillis() - currentUser.getStatusRefreshTime() >= USER_STATUS_REFRESH_INTERVAL_MILLIS;
     }
 
     /**
@@ -105,7 +91,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         HttpSession session = request.getSession(false);
         CurrentUser currentUser = session == null ? null : (CurrentUser) session.getAttribute(GlobalConstant.SESSION_AUTHOR);
-        if (currentUser == null || !shouldRecordOperation(request)) {
+        if (currentUser == null || !this.shouldRecordOperation(request)) {
             return;
         }
         this.logService.recordSystemOperationAsync(request, currentUser, ex);
@@ -145,18 +131,18 @@ public class AuthInterceptor implements HandlerInterceptor {
         if ("main".equals(controller) && ("index".equals(action) || "default".equals(action))) {
             return true;
         }
-        if (currentUser.getRoleId() != null && currentUser.getRoleId() == GlobalConstant.ROOT_ROLE_ID) {
+        if (currentUser.getRoleId() != null && Objects.equals(currentUser.getRoleId(), GlobalConstant.ROOT_ROLE_ID)) {
             return true;
         }
         Privilege privilege = this.privilegeMapper.findControllerPrivilege(controller, action);
         if (privilege == null) {
-            return handleForbidden(request, response);
+            return this.handleForbidden(request, response);
         }
         Set<Integer> allowed = new HashSet<>(this.rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
         if (allowed.contains(privilege.getPrivilegeId())) {
             return true;
         }
-        return handleForbidden(request, response);
+        return this.handleForbidden(request, response);
     }
 
     /**

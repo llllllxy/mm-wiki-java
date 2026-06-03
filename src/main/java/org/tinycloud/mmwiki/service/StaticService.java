@@ -62,9 +62,7 @@ public class StaticService {
      * @return 仪表盘统计视图
      */
     public Dashboard dashboard() {
-        int todayStart = Math.toIntExact(LocalDate.now()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toEpochSecond());
+        int todayStart = Math.toIntExact(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
         return new Dashboard(
                 userMapper.countNormalUsers(),
                 userMapper.countForbiddenUsers(),
@@ -128,8 +126,7 @@ public class StaticService {
         serverInfo.put("os", System.getProperty("os.name", ""));
         serverInfo.put("platform", System.getProperty("os.version", ""));
         serverInfo.put("platformFamily", System.getProperty("os.arch", ""));
-        Page<LogEntry> pageInfo = PaginateRequest.of(1, 5)
-                .request(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
+        Page<LogEntry> pageInfo = PaginateRequest.of(1, 5).request(() -> logMapper.pageByLevel(LogService.LEVEL_ERROR));
         List<LogEntry> errLogs = pageInfo.getRecords();
         errLogs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new Monitor(serverInfo, pageInfo.getTotal(), errLogs);

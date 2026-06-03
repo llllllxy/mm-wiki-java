@@ -2,10 +2,11 @@ package org.tinycloud.mmwiki.web;
 
 import java.io.Serial;
 import java.io.Serializable;
+
 import org.tinycloud.mmwiki.domain.User;
 
 /**
- * MM-Wiki Web 层支持组件。
+ * 当前登录用户信息会话对象
  *
  * @author liuxingyu01
  * @since 2026-05-06

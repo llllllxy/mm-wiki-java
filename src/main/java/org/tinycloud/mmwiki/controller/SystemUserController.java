@@ -122,6 +122,7 @@ public class SystemUserController extends ControllerSupport {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "不能操作超级管理员。");
         }
         userService.updateForbidden(userId, 1);
+        userService.invalidateSessions(userId);
         return JsonResponse.success("屏蔽用户成功", "/system/user/list");
     }
 

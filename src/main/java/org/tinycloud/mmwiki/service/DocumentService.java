@@ -218,12 +218,12 @@ public class DocumentService {
             return List.of(document);
         }
         if (!StringUtils.hasText(document.getPath())) {
-            return List.of();
+            return Collections.emptyList();
         }
         List<String> ids = List.of(document.getPath().split(","));
         List<String> filteredIds = ids.stream().filter(id -> !"0".equals(id) && StringUtils.hasText(id)).toList();
         if (filteredIds.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         List<Document> documents = documentMapper.findActiveByIds(filteredIds);
         Map<String, Document> index = documents.stream().collect(Collectors.toMap(Document::getDocumentId, item -> item));

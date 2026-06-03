@@ -97,8 +97,11 @@ public class SystemProfileService {
 
         userService.updateProfile(userId, givenName.trim(),
                 email.trim(), mobile.trim(),
-                trim(phone), trim(department),
-                trim(position), trim(location), trim(im)
+                phone == null ? "" : phone.trim(),
+                department == null ? "" : department.trim(),
+                position == null ? "" : position.trim(),
+                location == null ? "" : location.trim(),
+                im == null ? "" : im.trim()
         );
         return JsonResponse.success("个人资料修改成功", "/system/profile/info");
     }
@@ -181,7 +184,7 @@ public class SystemProfileService {
      */
     public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
         requireUser(userId);
-        String search = trim(keyword);
+        String search = keyword == null ? "" : keyword.trim();
         Page<LogDocumentView> pageInfo = PaginateRequest.of(pageNum, pageSize)
                 .request(() -> {
                     if (search.isBlank()) {
@@ -231,14 +234,4 @@ public class SystemProfileService {
         return user;
     }
 
-
-    /**
-     * 安全裁剪字符串，null 会转换为空字符串。
-     *
-     * @param value 原始字符串
-     * @return 裁剪后的字符串
-     */
-    private String trim(String value) {
-        return value == null ? "" : value.trim();
-    }
 }

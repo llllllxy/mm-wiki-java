@@ -192,10 +192,10 @@ public class RoleService {
      */
     public List<Integer> rolePrivilegeIds(Integer roleId) {
         if (roleId == null) {
-            return List.of();
+            return Collections.emptyList();
         }
         if (roleId == ROOT_ROLE_ID) {
-            return List.of();
+            return Collections.emptyList();
         }
         return rolePrivilegeMapper.findPrivilegeIdsByRoleId(roleId);
     }

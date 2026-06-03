@@ -14,6 +14,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.PageModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class MainService {
     public List<Document> loadCollectedDocuments(CurrentUser currentUser) {
         List<CollectionEntry> collections = collectionMapper.findByUserIdAndType(currentUser.getUserId(), CollectionTypeEnum.DOCUMENT.getCode());
         if (collections.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         List<String> documentIds = new ArrayList<>(collections.size());
         for (CollectionEntry collection : collections) {

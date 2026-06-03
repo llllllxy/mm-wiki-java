@@ -3,10 +3,7 @@ package org.tinycloud.mmwiki.service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -273,7 +270,7 @@ public class EmailService {
     private List<String> findDocumentFollowerEmails(String documentId) {
         List<Follow> follows = followMapper.findByObjectIdAndType(documentId, FollowTypeEnum.DOCUMENT.getCode());
         if (follows.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         List<Integer> userIds = follows.stream()
                 .map(Follow::getUserId)
@@ -281,7 +278,7 @@ public class EmailService {
                 .distinct()
                 .toList();
         if (userIds.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
         Set<String> emails = new LinkedHashSet<>();
         for (User user : userMapper.findActiveByIds(userIds)) {
@@ -300,7 +297,7 @@ public class EmailService {
      */
     private List<String> parseEmails(String emails) {
         if (!StringUtils.hasText(emails)) {
-            return List.of();
+            return Collections.emptyList();
         }
         Set<String> result = new LinkedHashSet<>();
         for (String email : emails.split("[;,，；\\s]+")) {
