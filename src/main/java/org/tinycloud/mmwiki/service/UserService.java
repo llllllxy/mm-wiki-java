@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.mapper.UserMapper;
@@ -14,6 +16,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.tinycloud.mmwiki.constant.GlobalConstant.DEFAULT_ROLE_ID;
@@ -27,7 +30,6 @@ import static org.tinycloud.mmwiki.constant.GlobalConstant.ROOT_ROLE_ID;
  */
 @Service
 public class UserService {
-
     private static final Pattern ALPHA_NUMERIC = Pattern.compile("^[A-Za-z0-9]+$");
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
@@ -37,6 +39,8 @@ public class UserService {
     private RoleService roleService;
     @Autowired
     private PasswordCryptoService passwordCryptoService;
+    @Autowired
+    private FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
     /**
      * 按用户名查询未删除用户。
@@ -209,16 +213,16 @@ public class UserService {
         if (user == null) {
             throw new SystemException("用户信息不能为空！");
         }
-        user.setUsername(trim(user.getUsername()));
-        user.setGivenName(trim(user.getGivenName()));
-        user.setPassword(trim(user.getPassword()));
-        user.setEmail(trim(user.getEmail()));
-        user.setMobile(trim(user.getMobile()));
-        user.setPhone(trim(user.getPhone()));
-        user.setDepartment(trim(user.getDepartment()));
-        user.setPosition(trim(user.getPosition()));
-        user.setLocation(trim(user.getLocation()));
-        user.setIm(trim(user.getIm()));
+        user.setUsername(user.getUsername() == null ? "" : user.getUsername().trim());
+        user.setGivenName(user.getGivenName() == null ? "" : user.getGivenName().trim());
+        user.setPassword(user.getPassword() == null ? "" : user.getPassword().trim());
+        user.setEmail(user.getEmail() == null ? "" : user.getEmail().trim());
+        user.setMobile(user.getMobile() == null ? "" : user.getMobile().trim());
+        user.setPhone(user.getPhone() == null ? "" : user.getPhone().trim());
+        user.setDepartment(user.getDepartment() == null ? "" : user.getDepartment().trim());
+        user.setPosition(user.getPosition() == null ? "" : user.getPosition().trim());
+        user.setLocation(user.getLocation() == null ? "" : user.getLocation().trim());
+        user.setIm(user.getIm() == null ? "" : user.getIm().trim());
 
         if (requirePassword) {
             if (!StringUtils.hasText(user.getUsername())) {
@@ -256,13 +260,19 @@ public class UserService {
 
 
     /**
-     * 安全裁剪字符串，null 会转换为空字符串。
+     * 强制指定用户下线，删除其所有 Spring Session 记录。
      *
-     * @param value 原始字符串
-     * @return 裁剪后的字符串
+     * @param userId 用户ID
      */
-    private String trim(String value) {
-        return value == null ? "" : value.trim();
+    public void invalidateSessions(Integer userId) {
+        User user = findActiveById(userId);
+        if (user == null) {
+            return;
+        }
+        Map<String, ? extends Session> sessions = sessionRepository.findByPrincipalName(user.getUsername());
+        for (String sessionId : sessions.keySet()) {
+            sessionRepository.deleteById(sessionId);
+        }
     }
 }
 
