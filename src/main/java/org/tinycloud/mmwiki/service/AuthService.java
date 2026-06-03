@@ -3,12 +3,14 @@ package org.tinycloud.mmwiki.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
@@ -87,6 +89,9 @@ public class AuthService {
         HttpSession session = request.getSession();
         request.changeSessionId();
         session.setAttribute(GlobalConstant.SESSION_AUTHOR, currentUser);
+        // 写入 Spring Session 标准 principalName 索引字段，映射到 spring_session.PRINCIPAL_NAME。
+        // 便于后续按用户名查询会话、统计在线用户、实现单点登录及强制下线等功能
+        session.setAttribute(FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME, currentUser.getUsername());
         return JsonResponse.success("登录成功！", "/main/index");
     }
 
