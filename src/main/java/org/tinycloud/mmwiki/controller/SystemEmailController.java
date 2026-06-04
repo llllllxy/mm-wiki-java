@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -22,6 +23,7 @@ import org.tinycloud.mmwiki.web.PageModel;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/email")
 public class SystemEmailController extends ControllerSupport {
 
     @Autowired
@@ -30,7 +32,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 邮件服务器列表页。
      */
-    @GetMapping("/system/email/list")
+    @GetMapping("/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/email/list";
@@ -39,7 +41,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 邮件服务器列表数据。
      */
-    @PostMapping("/system/email/list")
+    @PostMapping("/list")
     @ResponseBody
     public JsonResponse<PageModel<EmailServer>> listData(@RequestParam(defaultValue = "1") int pageNum,
                                                          @RequestParam(defaultValue = "20") int pageSize,
@@ -50,7 +52,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 新增邮件服务器表单页。
      */
-    @GetMapping("/system/email/add")
+    @GetMapping("/add")
     public String add() {
         return "system/email/form";
     }
@@ -58,7 +60,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 修改邮件服务器表单页。
      */
-    @GetMapping("/system/email/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("emailId") Integer emailId, Model model) {
         EmailServer email = emailService.findById(emailId);
         if (email == null) {
@@ -71,7 +73,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 保存新增邮件服务器。
      */
-    @PostMapping("/system/email/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(EmailServer emailServer) {
         return emailService.save(emailServer);
@@ -80,7 +82,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 保存邮件服务器修改。
      */
-    @PostMapping("/system/email/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(EmailServer emailServer) {
         return emailService.update(emailServer);
@@ -89,7 +91,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 启用邮件服务器。
      */
-    @PostMapping("/system/email/used")
+    @PostMapping("/used")
     @ResponseBody
     public JsonResponse<Void> used(@RequestParam("emailId") Integer emailId) {
         return emailService.markUsed(emailId);
@@ -98,7 +100,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 删除邮件服务器。
      */
-    @PostMapping("/system/email/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("emailId") Integer emailId) {
         return emailService.delete(emailId);
@@ -107,7 +109,7 @@ public class SystemEmailController extends ControllerSupport {
     /**
      * 使用表单配置发送测试邮件。
      */
-    @PostMapping("/system/email/test")
+    @PostMapping("/test")
     @ResponseBody
     public JsonResponse<Void> test(EmailServer emailServer, @RequestParam(defaultValue = "") String emails) {
         return emailService.testSend(emailServer, emails);

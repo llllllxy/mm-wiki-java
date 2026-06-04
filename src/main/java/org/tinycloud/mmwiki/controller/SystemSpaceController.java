@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Space;
@@ -32,18 +33,19 @@ import org.tinycloud.mmwiki.web.PageModel;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/space")
 public class SystemSpaceController extends ControllerSupport {
 
     @Autowired
     private SpaceService spaceService;
 
-    @GetMapping("/system/space/list")
+    @GetMapping("/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/space/list";
     }
 
-    @PostMapping("/system/space/list")
+    @PostMapping("/list")
     @ResponseBody
     public JsonResponse<PageModel<Space>> listData(
             @RequestParam(defaultValue = "1") int pageNum,
@@ -53,7 +55,7 @@ public class SystemSpaceController extends ControllerSupport {
         return JsonResponse.success("查询成功", spaceService.listSpacesPage(currentUser(), keyword, pageNum, pageSize));
     }
 
-    @GetMapping("/system/space/member")
+    @GetMapping("/member")
     public String member(@RequestParam("space_id") Integer spaceId, Model model) {
         MemberPage view = spaceService.getMemberPageInfo(currentUser(), spaceId, "/system/space/member?space_id=" + spaceId);
         model.addAttribute("space_id", spaceId);
@@ -61,7 +63,7 @@ public class SystemSpaceController extends ControllerSupport {
         return "system/space/member";
     }
 
-    @PostMapping("/system/space/member")
+    @PostMapping("/member")
     @ResponseBody
     public JsonResponse<PageModel<MemberView>> memberData(
             @RequestParam("space_id") Integer spaceId,
@@ -71,36 +73,36 @@ public class SystemSpaceController extends ControllerSupport {
         return JsonResponse.success("查询成功", spaceService.listMembersPage(currentUser(), spaceId, pageNum, pageSize));
     }
 
-    @GetMapping("/system/space/add")
+    @GetMapping("/add")
     public String add() {
         return "system/space/form";
     }
 
-    @PostMapping("/system/space/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(Space space) throws IOException {
         return spaceService.createSpace(currentUser(), space);
     }
 
-    @GetMapping("/system/space/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("space_id") Integer spaceId, Model model) {
         model.addAttribute("space", spaceService.requireSpace(spaceId));
         return "system/space/form";
     }
 
-    @PostMapping("/system/space/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(Space space) throws IOException {
         return spaceService.updateSpace(currentUser(), space);
     }
 
-    @PostMapping("/system/space/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("space_id") Integer spaceId) throws IOException {
         return spaceService.deleteSpace(currentUser(), spaceId);
     }
 
-    @GetMapping("/system/space/download")
+    @GetMapping("/download")
     public ResponseEntity<ByteArrayResource> download(@RequestParam("space_id") Integer spaceId) throws IOException {
         SpaceDownload payload = spaceService.downloadSpace(currentUser(), spaceId);
         String encoded = URLEncoder.encode(payload.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");

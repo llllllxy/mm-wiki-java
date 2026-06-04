@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -30,6 +31,7 @@ import java.util.List;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/user")
 public class SystemUserController extends ControllerSupport {
 
     @Autowired
@@ -37,7 +39,7 @@ public class SystemUserController extends ControllerSupport {
     @Autowired
     private RoleService roleService;
 
-    @GetMapping("/system/user/list")
+    @GetMapping("/list")
     public String list(@RequestParam(defaultValue = "") String username,
                        @RequestParam(value = "role_id", required = false) Integer roleId,
                        Model model) {
@@ -48,7 +50,7 @@ public class SystemUserController extends ControllerSupport {
         return "system/user/list";
     }
 
-    @PostMapping("/system/user/list")
+    @PostMapping("/list")
     @ResponseBody
     public JsonResponse<PageModel<User>> listData(@RequestParam(defaultValue = "1") int pageNum,
                                                   @RequestParam(defaultValue = "20") int pageSize,
@@ -60,7 +62,7 @@ public class SystemUserController extends ControllerSupport {
         return JsonResponse.success("查询成功", PageModel.from(pageInfo));
     }
 
-    @GetMapping("/system/user/info")
+    @GetMapping("/info")
     public String info(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
@@ -74,19 +76,19 @@ public class SystemUserController extends ControllerSupport {
         return "system/user/info";
     }
 
-    @GetMapping("/system/user/add")
+    @GetMapping("/add")
     public String add(Model model) {
         model.addAttribute("roles", assignableRoles());
         return "system/user/form";
     }
 
-    @PostMapping("/system/user/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(User user) {
         return userService.saveSystemUser(user, currentUser());
     }
 
-    @GetMapping("/system/user/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("user_id") Integer userId, Model model) {
         User user = userService.findActiveById(userId);
         if (user == null) {
@@ -102,13 +104,13 @@ public class SystemUserController extends ControllerSupport {
         return "system/user/edit";
     }
 
-    @PostMapping("/system/user/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(User user) {
         return userService.updateSystemUser(user, currentUser());
     }
 
-    @PostMapping("/system/user/forbidden")
+    @PostMapping("/forbidden")
     @ResponseBody
     public JsonResponse<Void> forbidden(@RequestParam("user_id") Integer userId) {
         if (currentUser().getUserId().equals(userId)) {
@@ -126,7 +128,7 @@ public class SystemUserController extends ControllerSupport {
         return JsonResponse.success("屏蔽用户成功", "/system/user/list");
     }
 
-    @PostMapping("/system/user/recover")
+    @PostMapping("/recover")
     @ResponseBody
     public JsonResponse<Void> recover(@RequestParam("user_id") Integer userId) {
         User user = userService.findActiveById(userId);

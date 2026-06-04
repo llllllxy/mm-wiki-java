@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -27,12 +28,13 @@ import org.tinycloud.mmwiki.web.PageModel;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/profile")
 public class SystemProfileController extends ControllerSupport {
 
     @Autowired
     private SystemProfileService systemProfileService;
 
-    @GetMapping("/system/profile/info")
+    @GetMapping("/info")
     public String info(Model model) {
         CurrentUser currentUser = currentUser();
         ProfileInfoView view = systemProfileService.loadInfo(currentUser.getUserId());
@@ -42,13 +44,13 @@ public class SystemProfileController extends ControllerSupport {
         return "system/profile/info";
     }
 
-    @GetMapping("/system/profile/edit")
+    @GetMapping("/edit")
     public String edit(Model model) {
         model.addAttribute("user", systemProfileService.loadEditableProfile(currentUser().getUserId()));
         return "system/profile/edit";
     }
 
-    @PostMapping("/system/profile/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(
             @RequestParam("given_name") String givenName,
@@ -73,7 +75,7 @@ public class SystemProfileController extends ControllerSupport {
         );
     }
 
-    @GetMapping("/system/profile/followUser")
+    @GetMapping("/followUser")
     public String followUser(Model model) {
         FollowUserView view = systemProfileService.loadFollowUsers(currentUser().getUserId());
         model.addAttribute("user", view.getUser());
@@ -84,7 +86,7 @@ public class SystemProfileController extends ControllerSupport {
         return "system/profile/follow_user";
     }
 
-    @GetMapping("/system/profile/followDoc")
+    @GetMapping("/followDoc")
     public String followDoc(Model model) {
         FollowDocPage view = systemProfileService.loadFollowDocs(currentUser().getUserId());
         model.addAttribute("user", view.getUser());
@@ -92,19 +94,19 @@ public class SystemProfileController extends ControllerSupport {
         return "system/profile/follow_doc";
     }
 
-    @PostMapping("/system/profile/followDoc")
+    @PostMapping("/followDoc")
     @ResponseBody
     public JsonResponse<PageModel<ProfileFollowedDocument>> followDocData(@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
         return JsonResponse.success("查询成功", systemProfileService.loadFollowDocPage(currentUser(), pageNum, pageSize));
     }
 
-    @GetMapping("/system/profile/activity")
+    @GetMapping("/activity")
     public String activity(@RequestParam(defaultValue = "") String keyword, Model model) {
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/profile/activity";
     }
 
-    @PostMapping("/system/profile/activity")
+    @PostMapping("/activity")
     @ResponseBody
     public JsonResponse<PageModel<LogDocumentView>> activityData(
             @RequestParam(defaultValue = "1") int pageNum,
@@ -114,12 +116,12 @@ public class SystemProfileController extends ControllerSupport {
         return JsonResponse.success("查询成功", systemProfileService.loadActivityPage(currentUser().getUserId(), keyword, pageNum, pageSize));
     }
 
-    @GetMapping("/system/profile/password")
+    @GetMapping("/password")
     public String password() {
         return "system/profile/password";
     }
 
-    @PostMapping("/system/profile/savePass")
+    @PostMapping("/savePass")
     @ResponseBody
     public JsonResponse<Void> savePass(
             @RequestParam("pwd") String password,

@@ -3,11 +3,7 @@ package org.tinycloud.mmwiki.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.LogEntry;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
@@ -25,6 +21,7 @@ import org.tinycloud.mmwiki.web.PageModel;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/log")
 public class SystemLogController extends ControllerSupport {
 
     @Autowired
@@ -32,7 +29,7 @@ public class SystemLogController extends ControllerSupport {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/system/log/system")
+    @GetMapping("/system")
     public String system(@RequestParam(value = "level", required = false) Integer level,
                          @RequestParam(defaultValue = "") String message,
                          @RequestParam(defaultValue = "") String username,
@@ -43,7 +40,7 @@ public class SystemLogController extends ControllerSupport {
         return "system/log/system";
     }
 
-    @RequestMapping(value = "/system/log/system/list", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/system/list", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public JsonResponse<PageModel<LogEntry>> systemList(@RequestParam(value = "level", required = false) Integer level,
                                                         @RequestParam(defaultValue = "") String message,
@@ -54,7 +51,7 @@ public class SystemLogController extends ControllerSupport {
         return JsonResponse.success("查询成功", pageModel);
     }
 
-    @GetMapping("/system/log/info")
+    @GetMapping("/info")
     public String info(@RequestParam("log_id") Long logId, Model model) {
         LogEntry log = logService.findLog(logId);
         if (log == null) {
@@ -64,7 +61,7 @@ public class SystemLogController extends ControllerSupport {
         return "system/log/info";
     }
 
-    @GetMapping("/system/log/document")
+    @GetMapping("/document")
     public String document(@RequestParam(value = "user_id", required = false) Integer userId,
                            @RequestParam(defaultValue = "") String keyword,
                            Model model) {
@@ -74,7 +71,7 @@ public class SystemLogController extends ControllerSupport {
         return "system/log/document";
     }
 
-    @RequestMapping(value = "/system/log/document", method = RequestMethod.POST)
+    @PostMapping(value = "/document")
     @ResponseBody
     public JsonResponse<PageModel<LogDocumentView>> documentData(@RequestParam(value = "user_id", required = false) Integer userId,
                                                                  @RequestParam(defaultValue = "") String keyword,

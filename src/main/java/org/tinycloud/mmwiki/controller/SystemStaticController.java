@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.service.StaticService;
@@ -21,12 +22,13 @@ import org.tinycloud.mmwiki.web.JsonResponse;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/static")
 public class SystemStaticController extends ControllerSupport {
 
     @Autowired
     private StaticService staticService;
 
-    @GetMapping("/system/static/default")
+    @GetMapping("/default")
     public String defaultPage(Model model) {
         Dashboard view = staticService.dashboard();
         model.addAttribute("normalUserCount", view.getNormalUserCount());
@@ -41,25 +43,25 @@ public class SystemStaticController extends ControllerSupport {
         return "system/static/default";
     }
 
-    @PostMapping("/system/static/spaceDocsRank")
+    @PostMapping("/spaceDocsRank")
     @ResponseBody
     public JsonResponse<?> spaceDocsRank(@RequestParam(defaultValue = "15") int number) {
         return JsonResponse.success("ok", staticService.spaceDocsRank(number), "", 0);
     }
 
-    @PostMapping("/system/static/collectDocRank")
+    @PostMapping("/collectDocRank")
     @ResponseBody
     public JsonResponse<?> collectDocRank(@RequestParam(defaultValue = "10") int number) {
         return JsonResponse.success("ok", staticService.collectDocRank(number), "", 0);
     }
 
-    @PostMapping("/system/static/docCountByTime")
+    @PostMapping("/docCountByTime")
     @ResponseBody
     public JsonResponse<?> docCountByTime(@RequestParam(value = "limit_day", defaultValue = "10") int limitDay) {
         return JsonResponse.success("ok", staticService.docCountByTime(limitDay), "", 0);
     }
 
-    @GetMapping("/system/static/monitor")
+    @GetMapping("/monitor")
     public String monitor(Model model) {
         Monitor view = staticService.monitor();
         model.addAttribute("serverInfo", view.getServerInfo());
@@ -68,13 +70,13 @@ public class SystemStaticController extends ControllerSupport {
         return "system/static/monitor";
     }
 
-    @PostMapping("/system/static/serverStatus")
+    @PostMapping("/serverStatus")
     @ResponseBody
     public JsonResponse<?> serverStatus() {
         return JsonResponse.success("ok", staticService.serverStatus(), "", 0);
     }
 
-    @PostMapping("/system/static/serverTime")
+    @PostMapping("/serverTime")
     @ResponseBody
     public JsonResponse<?> serverTime() {
         return JsonResponse.success("ok", staticService.serverTime(), "", 0);

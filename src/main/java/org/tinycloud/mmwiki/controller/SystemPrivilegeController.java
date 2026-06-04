@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.Privilege;
@@ -23,12 +24,13 @@ import org.tinycloud.mmwiki.web.JsonResponse;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/privilege")
 public class SystemPrivilegeController extends ControllerSupport {
 
     @Autowired
     private PrivilegeService privilegeService;
 
-    @GetMapping("/system/privilege/list")
+    @GetMapping("/list")
     public String list(Model model) {
         PrivilegeGroups groups = privilegeService.groups();
         model.addAttribute("menus", groups.getMenus());
@@ -37,14 +39,14 @@ public class SystemPrivilegeController extends ControllerSupport {
         return "system/privilege/list";
     }
 
-    @GetMapping("/system/privilege/add")
+    @GetMapping("/add")
     public String add(Model model) {
         model.addAttribute("menus", privilegeService.groups().getMenus());
         model.addAttribute("mode", privilegeService.mode());
         return "system/privilege/form";
     }
 
-    @GetMapping("/system/privilege/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("privilege_id") Integer privilegeId, Model model) {
         Privilege privilege = privilegeService.findById(privilegeId);
         if (privilege == null) {
@@ -56,19 +58,19 @@ public class SystemPrivilegeController extends ControllerSupport {
         return "system/privilege/form";
     }
 
-    @PostMapping("/system/privilege/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(Privilege privilege) {
         return privilegeService.save(privilege);
     }
 
-    @PostMapping("/system/privilege/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(Privilege privilege) {
         return privilegeService.update(privilege);
     }
 
-    @PostMapping("/system/privilege/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("privilege_id") Integer privilegeId) {
         return privilegeService.delete(privilegeId);

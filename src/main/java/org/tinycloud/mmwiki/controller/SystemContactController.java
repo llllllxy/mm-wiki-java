@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -17,29 +18,30 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 系统联系人 页面与接口控制器。
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/contact")
 public class SystemContactController extends ControllerSupport {
 
     @Autowired
     private ContactService contactService;
 
-    @GetMapping("/system/contact/list")
+    @GetMapping("/list")
     public String list(Model model) {
         model.addAttribute("contacts", contactService.findAll());
         return "system/contact/list";
     }
 
-    @GetMapping("/system/contact/add")
+    @GetMapping("/add")
     public String add() {
         return "system/contact/form";
     }
 
-    @GetMapping("/system/contact/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("contact_id") Integer contactId, Model model) {
         Contact contact = contactService.findById(contactId);
         if (contact == null) {
@@ -49,31 +51,31 @@ public class SystemContactController extends ControllerSupport {
         return "system/contact/form";
     }
 
-    @PostMapping("/system/contact/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(Contact contact) {
         return contactService.save(contact);
     }
 
-    @PostMapping("/system/contact/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(Contact contact) {
         return contactService.update(contact);
     }
 
-    @PostMapping("/system/contact/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("contact_id") Integer contactId) {
         return contactService.delete(contactId);
     }
 
-    @GetMapping("/system/contact/import")
+    @GetMapping("/import")
     public String importPage(@RequestParam(defaultValue = "") String username, Model model) {
         model.addAttribute("username", username == null ? "" : username.trim());
         return "system/contact/import";
     }
 
-    @PostMapping("/system/contact/import")
+    @PostMapping("/import")
     @ResponseBody
     public JsonResponse<PageModel<User>> importData(@RequestParam(defaultValue = "1") int pageNum,
                                                     @RequestParam(defaultValue = "20") int pageSize,

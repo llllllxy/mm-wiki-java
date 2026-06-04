@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.tinycloud.mmwiki.service.SystemService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 
@@ -15,19 +16,20 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/main")
 public class SystemMainController extends ControllerSupport {
 
     @Autowired
     private SystemService systemService;
 
-    @GetMapping("/system/main/index")
+    @GetMapping("/index")
     public String index(Model model) {
         nav(model, "system");
         model.addAttribute("menuGroups", systemService.loadMenuGroups(currentUser()));
         return "system/main/index";
     }
 
-    @GetMapping("/system/main/default")
+    @GetMapping("/default")
     public String defaultPage() {
         return "redirect:/system/profile/info";
     }

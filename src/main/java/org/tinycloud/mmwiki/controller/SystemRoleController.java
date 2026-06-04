@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -31,6 +32,7 @@ import java.util.List;
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/role")
 public class SystemRoleController extends ControllerSupport {
 
     @Autowired
@@ -40,13 +42,13 @@ public class SystemRoleController extends ControllerSupport {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/system/role/list")
+    @GetMapping("/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/role/list";
     }
 
-    @PostMapping("/system/role/list")
+    @PostMapping("/list")
     @ResponseBody
     public JsonResponse<PageModel<Role>> listData(@RequestParam(defaultValue = "1") int pageNum,
                                                   @RequestParam(defaultValue = "20") int pageSize,
@@ -54,12 +56,12 @@ public class SystemRoleController extends ControllerSupport {
         return JsonResponse.success("查询成功", roleService.pageModel(keyword, pageNum, pageSize));
     }
 
-    @GetMapping("/system/role/add")
+    @GetMapping("/add")
     public String add() {
         return "system/role/form";
     }
 
-    @GetMapping("/system/role/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
@@ -72,19 +74,19 @@ public class SystemRoleController extends ControllerSupport {
         return "system/role/form";
     }
 
-    @PostMapping("/system/role/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(Role role) {
         return roleService.save(role);
     }
 
-    @PostMapping("/system/role/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(Role role) {
         return roleService.update(role);
     }
 
-    @GetMapping("/system/role/user")
+    @GetMapping("/user")
     public String user(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
@@ -95,7 +97,7 @@ public class SystemRoleController extends ControllerSupport {
         return "system/role/user";
     }
 
-    @PostMapping("/system/role/user")
+    @PostMapping("/user")
     @ResponseBody
     public JsonResponse<PageModel<org.tinycloud.mmwiki.domain.User>> userData(@RequestParam("role_id") Integer roleId,
                                                                               @RequestParam(defaultValue = "1") int pageNum,
@@ -105,7 +107,7 @@ public class SystemRoleController extends ControllerSupport {
         return JsonResponse.success("查询成功", PageModel.from(pageInfo));
     }
 
-    @GetMapping("/system/role/privilege")
+    @GetMapping("/privilege")
     public String privilege(@RequestParam("role_id") Integer roleId, Model model) {
         Role role = roleService.findActiveById(roleId);
         if (role == null) {
@@ -129,7 +131,7 @@ public class SystemRoleController extends ControllerSupport {
         return "system/role/privilege";
     }
 
-    @PostMapping("/system/role/grantPrivilege")
+    @PostMapping("/grantPrivilege")
     @ResponseBody
     public JsonResponse<Void> grantPrivilege(
         @RequestParam("role_id") Integer roleId,
@@ -138,13 +140,13 @@ public class SystemRoleController extends ControllerSupport {
         return roleService.grantPrivileges(roleId, privilegeIds);
     }
 
-    @PostMapping("/system/role/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("role_id") Integer roleId) {
         return roleService.delete(roleId);
     }
 
-    @PostMapping("/system/role/resetUser")
+    @PostMapping("/resetUser")
     @ResponseBody
     public JsonResponse<Void> resetUser(@RequestParam("user_id") Integer userId) {
         return roleService.resetUserRole(userId);

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
@@ -16,37 +17,38 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 系统链接 页面与接口控制器。
  *
  * @author liuxingyu01
  * @since 2026-05-06
  */
 @Controller
+@RequestMapping("/system/link")
 public class SystemLinkController extends ControllerSupport {
 
     @Autowired
     private LinkService linkService;
 
-    @GetMapping("/system/link/list")
+    @GetMapping("/list")
     public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
         model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/link/list";
     }
 
-    @PostMapping("/system/link/list")
+    @PostMapping("/list")
     @ResponseBody
     public JsonResponse<PageModel<Link>> listData(@RequestParam(defaultValue = "1") int pageNum,
-                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "10") int pageSize,
                                                   @RequestParam(defaultValue = "") String keyword) {
         return JsonResponse.success("查询成功", linkService.pageModel(keyword, pageNum, pageSize));
     }
 
-    @GetMapping("/system/link/add")
+    @GetMapping("/add")
     public String add() {
         return "system/link/form";
     }
 
-    @GetMapping("/system/link/edit")
+    @GetMapping("/edit")
     public String edit(@RequestParam("link_id") Integer linkId, Model model) {
         Link link = linkService.findById(linkId);
         if (link == null) {
@@ -56,19 +58,19 @@ public class SystemLinkController extends ControllerSupport {
         return "system/link/form";
     }
 
-    @PostMapping("/system/link/save")
+    @PostMapping("/save")
     @ResponseBody
     public JsonResponse<Void> save(Link link) {
         return linkService.save(link);
     }
 
-    @PostMapping("/system/link/modify")
+    @PostMapping("/modify")
     @ResponseBody
     public JsonResponse<Void> modify(Link link) {
         return linkService.update(link);
     }
 
-    @PostMapping("/system/link/delete")
+    @PostMapping("/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("link_id") Integer linkId) {
         return linkService.delete(linkId);
