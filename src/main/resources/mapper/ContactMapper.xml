@@ -8,6 +8,20 @@
         from mw_contact
     </select>
 
+    <select id="pageByKeyword" resultType="org.tinycloud.mmwiki.domain.Contact">
+        select *
+        from mw_contact
+        <where>
+            <if test="keyword != null and keyword != ''">
+                name like concat('%', #{keyword}, '%')
+                or position like concat('%', #{keyword}, '%')
+                or mobile like concat('%', #{keyword}, '%')
+                or email like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+        order by contact_id desc
+    </select>
+
     <select id="findById" resultType="org.tinycloud.mmwiki.domain.Contact">
         select *
         from mw_contact

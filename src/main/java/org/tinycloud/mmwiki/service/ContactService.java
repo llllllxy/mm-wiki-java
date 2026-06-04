@@ -43,6 +43,21 @@ public class ContactService {
     }
 
     /**
+     * 分页查询联系人，支持按姓名、职位、电话、邮箱模糊过滤。
+     *
+     * @param keyword  查询关键字
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 联系人分页数据
+     */
+    public PageModel<Contact> pageModel(String keyword, int pageNum, int pageSize) {
+        String search = keyword == null ? "" : keyword.trim();
+        Page<Contact> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> contactMapper.pageByKeyword(search));
+        return PageModel.from(pageInfo);
+    }
+
+    /**
      * 根据联系人ID查询联系人。
      *
      * @param contactId 联系人ID

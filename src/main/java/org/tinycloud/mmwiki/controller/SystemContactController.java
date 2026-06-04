@@ -31,9 +31,17 @@ public class SystemContactController extends ControllerSupport {
     private ContactService contactService;
 
     @GetMapping("/list")
-    public String list(Model model) {
-        model.addAttribute("contacts", contactService.findAll());
+    public String list(@RequestParam(defaultValue = "") String keyword, Model model) {
+        model.addAttribute("keyword", keyword == null ? "" : keyword.trim());
         return "system/contact/list";
+    }
+
+    @PostMapping("/list")
+    @ResponseBody
+    public JsonResponse<PageModel<Contact>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                     @RequestParam(defaultValue = "10") int pageSize,
+                                                     @RequestParam(defaultValue = "") String keyword) {
+        return JsonResponse.success("查询成功", contactService.pageModel(keyword, pageNum, pageSize));
     }
 
     @GetMapping("/add")

@@ -16,6 +16,8 @@ public interface ContactMapper {
 
     List<Contact> findAll();
 
+    List<Contact> pageByKeyword(@Param("keyword") String keyword);
+
     Contact findById(@Param("contactId") Integer contactId);
 
     int insert(Contact contact);
