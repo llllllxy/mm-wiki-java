@@ -1,12 +1,6 @@
 package org.tinycloud.mmwiki.controller;
 
-import org.tinycloud.mmwiki.vo.FollowDocView;
-import org.tinycloud.mmwiki.vo.FollowUserListPage;
-import org.tinycloud.mmwiki.vo.UserFollowView;
-import org.tinycloud.mmwiki.vo.UserProfileView;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +9,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.service.UserDirectoryService;
+import org.tinycloud.mmwiki.vo.FollowDocView;
+import org.tinycloud.mmwiki.vo.FollowUserListPage;
+import org.tinycloud.mmwiki.vo.UserFollowView;
+import org.tinycloud.mmwiki.vo.UserProfileView;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 用户页面与接口控制器。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -39,10 +37,8 @@ public class UserController extends ControllerSupport {
     }
 
     @GetMapping("/user/list")
-    public String list(
-            @RequestParam(defaultValue = "") String username,
-            Model model
-    ) {
+    public String list(@RequestParam(defaultValue = "") String username,
+                       Model model) {
         CurrentUser currentUser = currentUser();
         model.addAttribute("username", username == null ? "" : username.trim());
         model.addAttribute("login_user_id", currentUser.getUserId());
@@ -51,11 +47,9 @@ public class UserController extends ControllerSupport {
 
     @PostMapping("/user/list")
     @ResponseBody
-    public JsonResponse<PageModel<User>> listData(
-            @RequestParam(defaultValue = "1") int pageNum,
-            @RequestParam(defaultValue = "20") int pageSize,
-            @RequestParam(defaultValue = "") String username
-    ) {
+    public JsonResponse<PageModel<User>> listData(@RequestParam(defaultValue = "1") int pageNum,
+                                                  @RequestParam(defaultValue = "20") int pageSize,
+                                                  @RequestParam(defaultValue = "") String username) {
         return JsonResponse.success("查询成功", userDirectoryService.userPage(currentUser(), username, pageNum, pageSize));
     }
 

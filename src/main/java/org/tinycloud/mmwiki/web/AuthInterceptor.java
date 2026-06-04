@@ -4,26 +4,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
-import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
-import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
-import org.tinycloud.mmwiki.util.JsonUtils;
 import org.tinycloud.mmwiki.util.WebUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 
 /**
@@ -37,8 +29,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private PrivilegeMapper privilegeMapper;
     @Autowired
     private RolePrivilegeMapper rolePrivilegeMapper;
     @Autowired
@@ -135,12 +125,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (currentUser.getRoleId() != null && Objects.equals(currentUser.getRoleId(), GlobalConstant.ROOT_ROLE_ID)) {
             return true;
         }
-        Privilege privilege = this.privilegeMapper.findControllerPrivilege(controller, action);
-        if (privilege == null) {
-            return this.handleForbidden(request, response);
-        }
-        Set<Integer> allowed = new HashSet<>(this.rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
-        if (allowed.contains(privilege.getPrivilegeId())) {
+        if (this.rolePrivilegeMapper.countAuthorized(controller, action, currentUser.getRoleId()) > 0) {
             return true;
         }
         return this.handleForbidden(request, response);

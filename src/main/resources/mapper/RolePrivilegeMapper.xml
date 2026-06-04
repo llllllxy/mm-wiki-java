@@ -10,6 +10,18 @@
         order by privilege_id asc
     </select>
 
+    <select id="countAuthorized" resultType="integer">
+        select count(*)
+        from mw_privilege p
+        where p.type = 'controller'
+          and lower(p.controller) = lower(#{controller})
+          and lower(p.action) = lower(#{action})
+          and exists (select 1
+                      from mw_role_privilege rp
+                      where rp.privilege_id = p.privilege_id
+                        and rp.role_id = #{roleId})
+    </select>
+
     <delete id="deleteByRoleId">
         delete
         from mw_role_privilege

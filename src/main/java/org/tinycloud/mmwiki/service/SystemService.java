@@ -90,7 +90,7 @@ public class SystemService {
      */
     private Set<Integer> allowedPrivilegeIds(CurrentUser currentUser) {
         if (currentUser == null || currentUser.getRoleId() == null) {
-            return Set.of();
+            return Collections.emptySet();
         }
         return new LinkedHashSet<>(rolePrivilegeMapper.findPrivilegeIdsByRoleId(currentUser.getRoleId()));
     }

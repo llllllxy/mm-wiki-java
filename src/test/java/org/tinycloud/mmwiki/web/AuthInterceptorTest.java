@@ -9,14 +9,10 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
-import org.tinycloud.mmwiki.domain.Privilege;
 import org.tinycloud.mmwiki.domain.User;
-import org.tinycloud.mmwiki.mapper.PrivilegeMapper;
 import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.service.LogService;
 import org.tinycloud.mmwiki.service.UserService;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.never;
@@ -29,8 +25,6 @@ class AuthInterceptorTest {
     @Mock
     private UserService userService;
     @Mock
-    private PrivilegeMapper privilegeMapper;
-    @Mock
     private RolePrivilegeMapper rolePrivilegeMapper;
     @Mock
     private LogService logService;
@@ -41,7 +35,6 @@ class AuthInterceptorTest {
     void setUp() {
         authInterceptor = new AuthInterceptor();
         ReflectionTestUtils.setField(authInterceptor, "userService", userService);
-        ReflectionTestUtils.setField(authInterceptor, "privilegeMapper", privilegeMapper);
         ReflectionTestUtils.setField(authInterceptor, "rolePrivilegeMapper", rolePrivilegeMapper);
         ReflectionTestUtils.setField(authInterceptor, "logService", logService);
     }
@@ -95,13 +88,12 @@ class AuthInterceptorTest {
         CurrentUser currentUser = currentUser(5, GlobalConstant.DEFAULT_ROLE_ID, System.currentTimeMillis());
         MockHttpServletRequest request = requestWithUser("/system/plugin/list", currentUser);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(privilegeMapper.findControllerPrivilege("plugin", "list")).thenReturn(null);
 
         boolean allowed = authInterceptor.preHandle(request, response, new Object());
 
         assertThat(allowed).isFalse();
         assertThat(response.getRedirectedUrl()).isEqualTo("/error/403");
-        verify(rolePrivilegeMapper, never()).findPrivilegeIdsByRoleId(GlobalConstant.DEFAULT_ROLE_ID);
+        verify(rolePrivilegeMapper).countAuthorized("plugin", "list", GlobalConstant.DEFAULT_ROLE_ID);
     }
 
     @Test
@@ -113,8 +105,7 @@ class AuthInterceptorTest {
         boolean allowed = authInterceptor.preHandle(request, response, new Object());
 
         assertThat(allowed).isTrue();
-        verify(privilegeMapper, never()).findControllerPrivilege("plugin", "list");
-        verify(rolePrivilegeMapper, never()).findPrivilegeIdsByRoleId(GlobalConstant.ROOT_ROLE_ID);
+        verify(rolePrivilegeMapper, never()).countAuthorized("plugin", "list", GlobalConstant.ROOT_ROLE_ID);
     }
 
     @Test
@@ -122,8 +113,7 @@ class AuthInterceptorTest {
         CurrentUser currentUser = currentUser(5, GlobalConstant.DEFAULT_ROLE_ID, System.currentTimeMillis());
         MockHttpServletRequest request = requestWithUser("/system/user/list", currentUser);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        when(privilegeMapper.findControllerPrivilege("user", "list")).thenReturn(privilege(12));
-        when(rolePrivilegeMapper.findPrivilegeIdsByRoleId(GlobalConstant.DEFAULT_ROLE_ID)).thenReturn(List.of(12));
+        when(rolePrivilegeMapper.countAuthorized("user", "list", GlobalConstant.DEFAULT_ROLE_ID)).thenReturn(1);
 
         boolean allowed = authInterceptor.preHandle(request, response, new Object());
 
@@ -153,11 +143,5 @@ class AuthInterceptorTest {
         user.setRoleId(roleId);
         user.setIsForbidden(isForbidden);
         return user;
-    }
-
-    private static Privilege privilege(Integer privilegeId) {
-        Privilege privilege = new Privilege();
-        privilege.setPrivilegeId(privilegeId);
-        return privilege;
     }
 }

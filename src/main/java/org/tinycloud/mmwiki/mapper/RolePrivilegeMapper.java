@@ -16,6 +16,10 @@ public interface RolePrivilegeMapper {
 
     List<Integer> findPrivilegeIdsByRoleId(@Param("roleId") Integer roleId);
 
+    int countAuthorized(@Param("controller") String controller,
+                        @Param("action") String action,
+                        @Param("roleId") Integer roleId);
+
     int deleteByRoleId(@Param("roleId") Integer roleId);
 
     int deleteByPrivilegeId(@Param("privilegeId") Integer privilegeId);
