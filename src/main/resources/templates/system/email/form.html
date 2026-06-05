@@ -16,6 +16,7 @@
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/form.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/modules/system/email.js}"></script>
 </head>
 <body id="frame-body">
@@ -109,7 +110,7 @@
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button type="button" th:data-url="@{/system/email/test}"
-                                onclick="Email.testSend(this.form, this.getAttribute('data-url'));"
+                                onclick="testSend(this.form, this.getAttribute('data-url'));"
                                 class="btn btn-success">测试
                         </button>
                         <button type="button" onclick="Form.ajaxSubmit(this.form, true);" class="btn btn-primary">保存</button>
@@ -127,6 +128,16 @@
             offText: '否'
         });
     });
+
+
+    function testSend(element, url) {
+        layer.prompt({title: '请输入收件人邮箱地址，多个以 ; 隔开', formType: 2}, function (text, index) {
+            layer.close(index);
+            $(element).find("input[name='emails']").val(text);
+            Common.ajaxSubmit(url, $(element).serializeArray());
+            return false;
+        });
+    }
 </script>
 </body>
 </html>
