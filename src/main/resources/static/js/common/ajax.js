@@ -100,7 +100,10 @@ function redirectTopWindow(url) {
     }
 }
 
-
+/**
+ * 处理 Ajax 错误信息。
+ * @param XMLHttpRequest 对象
+ */
 function handleErrorMsg(XMLHttpRequest) {
     if (XMLHttpRequest && Number(XMLHttpRequest.status) === 401) {
         handleUnauthorized(XMLHttpRequest.responseJSON || {});

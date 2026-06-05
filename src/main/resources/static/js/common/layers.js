@@ -30,13 +30,18 @@ var Layers = {
             closeBtn: 0
         })
     },
-
+    /**
+     * failed 提示信息框
+     * @param info
+     * @param time
+     * @param callback
+     */
     failedMsg: function (info, time, callback) {
         if (typeof time === "function") {
             callback = time;
             time = undefined;
         }
-        var content = '<i class="fa fa-frown-o"></i> ';
+        var content = '<strong><i class="fa fa-frown-o"></i>  操作失败：</strong>';
         content += info;
         if (time === undefined || time === null) {
             layer.msg(content, callback);
@@ -44,13 +49,37 @@ var Layers = {
             layer.msg(content, {time: time}, callback);
         }
     },
-
+    /**
+     * warning 提示信息框
+     * @param info
+     * @param time
+     * @param callback
+     */
+    warningMsg: function (info, time, callback) {
+        if (typeof time === "function") {
+            callback = time;
+            time = undefined;
+        }
+        var content = '<strong><i class="fa fa-volume-up"></i>  警告：</strong>';
+        content += info;
+        if (time === undefined || time === null) {
+            layer.msg(content, callback);
+        } else {
+            layer.msg(content, {time: time}, callback);
+        }
+    },
+    /**
+     * success 提示信息框
+     * @param info
+     * @param time
+     * @param callback
+     */
     successMsg: function (info, time, callback) {
         if (typeof time === "function") {
             callback = time;
             time = undefined;
         }
-        var content = '<i class="fa fa-smile-o"></i> ';
+        var content = '<strong><i class="fa fa-smile-o"></i>  操作成功：</strong>';
         content += info;
         // layer.msg(content, callback) 默认 time = 3000ms，也就是 3 秒后关闭，然后触发 end/callback
         if (time === undefined || time === null) {
@@ -124,6 +153,9 @@ var Layers = {
         })
     },
 
+    /**
+     * bind page 页面层
+     */
     bindPage: function (element, title, height, width, html) {
         $(element).each(function () {
             height = height || "500px";

@@ -20,7 +20,7 @@ var Email = {
          * @param data
          */
         function successBox(message, data) {
-            Common.successBox(Form.failedBox, message)
+            Layers.successMsg(message)
         }
 
         /**
@@ -29,7 +29,7 @@ var Email = {
          * @param data
          */
         function failed(message, data) {
-            Common.errorBox(Form.failedBox, message)
+            Layers.failedMsg(message)
         }
 
         /**
@@ -44,7 +44,6 @@ var Email = {
             if (result.code == 1) {
                 successBox(result.message, result.data);
             }
-            $("body,html").animate({scrollTop:0},300);
         }
 
         var $form = $(element);

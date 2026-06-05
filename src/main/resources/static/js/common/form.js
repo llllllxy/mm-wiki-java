@@ -5,11 +5,6 @@
 var Form = {
 
     /**
-     * 提示 div
-     */
-    failedBox: '#failedBox',
-
-    /**
      * 是否在弹框中
      */
     inPopup: false,
@@ -24,23 +19,12 @@ var Form = {
         if (inPopup) {
             Form.inPopup = true;
         }
-
-        function successBox(message, data) {
-            Common.successBox(Form.failedBox, message)
-        }
-
-        function failed(message, data) {
-            Common.errorBox(Form.failedBox, message)
-        }
-
         function response(result) {
             if (result.code !== 1) {
-                failed(result.message, result.data);
+                Layers.failedMsg(result.message)
+            } else {
+                Layers.successMsg(result.message)
             }
-            if (result.code == 1) {
-                successBox(result.message, result.data);
-            }
-            $("body,html").animate({scrollTop: 0}, 300);
             if (result.redirect.url) {
                 var sleepTime = result.redirect.sleep || 3000;
                 setTimeout(function () {
@@ -62,7 +46,7 @@ var Form = {
                 if (field.length > 0 && formData[i].value) {
                     var encrypted = rsa2048Encrypt(formData[i].value);
                     if (!encrypted) {
-                        failed("密码加密失败", null);
+                        Layers.failedMsg("密码加密失败！")
                         return false;
                     }
                     formData[i].value = encrypted;

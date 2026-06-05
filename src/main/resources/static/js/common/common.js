@@ -84,51 +84,6 @@ var Common = {
     },
 
     /**
-     * 成功提示
-     * @param element
-     * @param message
-     */
-    successBox: function (element, message) {
-        $(element).html('');
-        $(element).removeClass();
-        $(element).addClass('alert alert-success');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
-        $(element).append('<strong><i class="glyphicon glyphicon-ok-circle"></i> 操作成功：</strong>');
-        $(element).append(message);
-        $(element).show();
-    },
-
-    /**
-     * 错误提示
-     * @param element
-     * @param message
-     */
-    errorBox: function (element, message) {
-        $(element).html('');
-        $(element).removeClass('hide');
-        $(element).addClass('alert alert-danger');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
-        $(element).append('<strong><i class="glyphicon glyphicon-remove-circle"></i> 操作失败：</strong>');
-        $(element).append(message);
-        $(element).show();
-    },
-
-    /**
-     * 警告提示
-     * @param element
-     * @param message
-     */
-    warningBox: function (element, message) {
-        $(element).html('');
-        $(element).removeClass();
-        $(element).addClass('alert alert-warning');
-        $(element).append('<a class="close" href="#" onclick="$(this).parent().hide();">&times;</a>');
-        $(element).append('<strong><i class="glyphicon glyphicon-volume-up"></i> 警告：</strong>');
-        $(element).append(message);
-        $(element).show();
-    },
-
-    /**
      * 时间格式化
      * @param s
      * @returns {{s: (string|*), d: (string|*), h: (string|*), m: (string|*)}}
