@@ -78,7 +78,7 @@
         return '<a name="user" data-link="/system/space/member?space_id=' + row.spaceId + '"><i class="fa fa-group"></i> 成员</a> ' +
             '<a name="edit" data-link="/system/space/edit?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ' +
             '<a href="/system/space/download?space_id=' + row.spaceId + '"><i class="glyphicon glyphicon-download-alt"></i> 下载</a> ' +
-            '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="/system/space/delete?space_id=' + row.spaceId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
+            '<a data-message="确定删除该空间吗？删除前请确认已经备份。" data-url="/system/space/delete?space_id=' + row.spaceId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 删除</a>';
     }
 
     $(function () {

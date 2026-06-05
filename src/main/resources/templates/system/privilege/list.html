@@ -31,7 +31,7 @@
                         <a name="edit" th:data-link="@{/system/privilege/edit(privilege_id=${menu.privilegeId})}">改</a> |
                         <a data-message="确定要删除权限吗？"
                            th:data-url="@{/system/privilege/delete(privilege_id=${menu.privilegeId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
+                           onclick="Common.ajaxSubmitConfirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
                     </span>
                 </li>
                 <li th:each="controller : ${controllers}" th:if="${controller.parentId == menu.privilegeId}" class="list-group-item">
@@ -40,7 +40,7 @@
                         <a name="edit" th:data-link="@{/system/privilege/edit(privilege_id=${controller.privilegeId})}">改</a> |
                         <a data-message="确定要删除权限吗？"
                            th:data-url="@{/system/privilege/delete(privilege_id=${controller.privilegeId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
+                           onclick="Common.ajaxSubmitConfirm(this.getAttribute('data-message'), this.getAttribute('data-url'))">删</a>
                     </span>
                 </li>
             </ul>

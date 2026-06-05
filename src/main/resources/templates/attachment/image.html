@@ -49,7 +49,7 @@
                     <td class="center">
                         <a th:if="${is_delete}" data-message="确定删除图片吗？"
                            th:data-url="@{/attachment/delete(attachment_id=${attachment.attachmentId})}"
-                           onclick="Layers.confirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
+                           onclick="Common.ajaxSubmitConfirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
                                 class="glyphicon glyphicon-trash"></i></a>
                     </td>
                 </tr>

@@ -85,9 +85,9 @@
         }
         html += '<a name="edit" data-link="/system/user/edit?user_id=' + row.userId + '"><i class="glyphicon glyphicon-edit"></i> 修改</a> ';
         if (row.isForbidden === 1) {
-            html += '<a data-message="确定恢复该用户吗？" data-url="/system/user/recover?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok"></i> 恢复</a>';
+            html += '<a data-message="确定恢复该用户吗？" data-url="/system/user/recover?user_id=' + row.userId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok"></i> 恢复</a>';
         } else if (row.roleId !== 1) {
-            html += '<a data-message="确定屏蔽该用户吗？" data-url="/system/user/forbidden?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 屏蔽</a>';
+            html += '<a data-message="确定屏蔽该用户吗？" data-url="/system/user/forbidden?user_id=' + row.userId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove"></i> 屏蔽</a>';
         }
         return html;
     }

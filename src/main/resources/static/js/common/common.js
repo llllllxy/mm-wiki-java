@@ -40,6 +40,19 @@ var Common = {
     },
 
     /**
+     * 弹出确认框，确认后执行通用 ajax 提交。
+     * @param title 确认提示文案
+     * @param url 提交地址
+     * @param data 提交参数
+     */
+    ajaxSubmitConfirm: function (title, url, data) {
+        Layers.confirmCallback(title, function () {
+            Common.ajaxSubmit(url, data);
+        }, function () {
+        });
+    },
+
+    /**
      * ajax submit callback
      * @param url
      * @param data

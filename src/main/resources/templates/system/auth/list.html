@@ -63,9 +63,9 @@
     function actionFormatter(value, row) {
         var html = '<a name="edit" data-link="/system/auth/edit?login_auth_id=' + row.loginAuthId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
         if (row.isUsed !== 1) {
-            html += '<a data-message="确定要启用该登录认证吗？" data-url="/system/auth/used?login_auth_id=' + row.loginAuthId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok-circle"></i>启用</a> ';
+            html += '<a data-message="确定要启用该登录认证吗？" data-url="/system/auth/used?login_auth_id=' + row.loginAuthId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok-circle"></i>启用</a> ';
         }
-        html += '<a data-message="确定删除吗？" data-url="/system/auth/delete?login_auth_id=' + row.loginAuthId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+        html += '<a data-message="确定删除吗？" data-url="/system/auth/delete?login_auth_id=' + row.loginAuthId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
         return html;
     }
 

@@ -64,9 +64,9 @@
     function actionFormatter(value, row) {
         var html = '<a name="edit" data-link="/system/email/edit?emailId=' + row.emailId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ';
         if (row.isUsed !== 1) {
-            html += '<a data-message="确定要启用该邮件服务器吗？" data-url="/system/email/used?emailId=' + row.emailId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok-circle"></i>启用</a> ';
+            html += '<a data-message="确定要启用该邮件服务器吗？" data-url="/system/email/used?emailId=' + row.emailId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-ok-circle"></i>启用</a> ';
         }
-        html += '<a data-message="确定删除吗？" data-url="/system/email/delete?emailId=' + row.emailId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+        html += '<a data-message="确定删除吗？" data-url="/system/email/delete?emailId=' + row.emailId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
         return html;
     }
 

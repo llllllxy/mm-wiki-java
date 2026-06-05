@@ -41,7 +41,7 @@ var Layers = {
             callback = time;
             time = undefined;
         }
-        var content = '<strong><i class="fa fa-frown-o"></i>  操作失败：</strong>';
+        var content = '<strong><i class="glyphicon glyphicon-remove-circle"></i>  操作失败：</strong>';
         content += info;
         if (time === undefined || time === null) {
             layer.msg(content, callback);
@@ -60,7 +60,7 @@ var Layers = {
             callback = time;
             time = undefined;
         }
-        var content = '<strong><i class="fa fa-volume-up"></i>  警告：</strong>';
+        var content = '<strong><i class="glyphicon glyphicon-volume-up"></i>  警告：</strong>';
         content += info;
         if (time === undefined || time === null) {
             layer.msg(content, callback);
@@ -79,7 +79,7 @@ var Layers = {
             callback = time;
             time = undefined;
         }
-        var content = '<strong><i class="fa fa-smile-o"></i>  操作成功：</strong>';
+        var content = '<strong><i class="glyphicon glyphicon-ok-circle"></i>  操作成功：</strong>';
         content += info;
         // layer.msg(content, callback) 默认 time = 3000ms，也就是 3 秒后关闭，然后触发 end/callback
         if (time === undefined || time === null) {
@@ -87,26 +87,6 @@ var Layers = {
         } else {
             layer.msg(content, {time: time}, callback);
         }
-    },
-
-    /**
-     * confirm 提示框， post 请求
-     * @param title
-     * @param url
-     * @param data
-     */
-    confirm: function (title, url, data) {
-        title = '<i class="fa fa-volume-up"></i> ' + title;
-        layer.confirm(title, {
-            btn: ['是', '否'],
-            skin: Layers.skin,
-            btnAlign: 'c',
-            title: "<i class='fa fa-warning'></i><strong> 警告</strong>"
-        }, function () {
-            Common.ajaxSubmit(url, data)
-        }, function () {
-
-        });
     },
 
     /**

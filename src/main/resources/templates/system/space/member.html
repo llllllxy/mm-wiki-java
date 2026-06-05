@@ -76,7 +76,7 @@
     }
 
     function actionFormatter(value, row) {
-        return '<a data-message="确定要移除该成员吗？" data-url="/system/space_user/remove?space_user_id=' + row.spaceUserId + '&space_id=' + spaceId + '&user_id=' + row.user.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
+        return '<a data-message="确定要移除该成员吗？" data-url="/system/space_user/remove?space_user_id=' + row.spaceUserId + '&space_id=' + spaceId + '&user_id=' + row.user.userId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-remove-circle"></i>移除</a>';
     }
 
     function bindPrivilegeChange() {

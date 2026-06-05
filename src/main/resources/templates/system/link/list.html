@@ -63,7 +63,7 @@
 
     function actionFormatter(value, row) {
         return '<a name="edit" data-link="/system/link/edit?link_id=' + row.linkId + '"><i class="glyphicon glyphicon-edit"></i>修改</a> ' +
-            '<a data-message="确定删除吗？" data-url="/system/link/delete?link_id=' + row.linkId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
+            '<a data-message="确定删除吗？" data-url="/system/link/delete?link_id=' + row.linkId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i>删除</a>';
     }
 
     $(function () {

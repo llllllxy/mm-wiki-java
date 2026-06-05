@@ -46,7 +46,7 @@
         if (row.userId === 1) {
             return "无";
         }
-        return '<a data-message="确定重置该用户为默认角色吗？" data-url="/system/role/resetUser?user_id=' + row.userId + '" onclick="Layers.confirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-refresh"></i>重置角色</a>';
+        return '<a data-message="确定重置该用户为默认角色吗？" data-url="/system/role/resetUser?user_id=' + row.userId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="remove glyphicon glyphicon-refresh"></i>重置角色</a>';
     }
 
     $(function () {
