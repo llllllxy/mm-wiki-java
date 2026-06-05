@@ -8,15 +8,29 @@ var Common = {
     /**
      * ajax submit
      * @param url
-     * @param data
+     * @param data 可以是字符串 (如 "a=1&b=2")、数组 (serializeArray() 输出) 或普通对象
      */
     ajaxSubmit: function (url, data) {
         var jsonData = {};
-        if (data !== "" && data !== undefined) {
+        // 1. 处理 undefined 或空字符串
+        if (data === undefined || data === "") {
+            jsonData = {};
+        }
+        // 2. 如果已经是数组 (serializeArray 的结果)
+        else if (Array.isArray(data) && data.length && data[0].hasOwnProperty('name') && data[0].hasOwnProperty('value')) {
+            for (var i = 0; i < data.length; i++) {
+                jsonData[data[i].name] = data[i].value;
+            }
+        }
+        // 3. 当作字符串处理 (serialize 的结果)
+        else if (typeof data === 'string') {
             var values = data.split("&");
             for (var i = 0; i < values.length; i++) {
-                jsonData[values[i].split("=")[0]] = unescape(values[i].split("=")[1]);
+                var pair = values[i].split("=");/**/
+                jsonData[pair[0]] = pair.length > 1 ? decodeURIComponent(pair[1].replace(/\+/g, '%20')) : "";
             }
+        } else {
+            jsonData = data;
         }
 
         $.ajax({
@@ -61,11 +75,25 @@ var Common = {
      */
     ajaxSubmitCallback: function (url, data, success, err) {
         var jsonData = {};
-        if (data !== "" && data !== undefined) {
+        // 1. 处理 undefined 或空字符串
+        if (data === undefined || data === "") {
+            jsonData = {};
+        }
+        // 2. 如果已经是数组 (serializeArray 的结果)
+        else if (Array.isArray(data) && data.length && data[0].hasOwnProperty('name') && data[0].hasOwnProperty('value')) {
+            for (var i = 0; i < data.length; i++) {
+                jsonData[data[i].name] = data[i].value;
+            }
+        }
+        // 3. 当作字符串处理 (serialize 的结果)
+        else if (typeof data === 'string') {
             var values = data.split("&");
             for (var i = 0; i < values.length; i++) {
-                jsonData[values[i].split("=")[0]] = unescape(values[i].split("=")[1]);
+                var pair = values[i].split("=");/**/
+                jsonData[pair[0]] = pair.length > 1 ? decodeURIComponent(pair[1].replace(/\+/g, '%20')) : "";
             }
+        } else {
+            jsonData = data;
         }
         $.ajax({
             type: 'post',

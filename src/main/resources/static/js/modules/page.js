@@ -52,7 +52,7 @@ var Page = {
         layer.open({
             title: '<i class="fa fa-volume-up"></i> 请输入修改备注',
             type: 1,
-            area: ['380px', '232px'],
+            area: ['400px', '232px'],
             content: containerHtml,
             btn: ['确定', '取消'],
             yes: function (index, layero) {
