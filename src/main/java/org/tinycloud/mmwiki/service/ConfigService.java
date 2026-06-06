@@ -9,7 +9,7 @@ import org.tinycloud.mmwiki.domain.ConfigEntry;
 import org.tinycloud.mmwiki.mapper.ConfigMapper;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 系统配置读取服务，提供按配置键查询、列出和更新配置值的能力。
  *
  * @author liuxingyu01
  * @since 2026-05-06

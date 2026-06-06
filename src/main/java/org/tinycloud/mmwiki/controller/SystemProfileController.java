@@ -22,7 +22,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 个人中心控制器，负责个人资料、密码、关注用户、关注文档和个人动态页面。
  *
  * @author liuxingyu01
  * @since 2026-05-06

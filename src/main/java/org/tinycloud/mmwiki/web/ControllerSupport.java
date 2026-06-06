@@ -9,7 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.tinycloud.mmwiki.constant.GlobalConstant;
 
 /**
- * MM-Wiki Web 层支持组件。
+ * Controller 基类，提供当前登录用户读取和导航状态写入的公共方法。
  *
  * @author liuxingyu01
  * @since 2026-05-06

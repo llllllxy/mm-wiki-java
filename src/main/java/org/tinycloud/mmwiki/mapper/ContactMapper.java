@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Contact;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 联系人表数据访问接口，负责系统联系人查询、分页和维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

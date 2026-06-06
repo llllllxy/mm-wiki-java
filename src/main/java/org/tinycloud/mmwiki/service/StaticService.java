@@ -34,7 +34,7 @@ import org.tinycloud.mmwiki.mapper.SpaceMapper;
 import org.tinycloud.mmwiki.mapper.UserMapper;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 后台统计服务，负责仪表盘概览、排行榜、趋势图和服务器监控数据查询。
  *
  * @author liuxingyu01
  * @since 2026-05-06

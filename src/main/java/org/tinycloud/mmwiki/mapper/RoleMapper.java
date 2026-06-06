@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Role;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 角色表数据访问接口，负责角色查询、分页、维护和删除标记。
  *
  * @author liuxingyu01
  * @since 2026-05-06

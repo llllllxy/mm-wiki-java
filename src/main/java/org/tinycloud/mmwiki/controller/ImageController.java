@@ -38,7 +38,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.EditorImageResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 图片控制器，负责编辑器图片上传和受权限控制的图片读取。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -79,12 +79,10 @@ public class ImageController extends ControllerSupport {
         if (attachment == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "图片不存在。");
         }
-
         Space space = spaceService.requireSpace(spaceId);
         if (!canVisitImage(space)) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间图片。");
         }
-
         Path path = documentFileService.resolveAttachmentPath(attachment.getPath());
         if (!Files.isRegularFile(path)) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "图片不存在。");

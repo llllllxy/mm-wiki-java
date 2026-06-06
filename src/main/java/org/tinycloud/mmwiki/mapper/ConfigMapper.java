@@ -6,7 +6,7 @@ import java.util.List;
 import org.tinycloud.mmwiki.domain.ConfigEntry;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 系统配置表数据访问接口，负责配置项的查询和更新。
  *
  * @author liuxingyu01
  * @since 2026-05-06

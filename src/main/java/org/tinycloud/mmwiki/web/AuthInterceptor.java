@@ -19,7 +19,7 @@ import java.util.Objects;
 
 
 /**
- * MM-Wiki Web 层支持组件。
+ * 登录与权限拦截器，负责会话校验、用户状态刷新和后台路由权限校验。
  *
  * @author liuxingyu01
  * @since 2026-05-06

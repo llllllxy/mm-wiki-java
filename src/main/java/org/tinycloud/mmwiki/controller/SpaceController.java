@@ -24,7 +24,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 空间前台控制器，负责空间列表、空间文档入口、成员管理和收藏空间页面。
  *
  * @author liuxingyu01
  * @since 2026-05-06

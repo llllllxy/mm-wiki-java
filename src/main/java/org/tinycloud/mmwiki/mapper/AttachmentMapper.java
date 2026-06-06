@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Attachment;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 附件表数据访问接口，负责附件元数据的查询、保存和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

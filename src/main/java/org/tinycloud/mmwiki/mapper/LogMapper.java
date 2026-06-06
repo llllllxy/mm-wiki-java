@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.LogEntry;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 系统日志数据访问接口，负责后台系统日志记录和分页查询。
  *
  * @author liuxingyu01
  * @since 2026-05-06

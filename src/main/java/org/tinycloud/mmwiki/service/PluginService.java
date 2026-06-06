@@ -8,7 +8,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 插件展示服务，提供系统插件列表和插件配置页面所需的数据。
  *
  * @author liuxingyu01
  * @since 2026-05-06

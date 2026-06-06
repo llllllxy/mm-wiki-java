@@ -13,7 +13,7 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * 系统核心配置 页面与接口控制器。
+ * 后台系统配置控制器，负责全局配置页面展示和配置保存。
  *
  * @author liuxingyu01
  * @since 2026-05-06

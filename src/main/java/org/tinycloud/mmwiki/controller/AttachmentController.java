@@ -38,7 +38,7 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 附件控制器，负责文档附件页面、附件上传、下载和删除接口。
  *
  * @author liuxingyu01
  * @since 2026-05-06

@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Link;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 友情链接表数据访问接口，负责链接配置查询、排序和维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

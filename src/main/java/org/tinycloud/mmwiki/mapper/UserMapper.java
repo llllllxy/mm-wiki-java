@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.User;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 用户表数据访问接口，负责用户查询、分页、登录状态和资料维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

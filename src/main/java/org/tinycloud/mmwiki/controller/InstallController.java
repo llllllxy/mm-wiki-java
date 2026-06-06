@@ -19,7 +19,7 @@ import org.tinycloud.mmwiki.service.InstallService;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * 安装向导页面与接口控制器。
+ * 安装向导控制器，负责安装步骤页面、环境检测、配置提交和安装状态查询。
  *
  * @author liuxingyu01
  * @since 2026-05-06

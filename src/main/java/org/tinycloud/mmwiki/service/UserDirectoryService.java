@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 前台用户目录服务，负责用户列表、用户主页、关注关系和可见文档动态展示。
  *
  * @author liuxingyu01
  * @since 2026-05-06

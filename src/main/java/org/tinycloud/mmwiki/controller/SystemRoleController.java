@@ -26,7 +26,7 @@ import java.util.List;
 
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台角色控制器，负责角色列表、角色维护、授权和角色用户管理。
  *
  * @author liuxingyu01
  * @since 2026-05-06

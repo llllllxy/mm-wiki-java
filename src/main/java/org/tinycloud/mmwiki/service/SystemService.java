@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import static org.tinycloud.mmwiki.constant.GlobalConstant.ROOT_ROLE_ID;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 系统导航服务，负责根据当前用户角色过滤后台菜单和控制器权限。
  *
  * @author liuxingyu01
  * @since 2026-05-06

@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 个人中心服务，负责当前用户资料、关注、粉丝和个人文档动态的展示数据。
  *
  * @author liuxingyu01
  * @since 2026-05-06

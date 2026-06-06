@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * MM-Wiki 自定义配置类映射
+ * MM-Wiki 自定义配置属性映射，承接 application.yml 中的项目运行配置。
  *
  * @author liuxingyu01
  * @since 2026-05-06

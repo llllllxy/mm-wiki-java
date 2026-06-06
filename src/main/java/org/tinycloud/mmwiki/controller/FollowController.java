@@ -11,7 +11,7 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 关注控制器，负责用户和文档关注关系的添加与取消接口。
  *
  * @author liuxingyu01
  * @since 2026-05-06

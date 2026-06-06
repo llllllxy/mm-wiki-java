@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Follow;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 关注表数据访问接口，负责用户和文档关注关系的查询、统计和维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

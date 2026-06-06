@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Privilege;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 权限表数据访问接口，负责菜单权限和控制器权限的查询与维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

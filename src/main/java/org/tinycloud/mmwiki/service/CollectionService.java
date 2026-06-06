@@ -17,7 +17,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 收藏业务服务，负责文档和空间收藏的查询、添加、取消及权限校验。
  *
  * @author liuxingyu01
  * @since 2026-05-06

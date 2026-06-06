@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.tinycloud.mmwiki.web.AuthInterceptor;
 
 /**
- * MM-Wiki Spring 配置类。
+ * Spring MVC 配置类，负责拦截器注册、静态资源映射和安全响应头过滤器配置。
  *
  * @author liuxingyu01
  * @since 2026-05-06

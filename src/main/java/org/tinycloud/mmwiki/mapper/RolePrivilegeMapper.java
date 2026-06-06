@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 角色权限关系表数据访问接口，负责角色授权关系查询、校验和批量维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

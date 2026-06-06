@@ -23,7 +23,7 @@ import static org.tinycloud.mmwiki.constant.GlobalConstant.DEFAULT_ROLE_ID;
 import static org.tinycloud.mmwiki.constant.GlobalConstant.ROOT_ROLE_ID;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 用户管理服务，负责用户查询、资料维护、密码更新、禁用恢复和角色调整。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -275,4 +275,3 @@ public class UserService {
         }
     }
 }
-

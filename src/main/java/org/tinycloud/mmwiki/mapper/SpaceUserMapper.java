@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.SpaceUser;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 空间成员关系表数据访问接口，负责成员查询、权限维护和关系删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

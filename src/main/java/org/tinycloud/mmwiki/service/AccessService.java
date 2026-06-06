@@ -11,7 +11,7 @@ import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.web.CurrentUser;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 空间和文档访问权限判断服务，封装 root、空间成员和访问级别的权限判定。
  *
  * @author liuxingyu01
  * @since 2026-05-06

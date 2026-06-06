@@ -22,7 +22,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 关注业务服务，负责用户和文档关注关系的查询、添加、取消及可见性校验。
  *
  * @author liuxingyu01
  * @since 2026-05-06

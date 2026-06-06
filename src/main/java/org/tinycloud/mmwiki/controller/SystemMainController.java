@@ -10,7 +10,7 @@ import org.tinycloud.mmwiki.service.SystemService;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台首页控制器，负责系统后台入口和个人中心默认跳转。
  *
  * @author liuxingyu01
  * @since 2026-05-06

@@ -5,7 +5,7 @@ import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import java.util.Map;
 
 /**
- * MM-Wiki Web 层支持组件。
+ * 前后端 Ajax 统一响应对象，封装业务码、消息、数据和跳转信息。
  *
  * @author liuxingyu01
  * @since 2026-05-06

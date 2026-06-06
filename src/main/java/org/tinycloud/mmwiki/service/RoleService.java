@@ -1,5 +1,6 @@
 package org.tinycloud.mmwiki.service;
 
+import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.paginate.Page;
 import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.*;
 import static org.tinycloud.mmwiki.constant.GlobalConstant.*;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 角色管理服务，负责角色分页、增删改、授权和用户角色重置。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -236,7 +237,7 @@ public class RoleService {
         if (userId == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在");
         }
-        var user = userMapper.findActiveById(userId);
+        User user = userMapper.findActiveById(userId);
         if (user == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在");
         }

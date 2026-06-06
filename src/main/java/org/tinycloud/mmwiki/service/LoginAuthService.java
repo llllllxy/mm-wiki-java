@@ -18,7 +18,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 统一登录认证配置服务，负责 HTTP、LDAP 等外部认证配置的维护和启用切换。
  *
  * @author liuxingyu01
  * @since 2026-05-06

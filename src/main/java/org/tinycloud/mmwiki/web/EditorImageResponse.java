@@ -1,7 +1,7 @@
 package org.tinycloud.mmwiki.web;
 
 /**
- * MM-Wiki Web 层支持组件。
+ * editor.md 图片上传响应对象，按编辑器约定返回成功标记、提示和图片地址。
  *
  * @author liuxingyu01
  * @since 2026-05-06

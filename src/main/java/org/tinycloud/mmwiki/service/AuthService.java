@@ -24,7 +24,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.service.UnifiedAuthService.AuthLoginProfile;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 本地账号认证服务，负责登录校验、密码验证和当前用户会话信息构建。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -163,7 +163,7 @@ public class AuthService {
      * 清理服务端会话，完成本地退出登录。
      */
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        var session = request.getSession(false);
+        HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }

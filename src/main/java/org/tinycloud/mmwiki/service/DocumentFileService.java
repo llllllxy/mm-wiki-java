@@ -1,12 +1,5 @@
 package org.tinycloud.mmwiki.service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
-
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +9,16 @@ import org.tinycloud.mmwiki.constant.DocumentTypeEnum;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.exception.SystemException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
- * MM-Wiki 业务服务实现。
+ * 文档文件服务，负责 Markdown 文件、附件路径和文档目录文件的安全读写。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -81,7 +82,7 @@ public class DocumentFileService {
         }
         StringBuilder parentPath = new StringBuilder();
         for (Document parentDocument : parentDocuments) {
-            if (parentPath.length() > 0) {
+            if (!parentPath.isEmpty()) {
                 parentPath.append('/');
             }
             parentPath.append(parentDocument.getName());
@@ -252,29 +253,20 @@ public class DocumentFileService {
         if (path == null || !Files.exists(path)) {
             return;
         }
-        try (var stream = Files.walk(path)) {
+        try (Stream<Path> stream = Files.walk(path)) {
             stream.sorted((left, right) -> right.getNameCount() - left.getNameCount())
-                .forEach(item -> {
-                    try {
-                        Files.deleteIfExists(item);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                });
+                    .forEach(item -> {
+                        try {
+                            Files.deleteIfExists(item);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
         } catch (RuntimeException ex) {
             if (ex.getCause() instanceof IOException ioException) {
                 throw ioException;
             }
             throw ex;
         }
-    }
-
-    /**
-     * 判断文档根目录配置是否存在。
-     *
-     * @return true 表示已配置文档根目录
-     */
-    public boolean isConfigured() {
-        return StringUtils.hasText(documentRootDir.toString());
     }
 }

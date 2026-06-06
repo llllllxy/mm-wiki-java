@@ -8,7 +8,7 @@ import org.tinycloud.mmwiki.domain.DocumentHistoryView;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 文档操作日志数据访问接口，负责文档动态、历史记录和用户活动查询。
  *
  * @author liuxingyu01
  * @since 2026-05-06

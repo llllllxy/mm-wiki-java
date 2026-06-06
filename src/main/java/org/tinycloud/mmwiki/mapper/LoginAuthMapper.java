@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.LoginAuth;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 登录认证配置表数据访问接口，负责统一认证配置查询、启用和维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

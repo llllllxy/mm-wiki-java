@@ -15,7 +15,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台日志控制器，负责系统日志和文档操作日志的页面与分页接口。
  *
  * @author liuxingyu01
  * @since 2026-05-06

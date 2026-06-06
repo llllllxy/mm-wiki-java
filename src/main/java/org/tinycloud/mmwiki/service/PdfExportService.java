@@ -22,6 +22,7 @@ import org.tinycloud.mmwiki.domain.Document;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -469,7 +470,7 @@ public class PdfExportService {
             Path fontDir = Path.of(System.getProperty("java.io.tmpdir"), "mmwiki-fonts");
             Files.createDirectories(fontDir);
             Path target = fontDir.resolve(fileName).toAbsolutePath().normalize();
-            try (var inputStream = resource.getInputStream()) {
+            try (InputStream inputStream = resource.getInputStream()) {
                 Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
             }
             CLASSPATH_FONT_FILE_CACHE.put(location, target);

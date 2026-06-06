@@ -18,7 +18,7 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台权限控制器，负责权限列表、权限表单、保存、修改和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

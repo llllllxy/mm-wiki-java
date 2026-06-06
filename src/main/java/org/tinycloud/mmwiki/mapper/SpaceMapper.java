@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.tinycloud.mmwiki.domain.Space;
 
 /**
- * 空间信息 Mapper 接口
+ * 空间表数据访问接口，负责空间查询、分页、标签、统计和删除标记。
  *
  * @author liuxingyu01
  * @since 2026-05-06

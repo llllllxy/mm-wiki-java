@@ -16,7 +16,7 @@ import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台统计控制器，负责统计首页、监控页面和统计数据接口。
  *
  * @author liuxingyu01
  * @since 2026-05-06

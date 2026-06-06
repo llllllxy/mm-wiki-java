@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.EmailServer;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 邮件服务器配置表数据访问接口，负责邮件配置查询、启用和维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

@@ -15,7 +15,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台插件控制器，负责插件列表和插件配置页面展示。
  *
  * @author liuxingyu01
  * @since 2026-05-06

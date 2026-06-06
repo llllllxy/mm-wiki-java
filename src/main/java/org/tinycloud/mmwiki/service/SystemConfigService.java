@@ -13,7 +13,7 @@ import org.tinycloud.mmwiki.mapper.ConfigMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 系统配置管理服务，负责后台全局配置表单的数据读取、校验和保存。
  *
  * @author liuxingyu01
  * @since 2026-05-06

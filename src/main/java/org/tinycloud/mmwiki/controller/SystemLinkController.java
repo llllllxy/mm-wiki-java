@@ -17,7 +17,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * 系统链接 页面与接口控制器。
+ * 后台链接控制器，负责友情链接列表、表单、保存、修改和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

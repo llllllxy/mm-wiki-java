@@ -19,7 +19,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * 用户页面与接口控制器。
+ * 前台用户控制器，负责用户列表、用户主页、关注列表和个人入口跳转。
  *
  * @author liuxingyu01
  * @since 2026-05-06

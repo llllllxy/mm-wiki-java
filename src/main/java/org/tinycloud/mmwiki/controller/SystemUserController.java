@@ -25,7 +25,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 import java.util.List;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台用户控制器，负责用户列表、用户表单、资料查看、禁用恢复和角色维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06

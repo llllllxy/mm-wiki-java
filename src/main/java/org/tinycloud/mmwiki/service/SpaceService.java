@@ -34,11 +34,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 空间业务服务，负责空间查询、创建、修改、删除以及默认文档维护。
  *
  * @author liuxingyu01
  * @since 2026-05-06
@@ -475,7 +476,7 @@ public class SpaceService {
      */
     private void addPathToZip(ZipOutputStream zip, Path source, Path base) throws IOException {
         if (Files.isDirectory(source)) {
-            try (var stream = Files.list(source)) {
+            try (Stream<Path> stream = Files.list(source)) {
                 for (Path child : stream.toList()) {
                     addPathToZip(zip, child, base);
                 }

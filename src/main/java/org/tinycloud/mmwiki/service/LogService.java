@@ -24,7 +24,7 @@ import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 系统日志服务，负责系统日志和文档操作日志的记录、查询与展示数据转换。
  *
  * @author liuxingyu01
  * @since 2026-05-06

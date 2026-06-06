@@ -17,7 +17,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 后台登录认证控制器，负责统一认证配置的列表、表单、启用和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

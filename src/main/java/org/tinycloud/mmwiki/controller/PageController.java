@@ -26,7 +26,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 文档页面控制器，负责文档查看、编辑、分享展示和 Markdown/PDF/HTML 导出。
  *
  * @author liuxingyu01
  * @since 2026-05-06

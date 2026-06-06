@@ -10,7 +10,7 @@ import org.tinycloud.mmwiki.mapper.SpaceUserMapper;
 import org.tinycloud.mmwiki.util.TimeUtils;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 空间成员服务，负责空间用户关系查询、成员添加、权限调整和移除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

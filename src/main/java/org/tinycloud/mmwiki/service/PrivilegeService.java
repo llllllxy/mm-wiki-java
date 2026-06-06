@@ -19,7 +19,7 @@ import org.tinycloud.mmwiki.mapper.RolePrivilegeMapper;
 import org.tinycloud.mmwiki.web.JsonResponse;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 权限配置服务，负责菜单权限和控制器权限的维护、分组和删除校验。
  *
  * @author liuxingyu01
  * @since 2026-05-06

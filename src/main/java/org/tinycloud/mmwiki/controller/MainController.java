@@ -20,7 +20,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 import java.util.List;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 首页控制器，负责首页、全局搜索、关于页和首页动态数据。
  *
  * @author liuxingyu01
  * @since 2026-05-06

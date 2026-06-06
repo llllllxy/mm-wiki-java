@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import org.tinycloud.mmwiki.domain.Document;
 
 /**
- * MM-Wiki MyBatis 数据访问接口。
+ * 文档表数据访问接口，负责文档树、文档详情、排序和统计查询。
  *
  * @author liuxingyu01
  * @since 2026-05-06

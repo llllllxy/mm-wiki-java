@@ -16,7 +16,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 import java.time.LocalDateTime;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 友情链接服务，负责链接配置的分页查询、新增、修改和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06

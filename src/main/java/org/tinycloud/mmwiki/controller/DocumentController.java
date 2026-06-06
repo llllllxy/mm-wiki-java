@@ -17,7 +17,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * MM-Wiki 页面与接口控制器。
+ * 文档控制器，负责文档树页面、文档表单、历史记录、删除和移动操作。
  *
  * @author liuxingyu01
  * @since 2026-05-06

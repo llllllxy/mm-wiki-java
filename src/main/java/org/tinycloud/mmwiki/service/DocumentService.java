@@ -38,7 +38,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 文档业务服务，负责文档树、文档增删改查、移动排序和历史记录处理。
  *
  * @author liuxingyu01
  * @since 2026-05-06

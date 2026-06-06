@@ -20,7 +20,7 @@ import org.tinycloud.mmwiki.web.PageModel;
 
 
 /**
- * MM-Wiki 业务服务实现。
+ * 系统联系人服务，负责联系人分页查询、新增、修改、删除和导入校验。
  *
  * @author liuxingyu01
  * @since 2026-05-06

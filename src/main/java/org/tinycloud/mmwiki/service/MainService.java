@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * MM-Wiki 业务服务实现。
+ * 首页聚合服务，负责首页动态、搜索结果和常用展示数据的组装。
  *
  * @author liuxingyu01
  * @since 2026-05-06

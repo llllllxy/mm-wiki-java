@@ -18,7 +18,7 @@ import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
 /**
- * 系统联系人 页面与接口控制器。
+ * 后台联系人控制器，负责联系人列表、表单、导入、保存和删除。
  *
  * @author liuxingyu01
  * @since 2026-05-06
