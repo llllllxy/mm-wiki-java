@@ -21,7 +21,8 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${link != null} ? '/system/link/modify' : '/system/link/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${link != null} ? @{/system/link/modify} : @{/system/link/save}">
                 <input type="hidden" name="linkId" th:value="${link != null ? link.linkId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 名称</label>

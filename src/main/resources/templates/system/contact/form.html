@@ -20,7 +20,8 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${contact != null} ? '/system/contact/modify' : '/system/contact/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${contact != null} ? @{/system/contact/modify} : @{/system/contact/save}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 姓名 </label>
                     <div class="col-sm-4">

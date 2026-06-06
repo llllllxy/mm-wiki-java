@@ -21,7 +21,8 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${auth != null} ? '/system/auth/modify' : '/system/auth/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${auth != null} ? @{/system/auth/modify} : @{/system/auth/save}">
                 <input type="hidden" name="loginAuthId" th:value="${auth != null ? auth.loginAuthId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 认证名称</label>

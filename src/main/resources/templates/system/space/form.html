@@ -23,7 +23,8 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${space != null} ? '/system/space/modify' : '/system/space/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${space != null} ? @{/system/space/modify} : @{/system/space/save}">
                 <input type="hidden" name="spaceId" th:value="${space != null ? space.spaceId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 空间名称</label>

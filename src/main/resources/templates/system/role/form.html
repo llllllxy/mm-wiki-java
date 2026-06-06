@@ -21,7 +21,8 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <br>
-            <form class="form-horizontal" method="post" th:action="${role != null} ? '/system/role/modify' : '/system/role/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${role != null} ? @{/system/role/modify} : @{/system/role/save}">
                 <input type="hidden" name="roleId" th:value="${role != null ? role.roleId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span> 角色名称</label>

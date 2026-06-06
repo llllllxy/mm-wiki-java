@@ -35,7 +35,8 @@
     <div class="panel panel-default">
         <br>
         <div class="panel-body">
-            <form class="form-horizontal" method="post" th:action="${privilege != null} ? '/system/privilege/modify' : '/system/privilege/save'">
+            <form class="form-horizontal" method="post"
+                  th:action="${privilege != null} ? @{/system/privilege/modify} : @{/system/privilege/save}">
                 <input type="hidden" name="privilegeId" th:value="${privilege != null ? privilege.privilegeId : ''}">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="text-danger"> * </span>权限名称</label>
