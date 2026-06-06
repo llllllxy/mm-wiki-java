@@ -41,7 +41,15 @@ var Install = {
                         //成功
                         $("#install_load").addClass("hidden");
                         $("#install_failed").addClass("hidden");
-                        var res = JSON.parse(response.data.result);
+                        var res;
+                        try {
+                            res = JSON.parse(response.data.result);
+                        } catch (e) {
+                            $("#install_success").addClass("hidden");
+                            $("#install_failed [data-name='error_message']").text("安装结果解析失败，请检查服务端返回内容。");
+                            $("#install_failed").removeClass("hidden");
+                            return false;
+                        }
                         $("#install_success span[data-name='success_env_cmd'] code").text(res.env ? "set CODEPUBENV=" + res.env : "");
                         $("#install_success span[data-name='success_run_cmd'] code").text(res.cmd);
                         $("#install_success span[data-name='success_config'] code").text(res.config || "");
@@ -84,7 +92,7 @@ var Install = {
         function beforeSubmit(formData) {
             // 对要提交的数据进行修改
             for (var i = 0; i < formData.length; i++) {
-                if (formData[i].name == 'admin_pass') {
+                if (formData[i].name == 'pass' || formData[i].name == 'admin_pass') {
                     var value = formData[i].value;
                     var encrypted = rsa2048Encrypt(value);
                     if (!encrypted) {

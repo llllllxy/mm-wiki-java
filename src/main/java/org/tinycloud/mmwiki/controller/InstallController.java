@@ -60,9 +60,7 @@ public class InstallController {
     @PostMapping("/install/license")
     @ResponseBody
     public JsonResponse<Void> acceptLicense(@RequestParam(value = "license_agree", defaultValue = "0") String agree) {
-        if (installService.installed()) {
-            throw new SystemException("系统已经安装完成，不能重复安装", "/author/index");
-        }
+        ensureNotInstalled();
         if (!"1".equals(agree)) {
             throw new SystemException("请先同意协议后再继续");
         }
@@ -78,6 +76,9 @@ public class InstallController {
         if (installed(model)) {
             return "install/error";
         }
+        if (!licenseAccepted()) {
+            return "redirect:/install/license";
+        }
         EnvView view = installService.envView();
         model.addAttribute("server", view.getServer());
         model.addAttribute("envData", view.getEnvData());
@@ -91,6 +92,8 @@ public class InstallController {
     @PostMapping("/install/env")
     @ResponseBody
     public JsonResponse<Void> acceptEnv() {
+        ensureNotInstalled();
+        ensureLicenseAccepted();
         if (installService.data().getEnv() == InstallData.ENV_NOT_ACCESS) {
             throw new SystemException("环境检测未通过");
         }
@@ -106,6 +109,12 @@ public class InstallController {
         if (installed(model)) {
             return "install/error";
         }
+        if (!licenseAccepted()) {
+            return "redirect:/install/license";
+        }
+        if (!envAccepted()) {
+            return "redirect:/install/env";
+        }
         model.addAttribute("sysConf", installService.data().getSystemConf());
         return "install/config";
     }
@@ -120,6 +129,9 @@ public class InstallController {
             @RequestParam("port") String port,
             @RequestParam("document_dir") String documentDir
     ) {
+        ensureNotInstalled();
+        ensureLicenseAccepted();
+        ensureEnvAccepted();
         String error = installService.saveSystemConfig(addr, port, documentDir);
         if (!error.isBlank()) {
             throw new SystemException(error);
@@ -134,6 +146,15 @@ public class InstallController {
     public String database(Model model) {
         if (installed(model)) {
             return "install/error";
+        }
+        if (!licenseAccepted()) {
+            return "redirect:/install/license";
+        }
+        if (!envAccepted()) {
+            return "redirect:/install/env";
+        }
+        if (!systemConfigured()) {
+            return "redirect:/install/config";
         }
         model.addAttribute("databaseConf", installService.data().getDatabaseConf());
         return "install/database";
@@ -153,6 +174,10 @@ public class InstallController {
                                              @RequestParam("conn_max_connection") String connMaxConnection,
                                              @RequestParam("admin_name") String adminName,
                                              @RequestParam("admin_pass") String adminPass) {
+        ensureNotInstalled();
+        ensureLicenseAccepted();
+        ensureEnvAccepted();
+        ensureSystemConfigured();
         Map<String, String> conf = new LinkedHashMap<>();
         conf.put("host", host);
         conf.put("port", port);
@@ -178,6 +203,18 @@ public class InstallController {
         if (installed(model)) {
             return "install/error";
         }
+        if (!licenseAccepted()) {
+            return "redirect:/install/license";
+        }
+        if (!envAccepted()) {
+            return "redirect:/install/env";
+        }
+        if (!systemConfigured()) {
+            return "redirect:/install/config";
+        }
+        if (!databaseConfigured()) {
+            return "redirect:/install/database";
+        }
         InstallData data = installService.data();
         model.addAttribute("readyConf", readyConf(data));
         return "install/ready";
@@ -189,6 +226,7 @@ public class InstallController {
     @PostMapping("/install/ready")
     @ResponseBody
     public JsonResponse<Void> acceptReady() {
+        ensureNotInstalled();
         String error = installService.startInstall();
         if (!error.isBlank()) {
             throw new SystemException(error);
@@ -229,6 +267,70 @@ public class InstallController {
         model.addAttribute("redirect", "/author/index");
         model.addAttribute("sleep", 3000);
         return true;
+    }
+
+    /**
+     * 校验系统尚未安装完成，避免安装完成后继续通过 POST 入口修改安装状态或重复安装。
+     */
+    private void ensureNotInstalled() {
+        if (installService.installed()) {
+            throw new SystemException("系统已经安装完成，不能重复安装", "/author/index");
+        }
+    }
+
+    /**
+     * 判断许可协议是否已经确认，用于安装向导 GET 页面顺序控制。
+     */
+    private boolean licenseAccepted() {
+        return installService.data().getLicense() == InstallData.LICENSE_AGREE;
+    }
+
+    /**
+     * 判断环境检测是否已经通过，用于安装向导 GET 页面顺序控制。
+     */
+    private boolean envAccepted() {
+        return installService.data().getEnv() == InstallData.ENV_ACCESS;
+    }
+
+    /**
+     * 判断系统配置是否已经完成，用于安装向导 GET 页面顺序控制。
+     */
+    private boolean systemConfigured() {
+        return installService.data().getSystem() == InstallData.SYS_ACCESS;
+    }
+
+    /**
+     * 判断数据库配置是否已经完成，用于安装向导 GET 页面顺序控制。
+     */
+    private boolean databaseConfigured() {
+        return installService.data().getDatabase() == InstallData.DATABASE_ACCESS;
+    }
+
+    /**
+     * 校验许可协议已经确认，未确认时阻止后续安装步骤提交。
+     */
+    private void ensureLicenseAccepted() {
+        if (!licenseAccepted()) {
+            throw new SystemException("请先同意协议后再继续");
+        }
+    }
+
+    /**
+     * 校验环境检测已经通过，未通过时阻止系统配置提交。
+     */
+    private void ensureEnvAccepted() {
+        if (!envAccepted()) {
+            throw new SystemException("请先通过环境检测");
+        }
+    }
+
+    /**
+     * 校验系统配置已经完成，未完成时阻止数据库配置提交。
+     */
+    private void ensureSystemConfigured() {
+        if (!systemConfigured()) {
+            throw new SystemException("请先完成系统配置");
+        }
     }
 
     private java.util.List<Map<String, Object>> readyConf(InstallData data) {

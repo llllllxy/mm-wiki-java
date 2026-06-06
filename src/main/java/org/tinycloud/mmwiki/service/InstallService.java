@@ -217,7 +217,14 @@ public class InstallService {
             createLockFile();
             installSuccess();
         } catch (Exception ex) {
-            installFailed(ex.getMessage());
+            // 标记安装失败并记录失败原因。
+            data.setResult(ex.getMessage() == null ? "安装失败" : ex.getMessage());
+            data.setStatus(InstallData.INSTALL_END);
+            data.setIsSuccess(InstallData.INSTALL_FAILED);
+        } finally {
+            // 清理安装期暂存在内存中的敏感表单字段，安装成功或失败后都不继续保留数据库和管理员密码。
+            data.getDatabaseConf().put("pass", "");
+            data.getDatabaseConf().put("admin_pass", "");
         }
     }
 
@@ -305,7 +312,7 @@ public class InstallService {
         Map<String, String> conf = data.getDatabaseConf();
         String url = "jdbc:mysql://" + conf.get("host") + ":" + conf.get("port")
                 + "/?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&sslMode=DISABLED&allowMultiQueries=true";
-        return DriverManager.getConnection(url, conf.get("user"), conf.get("pass"));
+        return DriverManager.getConnection(url, conf.get("user"), this.passwordCryptoService.decryptPassword(conf.get("pass")));
     }
 
     /**
@@ -318,7 +325,7 @@ public class InstallService {
         Map<String, String> conf = data.getDatabaseConf();
         String url = "jdbc:mysql://" + conf.get("host") + ":" + conf.get("port") + "/" + conf.get("name")
                 + "?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&sslMode=DISABLED&allowMultiQueries=true";
-        return DriverManager.getConnection(url, conf.get("user"), conf.get("pass"));
+        return DriverManager.getConnection(url, conf.get("user"), this.passwordCryptoService.decryptPassword(conf.get("pass")));
     }
 
     /**
@@ -482,9 +489,9 @@ public class InstallService {
                 yamlValue(sys.get("addr")),
                 yamlValue(jdbcUrl),
                 yamlValue(db.get("user")),
-                yamlValue(db.get("pass")),
-                db.get("conn_max_idle"),
-                db.get("conn_max_connection"),
+                yamlValue(this.passwordCryptoService.decryptPassword(db.get("pass"))),
+                yamlValue(db.get("conn_max_idle")),
+                yamlValue(db.get("conn_max_connection")),
                 yamlValue(properties.getVersion()),
                 yamlValue(properties.getCopyright()),
                 yamlValue(data.getSystemConf().get("document_dir").replace("\\", "/")),
@@ -504,22 +511,11 @@ public class InstallService {
     }
 
     /**
-     * 标记安装失败并记录失败原因。
-     *
-     * @param message 失败原因
-     */
-    private void installFailed(String message) {
-        data.setResult(message == null ? "安装失败" : message);
-        data.setStatus(InstallData.INSTALL_END);
-        data.setIsSuccess(InstallData.INSTALL_FAILED);
-    }
-
-    /**
      * 标记安装成功并生成启动命令、访问地址和配置文件路径。
      */
     private void installSuccess() {
         Map<String, String> result = new LinkedHashMap<>();
-        result.put("cmd", "java -jar mmwiki-0.0.1-SNAPSHOT.jar");
+        result.put("cmd", "nohup java -jar mmwiki-0.0.1.jar >/dev/null 2>&1 &");
         result.put("url", "http://127.0.0.1:" + data.getSystemConf().get("port"));
         result.put("config", configDir.resolve("application.yml").toString());
         data.setResult(JsonUtils.writeValueAsString(result));

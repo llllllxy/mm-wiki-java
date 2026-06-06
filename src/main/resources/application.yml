@@ -37,7 +37,7 @@ spring:
     store-type: jdbc
     timeout: 1800s
     jdbc:
-      initialize-schema: never
+      initialize-schema: embedded
       cleanup-cron: 0 0/5 * * * ?
   # 设置上传文件大小
   servlet:
