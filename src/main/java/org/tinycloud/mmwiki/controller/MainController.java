@@ -69,13 +69,14 @@ public class MainController extends ControllerSupport {
 
     @GetMapping("/main/search")
     public String search(@RequestParam(defaultValue = "") String keyword,
-                         @RequestParam(name = "search_type", defaultValue = "title") String searchType,
+                         @RequestParam(name = "search_type", defaultValue = "all") String searchType,
                          Model model) {
         CurrentUser currentUser = currentUser();
         SearchView view = mainService.searchDocuments(currentUser, keyword, searchType);
         model.addAttribute("search_type", view.getSearchType());
         model.addAttribute("keyword", view.getKeyword());
         model.addAttribute("documents", view.getDocuments());
+        model.addAttribute("snippets", view.getSnippets());
         model.addAttribute("count", view.getCount());
         return "main/search";
     }

@@ -1,6 +1,7 @@
 package org.tinycloud.mmwiki.vo;
 
 import java.util.List;
+import java.util.Map;
 
 import org.tinycloud.mmwiki.domain.Document;
 
@@ -28,6 +29,11 @@ public class SearchView {
     private List<Document> documents;
 
     /**
+     * snippets.
+     */
+    private Map<String, String> snippets;
+
+    /**
      * count.
      */
     private int count;
@@ -41,9 +47,29 @@ public class SearchView {
             List<Document> documents,
             int count
     ) {
+        this(searchType, keyword, documents, Map.of(), count);
+    }
+
+    /**
+     * 创建带全文搜索摘要的搜索视图对象。
+     *
+     * @param searchType 搜索类型
+     * @param keyword    搜索关键字
+     * @param documents  搜索结果文档
+     * @param snippets   以文档ID为键的搜索摘要
+     * @param count      结果数量
+     */
+    public SearchView(
+            String searchType,
+            String keyword,
+            List<Document> documents,
+            Map<String, String> snippets,
+            int count
+    ) {
         this.searchType = searchType;
         this.keyword = keyword;
         this.documents = documents;
+        this.snippets = snippets;
         this.count = count;
     }
 
@@ -69,6 +95,20 @@ public class SearchView {
 
     public void setDocuments(List<Document> documents) {
         this.documents = documents;
+    }
+
+    /**
+     * 获取以文档ID为键的搜索摘要。
+     */
+    public Map<String, String> getSnippets() {
+        return snippets;
+    }
+
+    /**
+     * 设置以文档ID为键的搜索摘要。
+     */
+    public void setSnippets(Map<String, String> snippets) {
+        this.snippets = snippets;
     }
 
     public int getCount() {

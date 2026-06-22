@@ -64,6 +64,8 @@ public class SpaceService {
     private DocumentFileService documentFileService;
     @Autowired
     private AttachmentService attachmentService;
+    @Autowired
+    private DocumentSearchIndexService documentSearchIndexService;
 
     /**
      * 查询空间并在不存在时中断当前业务流程。
@@ -238,6 +240,7 @@ public class SpaceService {
         documentMapper.insert(defaultDocument);
         documentFileService.createEmptyPage(documentFileService.getDefaultPageFileBySpaceName(space.getName()));
         spaceUserService.add(space.getSpaceId(), currentUser.getUserId(), SpaceMemberPrivilegeEnum.MANAGER.getCode());
+        documentSearchIndexService.updateDocumentAfterCommit(defaultDocument.getDocumentId());
         return JsonResponse.success("添加空间成功", "/system/space/list");
     }
 
@@ -279,6 +282,7 @@ public class SpaceService {
             defaultDocument.setEditUserId(currentUser.getUserId());
             defaultDocument.setUpdateTime(now);
             documentMapper.updateDefaultDocumentName(defaultDocument);
+            documentSearchIndexService.updateDocumentAfterCommit(defaultDocument.getDocumentId());
         }
         return JsonResponse.success("修改空间成功", "/system/space/list");
     }
@@ -311,6 +315,7 @@ public class SpaceService {
             documentMapper.markDeleted(defaultDocument);
             attachmentService.deleteByDocumentId(defaultDocument.getDocumentId());
             documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentTypeEnum.DIRECTORY.getCode());
+            documentSearchIndexService.deleteDocumentAfterCommit(defaultDocument.getDocumentId());
         } else {
             documentFileService.deletePageOrDirectory(documentFileService.getDefaultPageFileBySpaceName(space.getName()), DocumentTypeEnum.DIRECTORY.getCode());
         }

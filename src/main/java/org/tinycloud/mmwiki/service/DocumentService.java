@@ -86,6 +86,9 @@ public class DocumentService {
     private PdfExportService pdfExportService;
 
     @Autowired
+    private DocumentSearchIndexService documentSearchIndexService;
+
+    @Autowired
     private ThreadPoolTaskExecutor asyncServiceExecutor;
 
     /**
@@ -308,6 +311,7 @@ public class DocumentService {
         documentFileService.createEmptyPage(pageFile);
         logDocumentMapper.insert(document.getDocumentId(), spaceId, currentUser.getUserId(), 1, "创建了文档", now);
         followService.autoFollowDocument(currentUser.getUserId(), document.getDocumentId());
+        documentSearchIndexService.updateDocumentAfterCommit(document.getDocumentId());
 
         return JsonResponse.success("创建文档成功", "/document/index?document_id=" + document.getDocumentId());
     }
@@ -367,6 +371,7 @@ public class DocumentService {
         if (noticeUsers) {
             asyncServiceExecutor.execute(() -> emailService.sendDocumentUpdateNotice(document, currentUser.getUsername(), content, comment, documentUrl));
         }
+        documentSearchIndexService.updateDocumentAfterCommit(documentId);
 
         return JsonResponse.success("文档修改成功", "/document/index?document_id=" + documentId);
     }
@@ -445,6 +450,7 @@ public class DocumentService {
         documentMapper.updateParentPathEditor(movedDocument);
         documentFileService.movePageOrDirectory(oldPageFile, newPageFile, document.getType());
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, "移动文档到 " + targetDocument.getName(), now);
+        documentSearchIndexService.updateDocumentAfterCommit(documentId);
         return JsonResponse.success("移动文档成功", "/document/index?document_id=" + documentId);
     }
 
@@ -478,6 +484,7 @@ public class DocumentService {
         attachmentService.deleteByDocumentId(documentId);
         followService.deleteDocumentFollowers(documentId);
         logDocumentMapper.insert(documentId, document.getSpaceId(), currentUser.getUserId(), 2, "删除文档", now);
+        documentSearchIndexService.deleteDocumentAfterCommit(documentId);
         return JsonResponse.success("删除文档成功", "/document/index?document_id=" + document.getParentId());
     }
 

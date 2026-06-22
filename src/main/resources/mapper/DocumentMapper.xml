@@ -55,6 +55,23 @@
         order by d.sequence asc, d.create_time asc
     </select>
 
+    <select id="findAllActive" resultType="org.tinycloud.mmwiki.domain.Document">
+        select document_id,
+               parent_id,
+               space_id,
+               name,
+               type,
+               path,
+               sequence,
+               create_user_id,
+               edit_user_id,
+               create_time,
+               update_time
+        from mw_document
+        where is_delete = 0
+        order by space_id asc, sequence asc, create_time asc
+    </select>
+
     <select id="findActiveById" resultType="org.tinycloud.mmwiki.domain.Document">
         select document_id,
                parent_id,

@@ -21,6 +21,8 @@ public interface DocumentMapper {
 
     List<Document> findVisibleByIds(@Param("userId") Integer userId, @Param("root") boolean root, @Param("documentIds") List<String> documentIds);
 
+    List<Document> findAllActive();
+
     Document findActiveById(@Param("documentId") String documentId);
 
     Document findSpaceDefaultDocument(@Param("spaceId") Integer spaceId);

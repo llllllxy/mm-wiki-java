@@ -82,7 +82,7 @@
         }
         function mainSearch(element, url) {
             var searchText = $(element).find("input[name='keyword']").val();
-            url = url + "?keyword=" + searchText;
+            url = url + "?search_type=all&keyword=" + encodeURIComponent(searchText);
             layer.open({
                 type: 2,
                 skin: Layers.skin,
