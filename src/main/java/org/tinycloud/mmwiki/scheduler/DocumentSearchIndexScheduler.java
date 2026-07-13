@@ -1,5 +1,7 @@
 package org.tinycloud.mmwiki.scheduler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import java.time.Instant;
  */
 @Component
 public class DocumentSearchIndexScheduler {
+    private static final Logger log = LoggerFactory.getLogger(DocumentSearchIndexScheduler.class);
 
     private static final int DEFAULT_REBUILD_INTERVAL_SECONDS = 3600;
 
@@ -36,6 +39,7 @@ public class DocumentSearchIndexScheduler {
      */
     @Scheduled(fixedDelayString = "60000")
     public void rebuildDocumentSearchIndex() {
+        log.info("DocumentSearchIndexScheduler.rebuildDocumentSearchIndex start");
         if (!this.installService.installed() || !this.documentSearchIndexService.isFullTextSearchOpen()) {
             return;
         }
@@ -45,6 +49,7 @@ public class DocumentSearchIndexScheduler {
         }
         this.documentSearchIndexService.rebuildAll();
         this.lastRebuildTime = Instant.now();
+        log.info("DocumentSearchIndexScheduler.rebuildDocumentSearchIndex done");
     }
 
     /**
