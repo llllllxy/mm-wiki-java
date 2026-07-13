@@ -449,7 +449,7 @@ public class InstallService {
                     correlation: ""
                   logback:
                     rollingpolicy:
-                      file-name-pattern: logs/mm-wiki.%%d{yyyy-MM-dd}.%%i.log.gz
+                      file-name-pattern: /opt/logs/mm-wiki.%%d{yyyy-MM-dd}.%%i.log.gz
                       max-file-size: 10MB
                       max-history: 7
                       total-size-cap: 1GB
