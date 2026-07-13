@@ -1,16 +1,11 @@
 package org.tinycloud.mmwiki.controller;
 
-import org.tinycloud.mmwiki.exception.SystemException;
-import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
-import org.tinycloud.mmwiki.vo.Access;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -25,17 +20,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
+import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.domain.Document;
 import org.tinycloud.mmwiki.domain.Space;
+import org.tinycloud.mmwiki.exception.SystemException;
 import org.tinycloud.mmwiki.service.AccessService;
 import org.tinycloud.mmwiki.service.AttachmentService;
 import org.tinycloud.mmwiki.service.DocumentFileService;
 import org.tinycloud.mmwiki.service.DocumentService;
 import org.tinycloud.mmwiki.service.SpaceService;
 import org.tinycloud.mmwiki.util.FileUtils;
+import org.tinycloud.mmwiki.vo.Access;
 import org.tinycloud.mmwiki.web.ControllerSupport;
 import org.tinycloud.mmwiki.web.JsonResponse;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * 附件控制器，负责文档附件页面、附件上传、下载和删除接口。
@@ -59,38 +58,72 @@ public class AttachmentController extends ControllerSupport {
 
     @GetMapping("/attachment/page")
     public String page(@RequestParam("document_id") String documentId, Model model) {
-        Document document = requireDocument(documentId);
-        Access access = requireAccess(document);
-        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentSourceEnum.ATTACHMENT));
+        Document document = this.requireDocument(documentId);
+        Access access = this.requireAccess(document);
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_upload", access.isEditor());
         model.addAttribute("is_delete", access.isManager());
         return "attachment/page";
     }
 
+    /**
+     * 异步分页加载普通附件列表，加载前校验当前用户是否有文档访问权限。
+     *
+     * @param documentId 文档ID
+     * @param pageNum    当前页码
+     * @param pageSize   每页数量
+     * @return 普通附件分页数据
+     */
+    @PostMapping("/attachment/page")
+    @ResponseBody
+    public JsonResponse<PageModel<Attachment>> pageData(@RequestParam("document_id") String documentId,
+                                                        @RequestParam(defaultValue = "1") int pageNum,
+                                                        @RequestParam(defaultValue = "10") int pageSize) {
+        Document document = this.requireDocument(documentId);
+        this.requireAccess(document);
+        return JsonResponse.success("查询成功", this.attachmentService.pageByDocumentIdAndSource(documentId, AttachmentSourceEnum.ATTACHMENT, pageNum, pageSize));
+    }
+
     @GetMapping("/attachment/image")
     public String image(@RequestParam("document_id") String documentId, Model model) {
-        Document document = requireDocument(documentId);
-        Access access = requireAccess(document);
-        model.addAttribute("attachments", attachmentService.findByDocumentIdAndSource(documentId, AttachmentSourceEnum.IMAGE));
+        Document document = this.requireDocument(documentId);
+        Access access = this.requireAccess(document);
         model.addAttribute("document_id", documentId);
         model.addAttribute("is_delete", access.isManager());
         return "attachment/image";
+    }
+
+    /**
+     * 异步分页加载图片附件列表，加载前校验当前用户是否有文档访问权限。
+     *
+     * @param documentId 文档ID
+     * @param pageNum    当前页码
+     * @param pageSize   每页数量
+     * @return 图片附件分页数据
+     */
+    @PostMapping("/attachment/image")
+    @ResponseBody
+    public JsonResponse<PageModel<Attachment>> imageData(@RequestParam("document_id") String documentId,
+                                                         @RequestParam(defaultValue = "1") int pageNum,
+                                                         @RequestParam(defaultValue = "10") int pageSize) {
+        Document document = this.requireDocument(documentId);
+        this.requireAccess(document);
+        return JsonResponse.success("查询成功", this.attachmentService.pageByDocumentIdAndSource(documentId, AttachmentSourceEnum.IMAGE, pageNum, pageSize));
     }
 
     @PostMapping("/attachment/upload")
     @ResponseBody
     public JsonResponse<Void> upload(@RequestParam("document_id") String documentId,
                                      @RequestParam("attachment") MultipartFile file) throws Exception {
-        Document document = requireDocument(documentId);
-        Access access = requireAccess(document);
+        Document document = this.requireDocument(documentId);
+        Access access = this.requireAccess(document);
         if (!access.isEditor()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限操作该空间文档。");
         }
         if (file == null || file.isEmpty()) {
             throw new SystemException("上传附件错误。");
         }
-        Path saveDir = documentFileService.ensureAttachmentDirectory("attachment", String.valueOf(document.getSpaceId()), documentId);
+        Path saveDir = this.documentFileService.ensureAttachmentDirectory("attachment", String.valueOf(document.getSpaceId()), documentId);
         String originalFileName = StringUtils.hasText(file.getOriginalFilename()) ? file.getOriginalFilename() : "attachment";
         String storedFileName = UUID.randomUUID().toString().replace("-", "") + FileUtils.getExtension(originalFileName);
         Path saveFile = saveDir.resolve(storedFileName);
@@ -100,8 +133,8 @@ public class AttachmentController extends ControllerSupport {
         file.transferTo(saveFile);
         try {
             String relativePath = "attachment/" + document.getSpaceId() + "/" + documentId + "/" + storedFileName;
-            attachmentService.save(
-                    currentUser().getUserId(),
+            this.attachmentService.save(
+                    this.currentUser().getUserId(),
                     documentId,
                     originalFileName,
                     relativePath,
@@ -117,16 +150,16 @@ public class AttachmentController extends ControllerSupport {
     @PostMapping("/attachment/delete")
     @ResponseBody
     public JsonResponse<Void> delete(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
-        Attachment attachment = attachmentService.findById(attachmentId);
+        Attachment attachment = this.attachmentService.findById(attachmentId);
         if (attachment == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "附件不存在。");
         }
-        Document document = requireDocument(attachment.getDocumentId());
-        Access access = requireAccess(document);
+        Document document = this.requireDocument(attachment.getDocumentId());
+        Access access = this.requireAccess(document);
         if (!access.isManager()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限删除该空间文档附件。");
         }
-        attachmentService.deleteById(attachmentId);
+        this.attachmentService.deleteById(attachmentId);
         String redirect = AttachmentSourceEnum.IMAGE.is(attachment.getSource())
                 ? "/attachment/image?document_id=" + document.getDocumentId()
                 : "/attachment/page?document_id=" + document.getDocumentId();
@@ -135,16 +168,16 @@ public class AttachmentController extends ControllerSupport {
 
     @GetMapping("/attachment/download")
     public ResponseEntity<PathResource> download(@RequestParam("attachment_id") Integer attachmentId) throws Exception {
-        Attachment attachment = attachmentService.findById(attachmentId);
+        Attachment attachment = this.attachmentService.findById(attachmentId);
         if (attachment == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "附件不存在。");
         }
-        Document document = requireDocument(attachment.getDocumentId());
-        Access access = requireAccess(document);
+        Document document = this.requireDocument(attachment.getDocumentId());
+        Access access = this.requireAccess(document);
         if (!access.isVisit()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限下载该空间附件。");
         }
-        Path path = documentFileService.resolveAttachmentPath(attachment.getPath());
+        Path path = this.documentFileService.resolveAttachmentPath(attachment.getPath());
         PathResource resource = new PathResource(path);
         String downloadFileName = StringUtils.hasText(attachment.getName()) ? attachment.getName() : "attachment";
         ContentDisposition contentDisposition = ContentDisposition.attachment()
@@ -158,7 +191,7 @@ public class AttachmentController extends ControllerSupport {
     }
 
     private Document requireDocument(String documentId) {
-        Document document = documentService.findActiveById(documentId);
+        Document document = this.documentService.findActiveById(documentId);
         if (document == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "文档不存在。");
         }
@@ -166,8 +199,8 @@ public class AttachmentController extends ControllerSupport {
     }
 
     private Access requireAccess(Document document) {
-        Space space = spaceService.requireSpace(document.getSpaceId());
-        Access access = accessService.access(currentUser(), space);
+        Space space = this.spaceService.requireSpace(document.getSpaceId());
+        Access access = this.accessService.access(this.currentUser(), space);
         if (!access.isVisit()) {
             throw new SystemException(ErrorCodeEnum.FORBIDDEN, "您没有权限访问该空间文档。");
         }

@@ -6,12 +6,15 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.tinycloud.paginate.Page;
+import org.tinycloud.paginate.request.PaginateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.tinycloud.mmwiki.constant.AttachmentSourceEnum;
 import org.tinycloud.mmwiki.domain.Attachment;
 import org.tinycloud.mmwiki.mapper.AttachmentMapper;
+import org.tinycloud.mmwiki.web.PageModel;
 
 /**
  * 附件业务服务，负责附件元数据查询、保存和删除时的磁盘文件清理。
@@ -34,7 +37,7 @@ public class AttachmentService {
      * @return 文档关联的附件列表
      */
     public List<Attachment> findByDocumentId(String documentId) {
-        return attachmentMapper.findByDocumentId(documentId);
+        return this.attachmentMapper.findByDocumentId(documentId);
     }
 
     /**
@@ -44,7 +47,7 @@ public class AttachmentService {
      * @return 空间内文档关联的附件列表
      */
     public List<Attachment> findBySpaceId(Integer spaceId) {
-        return attachmentMapper.findBySpaceId(spaceId);
+        return this.attachmentMapper.findBySpaceId(spaceId);
     }
 
     /**
@@ -55,7 +58,22 @@ public class AttachmentService {
      * @return 匹配来源的附件列表
      */
     public List<Attachment> findByDocumentIdAndSource(String documentId, AttachmentSourceEnum source) {
-        return attachmentMapper.findByDocumentIdAndSource(documentId, source.getCode());
+        return this.attachmentMapper.findByDocumentIdAndSource(documentId, source.getCode());
+    }
+
+    /**
+     * 分页查询指定文档下的附件列表，供 bootstrap-table 异步加载普通附件和图片附件。
+     *
+     * @param documentId 文档ID
+     * @param source     附件来源类型
+     * @param pageNum    当前页码
+     * @param pageSize   每页数量
+     * @return 附件分页数据
+     */
+    public PageModel<Attachment> pageByDocumentIdAndSource(String documentId, AttachmentSourceEnum source, int pageNum, int pageSize) {
+        Page<Attachment> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> this.attachmentMapper.findByDocumentIdAndSource(documentId, source.getCode()));
+        return PageModel.from(pageInfo);
     }
 
     /**
@@ -65,7 +83,7 @@ public class AttachmentService {
      * @return 附件记录，不存在时返回 null
      */
     public Attachment findById(Integer attachmentId) {
-        return attachmentMapper.findById(attachmentId);
+        return this.attachmentMapper.findById(attachmentId);
     }
 
     /**
@@ -77,7 +95,7 @@ public class AttachmentService {
      * @return 匹配的附件记录，不存在时返回 null
      */
     public Attachment findByDocumentIdPathAndSource(String documentId, String path, AttachmentSourceEnum source) {
-        return attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source.getCode());
+        return this.attachmentMapper.findByDocumentIdPathAndSource(documentId, path, source.getCode());
     }
 
     /**
@@ -100,7 +118,7 @@ public class AttachmentService {
         attachment.setSource(source.getCode());
         attachment.setCreateTime(now);
         attachment.setUpdateTime(now);
-        attachmentMapper.insert(attachment);
+        this.attachmentMapper.insert(attachment);
         return attachment;
     }
 
@@ -112,13 +130,13 @@ public class AttachmentService {
      */
     @Transactional
     public void deleteById(Integer attachmentId) throws IOException {
-        Attachment attachment = attachmentMapper.findById(attachmentId);
+        Attachment attachment = this.attachmentMapper.findById(attachmentId);
         if (attachment == null) {
             return;
         }
-        Path file = documentFileService.resolveAttachmentPath(attachment.getPath());
+        Path file = this.documentFileService.resolveAttachmentPath(attachment.getPath());
         Files.deleteIfExists(file);
-        attachmentMapper.deleteById(attachmentId);
+        this.attachmentMapper.deleteById(attachmentId);
     }
 
     /**
@@ -129,11 +147,11 @@ public class AttachmentService {
      */
     @Transactional
     public void deleteByDocumentId(String documentId) throws IOException {
-        List<Attachment> attachments = attachmentMapper.findByDocumentId(documentId);
+        List<Attachment> attachments = this.attachmentMapper.findByDocumentId(documentId);
         for (Attachment attachment : attachments) {
-            Path file = documentFileService.resolveAttachmentPath(attachment.getPath());
+            Path file = this.documentFileService.resolveAttachmentPath(attachment.getPath());
             Files.deleteIfExists(file);
         }
-        attachmentMapper.deleteByDocumentId(documentId);
+        this.attachmentMapper.deleteByDocumentId(documentId);
     }
 }

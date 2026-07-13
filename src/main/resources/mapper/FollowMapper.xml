@@ -3,6 +3,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.tinycloud.mmwiki.mapper.FollowMapper">
 
+    <resultMap id="UserFollowedDocumentResultMap" type="org.tinycloud.mmwiki.vo.UserFollowedDocument">
+        <id property="followId" column="follow_id"/>
+        <association property="document" javaType="org.tinycloud.mmwiki.domain.Document">
+            <id property="documentId" column="document_id"/>
+            <result property="parentId" column="parent_id"/>
+            <result property="spaceId" column="space_id"/>
+            <result property="name" column="name"/>
+            <result property="type" column="type"/>
+            <result property="path" column="path"/>
+            <result property="sequence" column="sequence"/>
+            <result property="createUserId" column="create_user_id"/>
+            <result property="editUserId" column="edit_user_id"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+        </association>
+    </resultMap>
+
     <select id="findByUserTypeAndObjectId" resultType="org.tinycloud.mmwiki.domain.Follow">
         select follow_id, user_id, type, object_id, create_time
         from mw_follow
@@ -31,6 +48,84 @@
         where object_id = #{objectId}
           and type = #{type}
         order by follow_id desc
+    </select>
+
+    <select id="pageFollowedUsers" resultType="org.tinycloud.mmwiki.domain.User">
+        select u.user_id,
+               u.username,
+               u.given_name,
+               u.mobile,
+               u.phone,
+               u.email,
+               u.department,
+               u.position,
+               u.location,
+               u.im,
+               u.last_ip,
+               u.last_time,
+               u.role_id,
+               u.is_forbidden,
+               u.is_delete,
+               u.create_time,
+               u.update_time,
+               f.follow_id
+        from mw_follow f
+                 inner join mw_user u on u.user_id = cast(f.object_id as signed)
+        where f.user_id = #{userId}
+          and f.type = #{type}
+          and u.is_delete = 0
+        order by f.follow_id desc
+    </select>
+
+    <select id="pageFansUsers" resultType="org.tinycloud.mmwiki.domain.User">
+        select u.user_id,
+               u.username,
+               u.given_name,
+               u.mobile,
+               u.phone,
+               u.email,
+               u.department,
+               u.position,
+               u.location,
+               u.im,
+               u.last_ip,
+               u.last_time,
+               u.role_id,
+               u.is_forbidden,
+               u.is_delete,
+               u.create_time,
+               u.update_time
+        from mw_follow f
+                 inner join mw_user u on u.user_id = f.user_id
+        where f.object_id = #{objectId}
+          and f.type = #{type}
+          and u.is_delete = 0
+        order by f.follow_id desc
+    </select>
+
+    <select id="pageFollowedDocuments" resultMap="UserFollowedDocumentResultMap">
+        select f.follow_id,
+               d.document_id,
+               d.parent_id,
+               d.space_id,
+               d.name,
+               d.type,
+               d.path,
+               d.sequence,
+               d.create_user_id,
+               d.edit_user_id,
+               d.create_time,
+               d.update_time
+        from mw_follow f
+                 inner join mw_document d on d.document_id = f.object_id
+                 inner join mw_space s on s.space_id = d.space_id
+                 left join mw_space_user su on su.space_id = d.space_id and su.user_id = #{viewerId}
+        where f.user_id = #{userId}
+          and f.type = #{type}
+          and d.is_delete = 0
+          and s.is_delete = 0
+          and (#{root} = true or s.visit_level = 'public' or su.space_user_id is not null)
+        order by f.follow_id desc
     </select>
 
     <insert id="insert">

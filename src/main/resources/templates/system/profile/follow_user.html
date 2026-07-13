@@ -7,14 +7,22 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -32,59 +40,88 @@
             <div class="row">
                 <div class="col-md-6">
                     <div style="margin: 10px 0 15px 0"><span class="label label-default">我的关注</span></div>
-                    <div th:if="${followCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                    <div id="emptyMyFollowAlert" class="alert alert-info alert-dismissible fade in hide" role="alert"
+                         style="margin-bottom: 0">
                         <p><i class="glyphicon glyphicon-volume-up"></i> 还没有关注任何用户。</p>
                     </div>
-                    <table th:if="${followCount > 0}" class="table">
-                        <thead>
-                        <tr>
-                            <td class="w25p text-left"><strong>用户名</strong></td>
-                            <td class="text-left"><strong>姓名</strong></td>
-                            <td class="text-left"><strong>邮箱</strong></td>
-                            <td class="w12p center"><strong>取消</strong></td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="item : ${users}">
-                            <!-- _parent为在父框架打开，嵌套 <iframe> 时跳出一层 -->
-                            <td><strong><a th:href="@{/user/info(user_id=${item.userId})}" target="_parent" th:text="${item.username}">user</a></strong></td>
-                            <td th:text="${item.givenName}">name</td>
-                            <td th:text="${item.email}">email</td>
-                            <td class="center">
-                                <a th:data-url="@{/follow/cancel(follow_id=${item.followId},redirect='/system/profile/followUser')}"
-                                    onclick="Common.ajaxSubmit(this.getAttribute('data-url'))">
-                                    <i class="glyphicon glyphicon-heart"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <table id="myFollowTable"></table>
                 </div>
                 <div class="col-md-6">
                     <div style="margin: 10px 0 15px 0"><span class="label label-default">我的粉丝</span></div>
-                    <div th:if="${fansCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                    <div id="emptyMyFansAlert" class="alert alert-info alert-dismissible fade in hide" role="alert"
+                         style="margin-bottom: 0">
                         <p><i class="glyphicon glyphicon-volume-up"></i> 暂时还没有粉丝。</p>
                     </div>
-                    <table th:if="${fansCount > 0}" class="table">
-                        <thead>
-                        <tr>
-                            <td class="w25p text-left"><strong>用户名</strong></td>
-                            <td class="text-left"><strong>姓名</strong></td>
-                            <td class="text-left"><strong>邮箱</strong></td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="fansUser : ${fansUsers}">
-                            <td><strong><a th:href="@{/user/info(user_id=${fansUser.userId})}" target="_parent" th:text="${fansUser.username}">user</a></strong></td>
-                            <td th:text="${fansUser.givenName}">name</td>
-                            <td th:text="${fansUser.email}">email</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <table id="myFansTable"></table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    /**
+     * 渲染用户详情链接，在父框架中打开用户详情。
+     *
+     * @param value 用户名
+     * @param row 用户行数据
+     * @returns {string} 用户链接 HTML
+     */
+    function profileUsernameFormatter(value, row) {
+        return '<strong><a href="/user/info?user_id=' + row.userId + '" target="_parent">' + tableHtml(value) + '</a></strong>';
+    }
+
+    /**
+     * 渲染当前用户取消关注按钮，取消后回到个人中心关注页。
+     *
+     * @param value 当前字段值
+     * @param row 用户行数据
+     * @returns {string} 操作按钮 HTML
+     */
+    function profileActionFormatter(value, row) {
+        return '<a data-url="/follow/cancel?follow_id=' + row.followId + '&redirect=/system/profile/followUser" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart"></i></a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "myFollowTable",
+            url: "/system/profile/followUser",
+            uniqueId: "followId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {relation: "follow"};
+            },
+            columns: [
+                {field: "username", title: "用户名", width: "25%", formatter: profileUsernameFormatter},
+                {field: "givenName", title: "姓名"},
+                {field: "email", title: "邮箱"},
+                {field: "operate", title: "取消", width: "12%", align: "center", formatter: profileActionFormatter}
+            ],
+            onLoadSuccess: function (data) {
+                $("#emptyMyFollowAlert").toggleClass("hide", (data.total || 0) > 0);
+            }
+        });
+        initTable({
+            domId: "myFansTable",
+            url: "/system/profile/followUser",
+            uniqueId: "userId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {relation: "fans"};
+            },
+            columns: [
+                {field: "username", title: "用户名", width: "25%", formatter: profileUsernameFormatter},
+                {field: "givenName", title: "姓名"},
+                {field: "email", title: "邮箱"}
+            ],
+            onLoadSuccess: function (data) {
+                $("#emptyMyFansAlert").toggleClass("hide", (data.total || 0) > 0);
+            }
+        });
+    });
+</script>
 </body>
 </html>

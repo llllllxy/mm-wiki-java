@@ -7,14 +7,22 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -28,35 +36,61 @@
             </div>
         </div>
         <div class="panel-body">
-            <table class="table">
-                <thead>
-                <tr>
-                    <td class="text-left"><strong>图片</strong></td>
-                    <td class="w15p text-left"><strong>上传用户</strong></td>
-                    <td class="w20p text-left"><strong>上传时间</strong></td>
-                    <td class="w11p center"><strong>操作</strong></td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="attachment : ${attachments}">
-                    <td>
-                        <a target="_blank" th:href="@{/{path}(path=${attachment.path})}" class="thumbnail" style="width: 100px;height: 80px;margin-bottom: 0">
-                            <img th:src="@{/{path}(path=${attachment.path})}" alt="image">
-                        </a>
-                    </td>
-                    <td th:text="${attachment.username}">user</td>
-                    <td th:text="${attachment.createTime}">time</td>
-                    <td class="center">
-                        <a th:if="${is_delete}" data-message="确定删除图片吗？"
-                           th:data-url="@{/attachment/delete(attachment_id=${attachment.attachmentId})}"
-                           onclick="Common.ajaxSubmitConfirm(this.getAttribute('data-message'), this.getAttribute('data-url'))"><i
-                                class="glyphicon glyphicon-trash"></i></a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <table id="imageTable"></table>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    var documentId = /*[[${document_id}]]*/ "";
+    var canDelete = /*[[${is_delete}]]*/ false;
+
+    /**
+     * 渲染图片缩略图，图片地址保持和 Markdown 中一致的受控访问入口。
+     *
+     * @param value 当前字段值
+     * @param row 图片附件行数据
+     * @returns {string} 缩略图 HTML
+     */
+    function imagePreviewFormatter(value, row) {
+        var url = "/" + row.path;
+        return '<a target="_blank" href="' + tableHtml(url) + '" class="thumbnail" style="width: 100px;height: 80px;margin-bottom: 0">' +
+            '<img src="' + tableHtml(url) + '" alt="image">' +
+            '</a>';
+    }
+
+    /**
+     * 渲染图片附件操作按钮，只有空间管理员可以删除图片。
+     *
+     * @param value 当前字段值
+     * @param row 图片附件行数据
+     * @returns {string} 操作按钮 HTML
+     */
+    function imageActionFormatter(value, row) {
+        if (!canDelete) {
+            return "";
+        }
+        return '<a data-message="确定删除图片吗？" data-url="/attachment/delete?attachment_id=' + row.attachmentId + '" onclick="Common.ajaxSubmitConfirm(this.getAttribute(\'data-message\'), this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-trash"></i></a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "imageTable",
+            url: "/attachment/image",
+            uniqueId: "attachmentId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {document_id: documentId};
+            },
+            columns: [
+                {field: "path", title: "图片", formatter: imagePreviewFormatter},
+                {field: "username", title: "上传用户", width: "15%"},
+                {field: "createTime", title: "上传时间", width: "20%"},
+                {field: "operate", title: "操作", width: "11%", align: "center", formatter: imageActionFormatter}
+            ]
+        });
+    });
+</script>
 </body>
 </html>

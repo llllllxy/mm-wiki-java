@@ -7,29 +7,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.tinycloud.mmwiki.constant.ErrorCodeEnum;
 import org.tinycloud.mmwiki.constant.FollowTypeEnum;
-import org.tinycloud.mmwiki.domain.Document;
-import org.tinycloud.mmwiki.domain.Follow;
 import org.tinycloud.mmwiki.domain.LogDocumentView;
 import org.tinycloud.mmwiki.domain.User;
 import org.tinycloud.mmwiki.exception.SystemException;
-import org.tinycloud.mmwiki.mapper.DocumentMapper;
+import org.tinycloud.mmwiki.mapper.FollowMapper;
 import org.tinycloud.mmwiki.mapper.LogDocumentMapper;
 import org.tinycloud.mmwiki.util.BCrypt;
 import org.tinycloud.mmwiki.util.TimeUtils;
 import org.tinycloud.mmwiki.vo.FollowDocPage;
-import org.tinycloud.mmwiki.vo.FollowUserView;
 import org.tinycloud.mmwiki.vo.ProfileFollowedDocument;
 import org.tinycloud.mmwiki.vo.ProfileInfoView;
+import org.tinycloud.mmwiki.vo.UserFollowedDocument;
 import org.tinycloud.mmwiki.web.CurrentUser;
 import org.tinycloud.mmwiki.web.JsonResponse;
 import org.tinycloud.mmwiki.web.PageModel;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 个人中心服务，负责当前用户资料、关注、粉丝和个人文档动态的展示数据。
@@ -45,9 +39,7 @@ public class SystemProfileService {
     @Autowired
     private UserService userService;
     @Autowired
-    private FollowService followService;
-    @Autowired
-    private DocumentMapper documentMapper;
+    private FollowMapper followMapper;
     @Autowired
     private LogDocumentMapper logDocumentMapper;
     @Autowired
@@ -59,10 +51,10 @@ public class SystemProfileService {
      * 加载个人中心首页资料与最近动态。
      */
     public ProfileInfoView loadInfo(Integer userId) {
-        User user = requireUser(userId);
+        User user = this.requireUser(userId);
         // 最近动态，查询前10条
         Page<LogDocumentView> pageInfo = PaginateRequest.of(1, 10)
-                .request(() -> logDocumentMapper.pageByUserId(userId));
+                .request(() -> this.logDocumentMapper.pageByUserId(userId));
         List<LogDocumentView> logs = pageInfo.getRecords();
         logs.forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
         return new ProfileInfoView(user, logs, logs.size());
@@ -72,7 +64,7 @@ public class SystemProfileService {
      * 加载可编辑的个人资料。
      */
     public User loadEditableProfile(Integer userId) {
-        return requireUser(userId);
+        return this.requireUser(userId);
     }
 
     /**
@@ -95,7 +87,7 @@ public class SystemProfileService {
             throw new SystemException("手机号不能为空。");
         }
 
-        userService.updateProfile(userId, givenName.trim(),
+        this.userService.updateProfile(userId, givenName.trim(),
                 email.trim(), mobile.trim(),
                 phone == null ? "" : phone.trim(),
                 department == null ? "" : department.trim(),
@@ -107,32 +99,33 @@ public class SystemProfileService {
     }
 
     /**
-     * 加载当前用户关注与粉丝信息。
+     * 分页查询当前用户关注的用户列表，保留关注关系ID供前端取消关注。
+     *
+     * @param userId   当前用户ID
+     * @param pageNum  当前页码
+     * @param pageSize 每页数量
+     * @return 关注用户分页数据
      */
-    public FollowUserView loadFollowUsers(Integer userId) {
-        User user = this.requireUser(userId);
+    public PageModel<User> loadFollowedUserPage(Integer userId, int pageNum, int pageSize) {
+        this.requireUser(userId);
+        Page<User> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> this.followMapper.pageFollowedUsers(userId, FollowTypeEnum.USER.getCode()));
+        return PageModel.from(pageInfo);
+    }
 
-        List<Follow> follows = followService.findByUserIdAndType(userId, FollowTypeEnum.USER.getCode());
-        List<Integer> followedIds = follows.stream()
-                .map(item -> Integer.valueOf(item.getObjectId()))
-                .toList();
-        Map<String, Follow> followIndex = follows.stream()
-                .collect(Collectors.toMap(Follow::getObjectId, item -> item, (left, right) -> left, LinkedHashMap::new));
-
-        List<User> users = new ArrayList<>();
-        for (User followedUser : userService.findActiveByIds(followedIds)) {
-            Follow follow = followIndex.get(String.valueOf(followedUser.getUserId()));
-            if (follow != null) {
-                followedUser.setFollowId(follow.getFollowId());
-                followedUser.setFollow(true);
-                users.add(followedUser);
-            }
-        }
-
-        List<Follow> fans = followService.findByObjectIdAndType(String.valueOf(userId), FollowTypeEnum.USER.getCode());
-        List<Integer> fanIds = fans.stream().map(Follow::getUserId).toList();
-        List<User> fansUsers = userService.findActiveByIds(fanIds);
-        return new FollowUserView(user, users, fansUsers, users.size(), fansUsers.size());
+    /**
+     * 分页查询当前用户的粉丝列表。
+     *
+     * @param userId   当前用户ID
+     * @param pageNum  当前页码
+     * @param pageSize 每页数量
+     * @return 粉丝用户分页数据
+     */
+    public PageModel<User> loadFansUserPage(Integer userId, int pageNum, int pageSize) {
+        this.requireUser(userId);
+        Page<User> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> this.followMapper.pageFansUsers(String.valueOf(userId), FollowTypeEnum.USER.getCode()));
+        return PageModel.from(pageInfo);
     }
 
     /**
@@ -140,7 +133,7 @@ public class SystemProfileService {
      */
     public FollowDocPage loadFollowDocs(Integer userId) {
         User user = this.requireUser(userId);
-        return new FollowDocPage(user, configService.getValue("auto_follow_doc_open", "0"));
+        return new FollowDocPage(user, this.configService.getValue("auto_follow_doc_open", "0"));
     }
 
     /**
@@ -152,25 +145,22 @@ public class SystemProfileService {
      * @return 分页数据
      */
     public PageModel<ProfileFollowedDocument> loadFollowDocPage(CurrentUser currentUser, int pageNum, int pageSize) {
-        User user = this.requireUser(currentUser.getUserId());
-        List<Follow> follows = followService.findByUserIdAndType(user.getUserId(), FollowTypeEnum.DOCUMENT.getCode());
-        List<String> docIds = follows.stream().map(Follow::getObjectId).toList();
-        Map<String, Document> docs = documentMapper.findVisibleByIds(currentUser.getUserId(), AccessService.isRoot(currentUser), docIds).stream()
-                .collect(java.util.stream.Collectors.toMap(Document::getDocumentId, item -> item, (left, right) -> left));
-
-        List<ProfileFollowedDocument> items = new ArrayList<>();
-        for (Follow follow : follows) {
-            Document document = docs.get(follow.getObjectId());
-            if (document != null) {
-                items.add(new ProfileFollowedDocument(document, follow.getFollowId(), TimeUtils.format(document.getUpdateTime())));
-            }
-        }
-
-        int offset = Math.max(0, (pageNum - 1) * pageSize);
-        List<ProfileFollowedDocument> pageItems = offset >= items.size()
-                ? List.of()
-                : items.subList(offset, Math.min(items.size(), offset + pageSize));
-        return PageModel.build((long) pageNum, (long) pageSize, pageItems, (long) items.size());
+        this.requireUser(currentUser.getUserId());
+        Page<UserFollowedDocument> pageInfo = PaginateRequest.of(pageNum, pageSize)
+                .request(() -> this.followMapper.pageFollowedDocuments(
+                        currentUser.getUserId(),
+                        FollowTypeEnum.DOCUMENT.getCode(),
+                        currentUser.getUserId(),
+                        AccessService.isRoot(currentUser)
+                ));
+        List<ProfileFollowedDocument> records = pageInfo.getRecords().stream()
+                .map(item -> new ProfileFollowedDocument(
+                        item.getDocument(),
+                        item.getFollowId(),
+                        TimeUtils.format(item.getDocument().getUpdateTime())
+                ))
+                .toList();
+        return PageModel.build(pageInfo.getPageNum(), pageInfo.getPageSize(), records, pageInfo.getTotal(), pageInfo.getPages());
     }
 
     /**
@@ -183,14 +173,14 @@ public class SystemProfileService {
      * @return 文档动态分页数据
      */
     public PageModel<LogDocumentView> loadActivityPage(Integer userId, String keyword, int pageNum, int pageSize) {
-        requireUser(userId);
+        this.requireUser(userId);
         String search = keyword == null ? "" : keyword.trim();
         Page<LogDocumentView> pageInfo = PaginateRequest.of(pageNum, pageSize)
                 .request(() -> {
                     if (search.isBlank()) {
-                        logDocumentMapper.pageByUserId(userId);
+                        this.logDocumentMapper.pageByUserId(userId);
                     } else {
-                        logDocumentMapper.pageByUserIdAndKeyword(userId, search);
+                        this.logDocumentMapper.pageByUserIdAndKeyword(userId, search);
                     }
                 });
         pageInfo.getRecords().forEach(log -> log.setCreateTimeText(TimeUtils.format(log.getCreateTime())));
@@ -204,10 +194,10 @@ public class SystemProfileService {
         if (!StringUtils.hasText(password) || !StringUtils.hasText(passwordNew) || !StringUtils.hasText(passwordConfirm)) {
             throw new SystemException("密码不能为空。");
         }
-        String plainPassword = passwordCryptoService.decryptPassword(password);
-        String plainPasswordNew = passwordCryptoService.decryptPassword(passwordNew);
-        String plainPasswordConfirm = passwordCryptoService.decryptPassword(passwordConfirm);
-        User user = requireUser(userId);
+        String plainPassword = this.passwordCryptoService.decryptPassword(password);
+        String plainPasswordNew = this.passwordCryptoService.decryptPassword(passwordNew);
+        String plainPasswordConfirm = this.passwordCryptoService.decryptPassword(passwordConfirm);
+        User user = this.requireUser(userId);
         boolean isMatch = BCrypt.checkpw(plainPassword, user.getPassword());
         if (!isMatch) {
             throw new SystemException("当前密码错误。");
@@ -215,7 +205,7 @@ public class SystemProfileService {
         if (!plainPasswordNew.equals(plainPasswordConfirm)) {
             throw new SystemException("确认密码和新密码不一致。");
         }
-        userService.updatePassword(userId, BCrypt.hashpw(plainPasswordNew, BCrypt.gensalt()));
+        this.userService.updatePassword(userId, BCrypt.hashpw(plainPasswordNew, BCrypt.gensalt()));
         return JsonResponse.success("密码修改成功，下次登录生效。", "/system/profile/password");
     }
 
@@ -227,7 +217,7 @@ public class SystemProfileService {
      * @return 用户
      */
     private User requireUser(Integer userId) {
-        User user = userService.findActiveById(userId);
+        User user = this.userService.findActiveById(userId);
         if (user == null) {
             throw new SystemException(ErrorCodeEnum.NOT_FOUND, "用户不存在！");
         }

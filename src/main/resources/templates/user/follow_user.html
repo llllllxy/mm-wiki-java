@@ -7,14 +7,22 @@
     <title>MM-Wiki</title>
     <link type="favicon" rel="shortcut icon" th:href="@{/static/images/favicon.ico}"/>
     <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap/css/bootstrap.min.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/static/plugins/bootstrap-table/bootstrap-table.min.css}">
+    <link type="text/css" rel="stylesheet"
+          th:href="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/font-awesome/css/font-awesome.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/static/css/common.css}">
     <script type="text/javascript" th:src="@{/static/plugins/jquery/jquery1.11.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+    <script type="text/javascript" th:src="@{/static/plugins/bootstrap-table/bootstrap-table-zh-CN.min.js}"></script>
+    <script type="text/javascript"
+            th:src="@{/static/plugins/bootstrap-table/extensions/page-jump/bootstrap-table-pagejump.min.js}"></script>
     <script type="text/javascript" th:src="@{/static/plugins/layer/layer.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/layers.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/ajax.js}"></script>
     <script type="text/javascript" th:src="@{/static/js/common/common.js}"></script>
+    <script type="text/javascript" th:src="@{/static/js/common/table.js}"></script>
 </head>
 <body id="frame-body">
 <div class="container-fluid">
@@ -32,58 +40,98 @@
             <div class="row">
                 <div class="col-md-6">
                     <div style="margin: 10px 0 15px 0"><span class="label label-default">他的关注</span></div>
-                    <div th:if="${followCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                    <div id="emptyProfileFollowAlert" class="alert alert-info alert-dismissible fade in hide"
+                         role="alert"
+                         style="margin-bottom: 0">
                         <p><i class="glyphicon glyphicon-volume-up"></i> 还没有关注任何用户</p>
                     </div>
-                    <table th:if="${followCount > 0}" class="table">
-                        <thead>
-                        <tr>
-                            <td class="w25p text-left"><strong>用户名</strong></td>
-                            <td class="text-left"><strong>姓名</strong></td>
-                            <td class="text-left"><strong>邮箱</strong></td>
-                            <td class="w12p center"><strong>取消</strong></td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="item : ${users}">
-                            <td><strong><a th:href="@{/user/info(user_id=${item.userId})}" th:text="${item.username}">user</a></strong></td>
-                            <td th:text="${item.givenName}">name</td>
-                            <td th:text="${item.email}">email</td>
-                            <td class="center"><a th:data-url="@{/follow/cancel(follow_id=${item.followId})}"
-                                                  onclick="Common.ajaxSubmit(this.getAttribute('data-url'))"><i
-                                    class="glyphicon glyphicon-heart"></i></a></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <table id="profileFollowTable"></table>
                 </div>
                 <div class="col-md-6">
                     <div style="margin: 10px 0 15px 0"><span class="label label-default">他的粉丝</span></div>
-                    <div th:if="${fansCount == 0}" class="alert alert-info alert-dismissible fade in" role="alert" style="margin-bottom: 0">
+                    <div id="emptyProfileFansAlert" class="alert alert-info alert-dismissible fade in hide" role="alert"
+                         style="margin-bottom: 0">
                         <p><i class="glyphicon glyphicon-volume-up"></i> 暂时还没有粉丝</p>
                     </div>
-                    <table th:if="${fansCount > 0}" class="table">
-                        <thead>
-                        <tr>
-                            <td class="w25p text-left"><strong>用户名</strong></td>
-                            <td class="text-left"><strong>姓名</strong></td>
-                            <td class="text-left"><strong>邮箱</strong></td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="fansUser : ${fansUsers}">
-                            <td>
-                                <strong th:if="${fansUser.userId == login_user_id}"><a href="/system/main/index" target="_parent" th:text="${fansUser.username}">user</a></strong>
-                                <strong th:if="${fansUser.userId != login_user_id}"><a th:href="@{/user/info(user_id=${fansUser.userId})}" th:text="${fansUser.username}">user</a></strong>
-                            </td>
-                            <td th:text="${fansUser.givenName}">name</td>
-                            <td th:text="${fansUser.email}">email</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <table id="profileFansTable"></table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript" th:inline="javascript">
+    var profileUserId = /*[[${user.userId}]]*/ 0;
+    var loginUserId = /*[[${login_user_id}]]*/ 0;
+
+    /**
+     * 渲染用户详情链接，当前登录用户跳转到个人中心。
+     *
+     * @param value 用户名
+     * @param row 用户行数据
+     * @returns {string} 用户链接 HTML
+     */
+    function profileUsernameFormatter(value, row) {
+        if (row.userId === loginUserId) {
+            return '<strong><a href="/system/main/index" target="_parent">' + tableHtml(value) + '</a></strong>';
+        }
+        return '<strong>' + tableLink("/user/info?user_id=" + row.userId, value, null) + '</strong>';
+    }
+
+    /**
+     * 渲染取消关注操作按钮，沿用旧页面行为。
+     *
+     * @param value 当前字段值
+     * @param row 用户行数据
+     * @returns {string} 操作按钮 HTML
+     */
+    function profileActionFormatter(value, row) {
+        if (profileUserId !== loginUserId) {
+            return "";
+        }
+        return '<a data-url="/follow/cancel?follow_id=' + row.followId + '" onclick="Common.ajaxSubmit(this.getAttribute(\'data-url\'))"><i class="glyphicon glyphicon-heart"></i></a>';
+    }
+
+    $(function () {
+        initTable({
+            domId: "profileFollowTable",
+            url: "/user/followUser",
+            uniqueId: "followId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {user_id: profileUserId, relation: "follow"};
+            },
+            columns: [
+                {field: "username", title: "用户名", width: "25%", formatter: profileUsernameFormatter},
+                {field: "givenName", title: "姓名"},
+                {field: "email", title: "邮箱"},
+                {field: "operate", title: "取消", width: "12%", align: "center", formatter: profileActionFormatter}
+            ],
+            onLoadSuccess: function (data) {
+                $("#emptyProfileFollowAlert").toggleClass("hide", (data.total || 0) > 0);
+            }
+        });
+        initTable({
+            domId: "profileFansTable",
+            url: "/user/followUser",
+            uniqueId: "userId",
+            sortable: false,
+            pageSize: 10,
+            pageList: [10, 20, 50, 100],
+            queryParams: function () {
+                return {user_id: profileUserId, relation: "fans"};
+            },
+            columns: [
+                {field: "username", title: "用户名", width: "25%", formatter: profileUsernameFormatter},
+                {field: "givenName", title: "姓名"},
+                {field: "email", title: "邮箱"}
+            ],
+            onLoadSuccess: function (data) {
+                $("#emptyProfileFansAlert").toggleClass("hide", (data.total || 0) > 0);
+            }
+        });
+    });
+</script>
 </body>
 </html>
